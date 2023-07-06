@@ -11,7 +11,7 @@ import git
 # from ..log import logger
 
 
-DepotInfo = namedtuple("DepotInfo", ["path", "first_commit", "last_commit"])
+DepotInfo = namedtuple("DepotInfo", ["type", "path", "first_commit", "last_commit"])
 
 
 def username(repo: str) -> str:
@@ -99,7 +99,7 @@ def get_runtime_tests(user: str, lesson: str, task: str) -> DepotInfo | None:
                         os.path.join(os.getcwd(), task, "tests")).split("\n")
         first_commit = dt.date.fromtimestamp(int(commits[-1]))
         last_commit = dt.date.fromtimestamp(int(commits[0]))
-        return DepotInfo(tests, first_commit, last_commit)
+        return DepotInfo("tests", tests, first_commit, last_commit)
     return None
 
 
@@ -118,7 +118,7 @@ def get_solution(user: str, lesson: str, task: str) -> DepotInfo | None:
                         os.path.join(os.getcwd(), task, "main.py")).split("\n")
         first_commit = dt.date.fromtimestamp(int(commits[-1]))
         last_commit = dt.date.fromtimestamp(int(commits[0]))
-        return DepotInfo(main, first_commit, last_commit)
+        return DepotInfo("solution", main, first_commit, last_commit)
     return None
 
 
