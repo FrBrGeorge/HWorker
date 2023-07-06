@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+
+[project]
+name = "hworker"
+dependencies = ["sqlalchemy", "imap_tools", "termcolor"]
+dynamic = ["version"]
+#dynamic = ["description", "readme", "requires-python", "authors", "classifiers", "urls", "entry-points"]
+
+[tool.setuptools_scm]
+write_to = "hworker/_version.py"
+
+
+#[metadata]
+#name = netjudge
+#url = https://github.com/Veniamin-Arefev/NetJudge
+#author = Veniamin Arefev, Dmitry Stamplevsky, Okonishnikov Ariy
+#author_email = veniamin.arefev@mail.ru
+#description = Net Judge is a check environment for Linux Network oriented courses
+#long_description = file: README.md
+#project_urls =
+#Bug Tracker = https://www.github.com/Veniamin-Arefev/NetJudge/issues
+#classifiers =
+#Programming Language :: Python :: 3.10
+#License :: OSI Approved :: MIT License
+#Operating System :: OS Independent
+#
