@@ -20,7 +20,9 @@ def set_up_logger(logger: logging.Logger, true_name: str):
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(configs["Logging"]["console level"])
 
-    formatter = logging.Formatter(fmt="{asctime} |{name:>12}|: {levelname:>7} {message}", datefmt="%H:%M:%S %d.%m.%Y", style="{")
+    formatter = logging.Formatter(
+        fmt="{asctime} [{name:>15}]: |{levelname:>7}|: {message}", datefmt="%H:%M:%S %d.%m.%Y", style="{"
+    )
     file_handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
 
@@ -31,7 +33,7 @@ def set_up_logger(logger: logging.Logger, true_name: str):
 def get_logger(package_name: str, true_name: Optional[str] = None):
     """Get logger for current package"""
     if true_name is None:
-        true_name = package_name[package_name.find(".") :]
+        true_name = package_name[package_name.find(".") + 1 :]
 
     root_logger = logging.getLogger()
 
