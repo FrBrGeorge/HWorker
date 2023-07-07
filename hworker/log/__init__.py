@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from hworker.log.config import load_configs
+from .config import load_configs
 
 
 def set_up_logger(logger: logging.Logger, true_name: str):
