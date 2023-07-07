@@ -5,8 +5,12 @@ name = "pypi"
 
 [packages]
 gitpython = "*"
+imap-tools = "*"
 
 [dev-packages]
+pipenv = "*"
+black = {version = "*", extras = ["d"]}
 
 [requires]
 python_version = "3.11"
+python_full_version = "3.11.4"

@@ -1,3 +1,15 @@
+#cur project files
+.idea/
+venv/
+*.cfg
+test*.py
+logs/
+
+hworker/_version.py
+
+Pipfile.lock
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
