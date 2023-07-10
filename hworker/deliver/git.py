@@ -20,20 +20,20 @@ StorageObject = namedtuple("StorageObject", ["storage_type",
 
 
 def local_path(student_id: str) -> str:
-    """
+    """Convert student id to local repo path
 
-    :param student_id:
-    :return:
+    :param student_id: student id received by name from the config
+    :return: local repo path
     """
     git_directory = get_git_directory()
     return os.path.join(git_directory, student_id)
 
 
 def clone(repo: str) -> None:
-    """
+    """Clone given repo to local directory
 
-    :param repo:
-    :return:
+    :param repo: student repo path
+    :return: -
     """
     get_logger(__name__).log(f"Cloning {repo} repo")
     try:
@@ -43,10 +43,10 @@ def clone(repo: str) -> None:
 
 
 def pull(repo: str) -> None:
-    """
+    """Pull given repo in local directory
 
-    :param repo:
-    :return:
+    :param repo: student repo path
+    :return: -
     """
     get_logger(__name__).log(f"Pulling {repo} repo")
     try:
@@ -57,7 +57,7 @@ def pull(repo: str) -> None:
 
 
 def update_all() -> None:
-    """"""
+    """Pull every repo from config list (or clone if not downloaded)"""
     repos = get_repos()
     for repo in repos:
         if not os.path.exists(local_path(repo)):
@@ -67,10 +67,10 @@ def update_all() -> None:
 
 
 def get_homework_content(path: str) -> defaultdict:
-    """
+    """Extracts tests, solution and URLS from homework and pack into dict
 
-    :param path:
-    :return:
+    :param path: local path to homework
+    :return: dict with "prog", "tests" and "urls" keys
     """
     content = defaultdict(None)
     content["tests"] = []
@@ -93,10 +93,10 @@ def get_homework_content(path: str) -> defaultdict:
 
 
 def get_commits(path: str) -> list[tuple[str, str]]:
-    """
+    """Get list of all commits (with timestamps) for a given directory
 
-    :param path:
-    :return:
+    :param path: homework local path
+    :return: list of (commit hash, timestamp) pairs
     """
     g = git.cmd.Git(path)
     commits = [tuple(_.split()) for _ in g.log("--format", "%H %ct", "--date", "default").split("\n")]
@@ -104,9 +104,9 @@ def get_commits(path: str) -> list[tuple[str, str]]:
 
 
 class GitBackend(Backend):
-    """"""
+    """Backend class for git"""
     def download_all(self) -> None:
-        """"""
+        """Update all solutions and store every version in depot"""
         update_all()
         for student_id in get_ids():
             for lesson in os.listdir(local_path(student_id)):
