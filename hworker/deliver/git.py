@@ -36,6 +36,9 @@ def clone(repo: str) -> None:
     :return: -
     """
     get_logger(__name__).log(f"Cloning {repo} repo")
+    if not os.path.exists(local_path(repo_to_id(repo))):
+        os.makedirs(local_path(repo_to_id(repo)))
+
     try:
         git.Repo.clone_from(repo, local_path(repo_to_id(repo)))
     except git.GitError as git_error:
@@ -50,8 +53,8 @@ def pull(repo: str) -> None:
     """
     get_logger(__name__).log(f"Pulling {repo} repo")
     try:
-        g = git.cmd.Git(local_path(repo_to_id(repo)))
-        g.pull()
+        repo = git.Repo(local_path(repo_to_id(repo)))
+        repo.git.pull()
     except git.GitError as git_error:
         get_logger(__name__).warn(f"Can't pull {repo} repo: {git_error}")
 
@@ -61,7 +64,7 @@ def update_all() -> None:
     repos = get_repos()
     get_logger(__name__).log(f"Updating all repos")
     for repo in repos:
-        if not os.path.exists(local_path(repo)):
+        if not os.path.exists(local_path(repo_to_id(repo))):
             clone(repo)
         else:
             pull(repo)
@@ -75,10 +78,10 @@ def get_homework_content(path: str) -> defaultdict:
     """
     get_logger(__name__).log(f"Getting {path} content")
     content = defaultdict(None)
-    content["tests"] = []
+    content["tests"] = {}
 
-    if os.path.isfile(os.path.join(path, "main.py")):
-        with open(os.path.join(path, "main.py"), "rb") as prog:
+    if os.path.isfile(os.path.join(path, "prog.py")):
+        with open(os.path.join(path, "prog.py"), "rb") as prog:
             content["prog"] = prog.read()
 
     tests_path = os.path.join(path, "tests")
@@ -102,7 +105,7 @@ def get_commits(path: str) -> list[tuple[str, str]]:
     """
     get_logger(__name__).log(f"Getting {path} commits")
     g = git.cmd.Git(path)
-    commits = [tuple(_.split()) for _ in g.log("--format", "%H %ct", "--date", "default").split("\n")]
+    commits = [tuple(_.split()) for _ in g.log("--format=%H %ct", "--date=default").split("\n")]
     return commits
 
 
@@ -113,18 +116,18 @@ class GitBackend(Backend):
         get_logger(__name__).log(f"Downloading (or updating) all repos and store them")
         update_all()
         for student_id in get_ids():
+            repo = git.Repo(local_path(student_id))
             for lesson in os.listdir(local_path(student_id)):
-                for task in os.listdir(os.path.join(local_path(student_id), lesson)):
-                    task_path = os.path.join(local_path(student_id), lesson, task)
-                    commits = get_commits(task_path)
-                    for commit in commits:
-                        repo = git.Repo(local_path(student_id))
-                        repo.git.checkout(commit[0])
-                        content = get_homework_content(task_path)
+                if lesson.isnumeric():
+                    for task in os.listdir(os.path.join(local_path(student_id), lesson)):
+                        task_path = os.path.join(local_path(student_id), lesson, task)
+                        commits = get_commits(task_path)
+                        for commit in commits:
+                            repo.git.checkout(commit[0])
+                            content = get_homework_content(task_path)
 
-                        store_object(StorageObject("homework",
-                                                   content,
-                                                   student_id,
-                                                   os.path.join(task, lesson),
-                                                   commits[0] + commits[1]))
-
+                            store_object(StorageObject("homework",
+                                                       content,
+                                                       student_id,
+                                                       os.path.join(task, lesson),
+                                                       commit[0] + commit[1]))
