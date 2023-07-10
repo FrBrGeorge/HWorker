@@ -59,6 +59,7 @@ def pull(repo: str) -> None:
 def update_all() -> None:
     """Pull every repo from config list (or clone if not downloaded)"""
     repos = get_repos()
+    get_logger(__name__).log(f"Updating all repos")
     for repo in repos:
         if not os.path.exists(local_path(repo)):
             clone(repo)
@@ -72,6 +73,7 @@ def get_homework_content(path: str) -> defaultdict:
     :param path: local path to homework
     :return: dict with "prog", "tests" and "urls" keys
     """
+    get_logger(__name__).log(f"Getting {path} content")
     content = defaultdict(None)
     content["tests"] = []
 
@@ -98,6 +100,7 @@ def get_commits(path: str) -> list[tuple[str, str]]:
     :param path: homework local path
     :return: list of (commit hash, timestamp) pairs
     """
+    get_logger(__name__).log(f"Getting {path} commits")
     g = git.cmd.Git(path)
     commits = [tuple(_.split()) for _ in g.log("--format", "%H %ct", "--date", "default").split("\n")]
     return commits
@@ -107,6 +110,7 @@ class GitBackend(Backend):
     """Backend class for git"""
     def download_all(self) -> None:
         """Update all solutions and store every version in depot"""
+        get_logger(__name__).log(f"Downloading (or updating) all repos and store them")
         update_all()
         for student_id in get_ids():
             for lesson in os.listdir(local_path(student_id)):
