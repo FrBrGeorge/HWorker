@@ -11,6 +11,7 @@ imap-tools = "*"
 pipenv = "*"
 black = {version = "*", extras = ["d"]}
 pytest = "*"
+tomli_w = "*"
 
 [requires]
 python_version = "3.11"
