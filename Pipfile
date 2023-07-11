@@ -10,6 +10,7 @@ imap-tools = "*"
 [dev-packages]
 pipenv = "*"
 black = {version = "*", extras = ["d"]}
+pytest = "*"
 
 [requires]
 python_version = "3.11"

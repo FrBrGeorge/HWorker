@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hworker"
-dependencies = ["sqlalchemy", "imap_tools", "termcolor"]
+dependencies = ["sqlalchemy", "imap_tools", "termcolor", "gitpython"]
 dynamic = ["version"]
 #dynamic = ["description", "readme", "requires-python", "authors", "classifiers", "urls", "entry-points"]
 
