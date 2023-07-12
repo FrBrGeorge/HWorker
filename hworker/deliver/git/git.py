@@ -5,10 +5,10 @@ from collections import namedtuple, defaultdict
 
 import git
 
-from ..depot import store_object
-from ..config import get_git_directory, get_repos, get_ids, repo_to_id, id_to_repo
-from ..log import get_logger
-from ..deliver import Backend
+from ...depot import store_object
+from .config import get_git_directory, get_repos, get_ids, repo_to_id, id_to_repo
+from ...log import get_logger
+from ...deliver import Backend
 
 
 # Temporary

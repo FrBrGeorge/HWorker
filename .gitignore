@@ -2,7 +2,6 @@
 .idea/
 venv/
 *.cfg
-test*.py
 logs/
 
 hworker/_version.py
