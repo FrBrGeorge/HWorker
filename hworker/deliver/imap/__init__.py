@@ -1,4 +1,5 @@
 """IMAP backend"""
+import inspect
 import re
 import tarfile
 import tempfile
@@ -54,7 +55,7 @@ class IMAPBackend(Backend):
     def download_all(self):
         box = get_mailbox()
 
-        for mail in box.fetch("ALL", limit=100):
+        for mail in box.fetch("ALL", limit=43):
             for attachment in mail.attachments:
                 homework_name = attachment.filename
 

@@ -4,9 +4,6 @@ from imap_tools import MailBox, MailboxFolderCreateError
 __all__ = ["get_mailbox"]
 
 from .config import load_configs
-from ...log import get_logger
-
-my_logger = get_logger(__name__, true_name="mailer_utilities")
 
 
 def get_mailbox():
