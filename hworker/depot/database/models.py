@@ -15,7 +15,7 @@ class Base(DeclarativeBase):
     timestamp: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
 
     # noinspection PyTypeChecker
-    def __init__(self, ID: str, USER_ID: str, TASK_ID: str, timestamp: int, **kwargs):
+    def __init__(self, ID: str = None, USER_ID: str = None, TASK_ID: str = None, timestamp: int = None, **kwargs):
         """Initialise base object"""
         super().__init__(**kwargs)
         self.ID = ID
@@ -23,28 +23,16 @@ class Base(DeclarativeBase):
         self.TASK_ID = TASK_ID
         self.timestamp = timestamp
 
-    def __str__(self):
-        return f"ID = {self.ID:>10}, USER_ID={self.USER_ID:>10}, TASK_ID={self.TASK_ID:>10}, timestamp={self.timestamp:>10}"
-
-    def __repr__(self):
-        return self.__str__()
-
 
 class Homework(Base):
     """Class for homework from one student for one task"""
 
     __tablename__ = "homework"
 
-    data: Mapped[bytes] = mapped_column(LargeBinary)  # pickled dict
+    content: Mapped[bytes] = mapped_column(LargeBinary)  # pickled dict
 
     # noinspection PyTypeChecker
-    def __init__(self, data: bytes, **kwargs):
+    def __init__(self, content: bytes = None, **kwargs):
         """Initialise homework object"""
         super().__init__(**kwargs)
-        self.data = data
-
-    def __str__(self):
-        return super().__str__() + f", data={self.data[:10]}"
-
-    def __repr__(self):
-        return self.__str__()
+        self.content = content

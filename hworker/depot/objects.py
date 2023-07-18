@@ -1,6 +1,9 @@
 """Interface objects for depot management"""
-import inspect
 from typing import Any
+
+
+def get_field_from_object(obj: Any):
+    return {name: value for name, value in obj.__dict__.items() if not name.startswith("_") and value is not None}
 
 
 class StoreObject:
@@ -17,59 +20,64 @@ class StoreObject:
         self.TASK_ID = TASK_ID
         self.timestamp = timestamp
 
+    def __str__(self):
+        return ", ".join([f"{key}={value}" for key, value in get_field_from_object(self).items()])
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __eq__(self, other):
+        self_fields = get_field_from_object(self)
+        other_fields = get_field_from_object(other)
+        return self_fields == other_fields
+
 
 class Homework(StoreObject):
-    data: dict[str, bytes]  # filename : file_content
+    content: dict[str, bytes]  # filename : file_content
     _is_versioned = True
 
-    def __init__(self, data: dict[str, bytes] = None, **kwargs):
+    def __init__(self, content: dict[str, bytes] = None, **kwargs):
         super().__init__(**kwargs)
-        self.data = data
+        self.content = content
 
 
 class Test(StoreObject):
-    obj: dict[str, str]  # just dict object, for storage just pickled
+    content: dict[str, str]  # just dict object, for storage just pickled
     category: str  # needs to be enum
     _is_versioned = True
 
 
 class Solution(StoreObject):
-    obj: dict[str, str]  # filename with path: file text
+    content: dict[str, str]  # filename with path: file text
     tests: list[str]  # ?? or list[Test]?
     _is_versioned = True
 
 
 class TestResult(StoreObject):
-    obj: float
+    content: float
     category: str
     _is_versioned = False
 
 
 class Plagiary(StoreObject):
-    obj: list[str]  # ID's ?? or list[Homework] or list[Solution]
+    content: list[str]  # ID's ?? or list[Homework] or list[Solution]
 
 
 class ScoreFunction(StoreObject):
-    obj: str
+    content: str
     _is_versioned = False
 
 
 class PartialScore(StoreObject):
-    obj: float
+    content: float
     _is_versioned = False
 
 
 class Formula(StoreObject):
-    obj: str
+    content: str
     _is_versioned = False
 
 
 class Score(StoreObject):
-    obj: str
+    content: str
     _is_versioned = False
-
-
-def get_fields(obj: Any):
-    if isinstance(obj, type):
-        obj = obj()
-    return obj.__dict__
