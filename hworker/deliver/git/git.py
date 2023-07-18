@@ -1,22 +1,15 @@
 """Downloads solutions from repos"""
 
 import os
-from collections import namedtuple, defaultdict
+from collections import defaultdict
 
 import git
 
 from ...depot.objects import Homework
 from ...depot import store
-from ...config import get_git_directory, get_repos, get_uids, repo_to_uid, uid_to_repo
+from ...config import get_git_directory, get_repos, get_uids, repo_to_uid
 from ...log import get_logger
 from ...deliver import Backend
-
-# Temporary
-StorageObject = namedtuple("StorageObject", ["storage_type",
-                                             "content",
-                                             "student_id",
-                                             "homework_id",
-                                             "version"])
 
 
 def local_path(student_id: str) -> str:
@@ -127,8 +120,8 @@ class GitBackend(Backend):
                             repo.git.checkout(commit[0])
                             content = get_homework_content(task_path)
 
-                            store(StorageObject("homework",
-                                                content,
-                                                student_id,
-                                                os.path.join(task, lesson),
-                                                commit[0] + commit[1]))
+                            store(Homework(data=content,
+                                           ID=commit[0],
+                                           USER_ID=student_id,
+                                           TASK_ID=os.path.join(task, lesson),
+                                           timestamp=commit[1]))
