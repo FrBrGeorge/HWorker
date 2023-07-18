@@ -4,6 +4,7 @@ venv/
 *.cfg
 logs/
 
+data.db
 hworker/_version.py
 
 Pipfile.lock
