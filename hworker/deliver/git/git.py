@@ -1,22 +1,15 @@
 """Downloads solutions from repos"""
 
 import os
-from collections import namedtuple, defaultdict
+from collections import defaultdict
 
 import git
 
-from ...depot import store_object
-from .config import get_git_directory, get_repos, get_ids, repo_to_id, id_to_repo
+from ...depot.objects import Homework
+from ...depot import store
+from ...config import get_git_directory, get_repos, get_uids, repo_to_uid
 from ...log import get_logger
 from ...deliver import Backend
-
-
-# Temporary
-StorageObject = namedtuple("StorageObject", ["storage_type",
-                                             "content",
-                                             "student_id",
-                                             "homework_id",
-                                             "version"])
 
 
 def local_path(student_id: str) -> str:
@@ -36,11 +29,11 @@ def clone(repo: str) -> None:
     :return: -
     """
     get_logger(__name__).log(f"Cloning {repo} repo")
-    if not os.path.exists(local_path(repo_to_id(repo))):
-        os.makedirs(local_path(repo_to_id(repo)))
+    if not os.path.exists(local_path(repo_to_uid(repo))):
+        os.makedirs(local_path(repo_to_uid(repo)))
 
     try:
-        git.Repo.clone_from(repo, local_path(repo_to_id(repo)))
+        git.Repo.clone_from(repo, local_path(repo_to_uid(repo)))
     except git.GitError as git_error:
         get_logger(__name__).warn(f"Can't clone {repo} repo: {git_error}")
 
@@ -53,7 +46,7 @@ def pull(repo: str) -> None:
     """
     get_logger(__name__).log(f"Pulling {repo} repo")
     try:
-        repo = git.Repo(local_path(repo_to_id(repo)))
+        repo = git.Repo(local_path(repo_to_uid(repo)))
         repo.git.pull()
     except git.GitError as git_error:
         get_logger(__name__).warn(f"Can't pull {repo} repo: {git_error}")
@@ -64,7 +57,7 @@ def update_all() -> None:
     repos = get_repos()
     get_logger(__name__).log(f"Updating all repos")
     for repo in repos:
-        if not os.path.exists(local_path(repo_to_id(repo))):
+        if not os.path.exists(local_path(repo_to_uid(repo))):
             clone(repo)
         else:
             pull(repo)
@@ -111,11 +104,12 @@ def get_commits(path: str) -> list[tuple[str, str]]:
 
 class GitBackend(Backend):
     """Backend class for git"""
+
     def download_all(self) -> None:
         """Update all solutions and store every version in depot"""
         get_logger(__name__).log(f"Downloading (or updating) all repos and store them")
         update_all()
-        for student_id in get_ids():
+        for student_id in get_uids():
             repo = git.Repo(local_path(student_id))
             for lesson in os.listdir(local_path(student_id)):
                 if lesson.isnumeric():
@@ -126,8 +120,8 @@ class GitBackend(Backend):
                             repo.git.checkout(commit[0])
                             content = get_homework_content(task_path)
 
-                            store_object(StorageObject("homework",
-                                                       content,
-                                                       student_id,
-                                                       os.path.join(task, lesson),
-                                                       commit[0] + commit[1]))
+                            store(Homework(data=content,
+                                           ID=commit[0],
+                                           USER_ID=student_id,
+                                           TASK_ID=os.path.join(task, lesson),
+                                           timestamp=commit[1]))
