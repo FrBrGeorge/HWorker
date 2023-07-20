@@ -32,6 +32,9 @@ _default_config_content = {
             "soft deadline": "20240108 (example, fill it)",
             "hard deadline": "20240401 (example, fill it)"
         }
+    },
+    "tests": {
+        "max size": 100
     }
 }
 
@@ -139,3 +142,11 @@ def get_imap_info() -> dict:
     :return: IMAP info dict
     """
     return read_config()["IMAP"]
+
+
+def get_max_test_szie() -> int:
+    """
+
+    :return:
+    """
+    return read_config()["tests"]["max size"]

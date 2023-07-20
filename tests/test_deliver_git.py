@@ -38,7 +38,7 @@ class TestDeliverGit:
     def test_get_homework_content(self, example_git_repo):
         """"""
         assert get_homework_content(example_git_repo) == {
-            "prog": b"a, b = eval(input())\n" b"print(max(a, b))",
+            "prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
             "URLS": b"https://github.com/Test/test/tree/main/20220913/1/tests",
             "tests": {"1.in": b"123, 345", "1.out": b"345"},
         }
