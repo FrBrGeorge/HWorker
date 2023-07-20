@@ -12,9 +12,9 @@ from git import Repo
 
 @pytest.fixture()
 def example_git_repo():
-    repo_path = os.path.join(os.path.join(os.path.expanduser('~'), "tmp", "test_repo"))
+    repo_path = os.path.join(os.path.join(os.path.abspath(os.sep), "tmp", "test_repo"))
     os.mkdir(repo_path)
-    repo = Repo.init(repo_path, bare=True)
+    repo = Repo.init(repo_path)
     with open(os.path.join(repo_path, "prog.py"), "wb") as p:
         p.write(b"a, b = eval(input())\n"
                 b"print(max(a, b))")
@@ -25,13 +25,11 @@ def example_git_repo():
         test_in.write(b"123, 345")
     with open(os.path.join(repo_path, "1.out"), "wb") as test_out:
         test_out.write(b"345")
+    repo.git.add(".")
+    repo.git.commit(message="test commit")
 
-    files = repo.git.diff(None, name_only=True)
-    for f in files.split('\n'):
-        repo.git.add(f)
-
-    repo.git.commit('test commit', author='test@xxx.com')
     yield repo_path
+
     shutil.rmtree(repo_path)
 
 

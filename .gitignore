@@ -6,6 +6,7 @@ logs/
 
 data.db
 hworker/_version.py
+hworker.toml
 
 Pipfile.lock
 

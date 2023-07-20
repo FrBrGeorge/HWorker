@@ -25,6 +25,14 @@ _default_config_content = {
         "username": "username (example, fill it)",
         "password": "password (example, fill it)"
     },
+    "tasks": {
+        "task name": {
+            "task ID": "20240101 (example, fill it)",
+            "open date": "20240101 (example, fill it)",
+            "soft deadline": "20240108 (example, fill it)",
+            "hard deadline": "20240401 (example, fill it)"
+        }
+    }
 }
 
 
