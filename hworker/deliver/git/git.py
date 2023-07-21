@@ -75,7 +75,7 @@ def get_homework_content(path: str) -> defaultdict:
 
     if os.path.isfile(os.path.join(path, "prog.py")):
         with open(os.path.join(path, "prog.py"), "rb") as prog:
-            content["prog"] = prog.read()
+            content["prog.py"] = prog.read()
 
     tests_path = os.path.join(path, "tests")
     if os.path.isdir(tests_path):
