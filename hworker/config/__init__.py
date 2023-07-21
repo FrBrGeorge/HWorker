@@ -1,7 +1,7 @@
 """Read and parse config"""
 
-from default_config import _default_config_content, _default_config_name
-from ..log import get_logger
+from .default_config import _default_config_content, _default_config_name
+# from ..log import get_logger
 
 from functools import cache
 from tomllib import load
@@ -16,7 +16,7 @@ def create_config(content: dict = None, config_name: str = _default_config_name)
     :param content: config content dict
     :param config_name: config file name
     """
-    get_logger(__name__).warn("Config file doesnt exist, so it has been created.")
+    # get_logger(__name__).warn("Config file doesnt exist, so it has been created.")
     if content is None:
         content = _default_config_content
     with open(config_name, "wb") as cfg:
@@ -29,7 +29,7 @@ def check_config(content: dict = None, config_name: str = _default_config_name) 
     :param content: config content dict
     :param config_name: config file name
     """
-    get_logger(__name__).info("Check config fields.")
+    # get_logger(__name__).info("Check config fields.")
     if content is None:
         content = _default_config_content
     with open(config_name, "rb") as cfg:
@@ -50,7 +50,7 @@ def read_config(config_name: str = _default_config_name) -> dict:
     :param config_name: config file name
     :return: config info dict
     """
-    get_logger(__name__).info("Read config fields.")
+    # get_logger(__name__).info("Read config fields.")
     if os.path.isfile(config_name):
         check_config(config_name=config_name)
         with open(config_name, "rb") as cfg:

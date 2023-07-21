@@ -1,7 +1,7 @@
 """Downloads solutions from repos"""
 
 import os
-from collections import defaultdict
+from functools import reduce
 
 import git
 
@@ -63,30 +63,36 @@ def update_all() -> None:
             pull(repo)
 
 
-def get_homework_content(path: str) -> defaultdict:
+def get_file_content(path: str) -> bytes:
+    """
+
+    :param path:
+    :return:
+    """
+    with open(path, "rb") as file:
+        content = file.read()
+
+    return content
+
+
+def get_homework_content(root: str) -> dict:
     """Extracts tests, solution and URLS from homework and pack into dict
 
-    :param path: local path to homework
+    :param root: local path to homework
     :return: dict with "prog", "tests" and "urls" keys
     """
-    get_logger(__name__).info(f"Getting {path} content")
-    content = defaultdict(None)
-    content["tests"] = {}
+    get_logger(__name__).info(f"Getting {root} content")
 
-    if os.path.isfile(os.path.join(path, "prog.py")):
-        with open(os.path.join(path, "prog.py"), "rb") as prog:
-            content["prog.py"] = prog.read()
-
-    tests_path = os.path.join(path, "tests")
-    if os.path.isdir(tests_path):
-        for test_name in os.listdir(tests_path):
-            with open(os.path.join(tests_path, test_name), "rb") as test:
-                content["tests"][test_name] = test.read()
-
-    if os.path.isfile(os.path.join(path, "URLS")):
-        with open(os.path.join(path, "URLS"), "rb") as urls:
-            content["urls"] = urls.read()
-
+    # Modified https://code.activestate.com/recipes/577879-create-a-nested-dictionary-from-oswalk/
+    content = {}
+    root = root.rstrip(os.sep)
+    start = root.rfind(os.sep) + 1
+    for path, dirs, files in os.walk(root):
+        if all(map(lambda s: not s.startswith("."), path.split(os.sep))):
+            folders = path[start:].split(os.sep)
+            subdir = {file: get_file_content(os.path.join(path, file)) for file in files}
+            parent = reduce(dict.get, folders[:-1], content)
+            parent[folders[-1]] = subdir
     return content
 
 
