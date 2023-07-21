@@ -16,25 +16,56 @@ _default_config_content = {
         "file level": "DEBUG"},
     "git": {
         "directory": "~/.cache/hworker_git",
-        "repos": {"username": "repo (example, remove it)"},
+        "repos": {"username": "repo (example, fill it)"},
     },
     "IMAP": {
-        "host": "host (example, remove it)",
-        "port": "port (example, remove it)",
-        "folder": "folder (example, remove it)",
-        "username": "username (example, remove it)",
-        "password": "password (example, remove it)"
+        "host": "host (example, fill it)",
+        "port": "port (example, fill it)",
+        "folder": "folder (example, fill it)",
+        "username": "username (example, fill it)",
+        "password": "password (example, fill it)"
     },
+    "tasks": {
+        "task name": {
+            "task ID": "20240101 (example, fill it)",
+            "open date": "20240101 (example, fill it)",
+            "soft deadline": "20240108 (example, fill it)",
+            "hard deadline": "20240401 (example, fill it)"
+        }
+    },
+    "tests": {
+        "max size": 100
+    }
 }
 
 
-def create_config(content: dict = None) -> None:
+def create_config(content: dict = None, config_name: str = _default_config_name) -> None:
     """Creates config file
 
     :param content: config content dict
+    :param config_name: config file name
     """
     if content is None:
         content = _default_config_content
+    with open(config_name, "wb") as cfg:
+        dump(content, cfg)
+
+
+def check_config(content: dict = None, config_name: str = _default_config_name) -> None:
+    """Check field of current config file and add default values for missing ones
+
+    :param content: config content dict
+    :param config_name: config file name
+    """
+    if content is None:
+        content = _default_config_content
+    with open(config_name, "rb") as cfg:
+        cur_content = load(cfg)
+    for key, value in content.items():
+        cur_content.setdefault(key, value)
+        if isinstance(value, dict):
+            for subkey, subvalue in value.items():
+                cur_content[key].setdefault(subkey, subvalue)
     with open(_default_config_name, "wb") as cfg:
         dump(content, cfg)
 
@@ -47,9 +78,10 @@ def read_config(config_name: str = _default_config_name) -> dict:
     :return: config info dict
     """
     if os.path.isfile(config_name):
+        check_config(config_name=config_name)
         with open(config_name, "rb") as cfg:
             return load(cfg)
-    create_config()
+    create_config(config_name=config_name)
     raise FileNotFoundError("Config file doesnt exist, so it has been created. Please fill it with your data.")
 
 
@@ -110,3 +142,11 @@ def get_imap_info() -> dict:
     :return: IMAP info dict
     """
     return read_config()["IMAP"]
+
+
+def get_max_test_szie() -> int:
+    """
+
+    :return:
+    """
+    return read_config()["tests"]["max size"]
