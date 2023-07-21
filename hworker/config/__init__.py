@@ -1,38 +1,13 @@
 """Read and parse config"""
 
+from default_config import _default_config_content, _default_config_name
+from ..log import get_logger
+
 from functools import cache
 from tomllib import load
-from collections import namedtuple
 import os
 
 from tomli_w import dump
-
-LoggerInfo = namedtuple("LoggerInfo", ["file", "console"])
-
-_default_config_name = "hworker.toml"
-_default_config_content = {
-    "logging": {"console level": "INFO", "file level": "DEBUG"},
-    "git": {
-        "directory": "~/.cache/hworker_git",
-        "repos": {"username": "repo (example, fill it)"},
-    },
-    "IMAP": {
-        "host": "host (example, fill it)",
-        "port": "993",
-        "folder": "folder (example, fill it)",
-        "username": "username (example, fill it)",
-        "password": "password (example, fill it)",
-    },
-    "tasks": {
-        "task name": {
-            "task ID": "20240101 (example, fill it)",
-            "open date": "20240101 (example, fill it)",
-            "soft deadline": "20240108 (example, fill it)",
-            "hard deadline": "20240401 (example, fill it)",
-        }
-    },
-    "tests": {"max size": 100},
-}
 
 
 def create_config(content: dict = None, config_name: str = _default_config_name) -> None:
@@ -41,6 +16,7 @@ def create_config(content: dict = None, config_name: str = _default_config_name)
     :param content: config content dict
     :param config_name: config file name
     """
+    get_logger(__name__).warn("Config file doesnt exist, so it has been created.")
     if content is None:
         content = _default_config_content
     with open(config_name, "wb") as cfg:
@@ -53,6 +29,7 @@ def check_config(content: dict = None, config_name: str = _default_config_name) 
     :param content: config content dict
     :param config_name: config file name
     """
+    get_logger(__name__).info("Check config fields.")
     if content is None:
         content = _default_config_content
     with open(config_name, "rb") as cfg:
@@ -73,6 +50,7 @@ def read_config(config_name: str = _default_config_name) -> dict:
     :param config_name: config file name
     :return: config info dict
     """
+    get_logger(__name__).info("Read config fields.")
     if os.path.isfile(config_name):
         check_config(config_name=config_name)
         with open(config_name, "rb") as cfg:
@@ -140,9 +118,34 @@ def get_imap_info() -> dict:
     return read_config()["IMAP"]
 
 
-def get_max_test_szie() -> int:
+def get_max_test_size() -> int:
     """
 
     :return:
     """
-    return read_config()["tests"]["max size"]
+    return int(read_config()["tests"]["max size"])
+
+
+def get_default_time_limit() -> int:
+    """
+
+    :return:
+    """
+    return int(read_config()["tests"]["default time limit"])
+
+
+def get_default_resource_limit() -> int:
+    """
+
+    :return:
+    """
+    return int(read_config()["tests"]["default resource limit"])
+
+
+def get_task_info(task_name: str) -> dict:
+    """
+
+    :param task_name:
+    :return:
+    """
+    return read_config()["tasks"].get(task_name, None)
