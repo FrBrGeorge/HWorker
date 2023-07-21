@@ -26,3 +26,7 @@ packages = ["hworker"]
 
 [project.scripts]
 test_control = "hworker.control:test"
+
+[tool.pytest.ini_options]
+tmp_path_retention_policy = "failed"
+
