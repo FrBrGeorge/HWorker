@@ -4,21 +4,19 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from .config import load_configs
+from ..config import get_logger_info
 
 
 def set_up_logger(logger: logging.Logger, true_name: str):
     """Set up logger for first time"""
-    configs = load_configs()
-
     logger.setLevel(logging.DEBUG)
 
     Path("./logs").mkdir(exist_ok=True)
     file_handler = logging.FileHandler(f"./logs/{true_name}.log")
-    file_handler.setLevel(configs["Logging"]["file level"])
+    file_handler.setLevel(get_logger_info()["file level"])
 
     console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(configs["Logging"]["console level"])
+    console_handler.setLevel(get_logger_info()["console level"])
 
     formatter = logging.Formatter(
         fmt="{asctime} [{name:>15}]: |{levelname:>7}|: {message}", datefmt="%H:%M:%S %d.%m.%Y", style="{"

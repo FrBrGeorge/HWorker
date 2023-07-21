@@ -1,4 +1,5 @@
 """Database functions"""
+import functools
 import pickle
 from typing import Iterable, Union, Type
 
@@ -46,9 +47,14 @@ def _translate_object_to_model(obj: Union[objects.StoreObject, Type[objects.Stor
     return model_obj
 
 
-def _translate_model_to_object(model: Base) -> objects.StoreObject:
+def _translate_model_to_object(model: Base, field_filter: list[str] = None) -> objects.StoreObject:
     fields = get_field_from_object(model)
     obj = _model_class_to_object[type(model)]()
+
+    if field_filter is not None:
+        if field_filter not in fields:
+            raise ValueError("Requested field not found in object")
+        [fields.pop(name) for name in field_filter]
 
     # deal with class specific fields
     if isinstance(model, Homework) and "content" in fields:
@@ -61,7 +67,9 @@ def _translate_model_to_object(model: Base) -> objects.StoreObject:
 
 
 def store(obj: objects.StoreObject) -> None:
-    """Store object into database"""
+    """Store object into database
+    :param obj: object to store
+    """
     get_logger(__name__).debug(f"Tried to store {obj}")
 
     if not isinstance(obj, objects.StoreObject) or type(obj) == objects.StoreObject:
@@ -96,23 +104,36 @@ def store(obj: objects.StoreObject) -> None:
         get_logger(__name__).error(e)
 
 
-def search(obj_type: Union[objects.StoreObject, Type[objects.StoreObject]], criteria=None) -> Iterable[objects.StoreObject]:
-    """Search for object in database"""
+def search(
+    obj_type: Union[objects.StoreObject, Type[objects.StoreObject]], criteria: object = None, return_fields: list[str] = None
+) -> Iterable[objects.StoreObject]:
+    """Search for object in database
+    :param obj_type: type of object to search or its instance
+    :param criteria: criteria for searching
+    :param return_fields: filter for return fields
+    :return: iterator for found objects
+    """
     get_logger(__name__).debug(f"Tried to search {obj_type}")
 
     model_type = type(_translate_object_to_model(obj_type))
     with Session.begin() as session:
         if criteria is None:
             # TODO add search criteria
-            return map(_translate_model_to_object, session.query(model_type))
+            func = functools.partial(_translate_model_to_object, field_filter=return_fields)
+            return map(func, session.query(model_type))
 
     return iter([])
 
 
 def delete(obj_type: objects.StoreObject, criteria=None) -> None:
+    """
+    Delete object from database
+    :param obj_type: type of object to delete or its instance
+    :param criteria: criteria for searching objects for delete
+    """
     get_logger(__name__).debug(f"Tried to delete {obj_type}")
+
     model_type = type(_translate_object_to_model(obj_type))
-    """Delete object from database"""
     with Session.begin() as session:
         if criteria is None:
             session.query(model_type).delete()
