@@ -1,7 +1,7 @@
 """Downloads solutions from repos"""
 
 import os
-from collections import defaultdict
+from functools import reduce
 
 import git
 
@@ -28,7 +28,7 @@ def clone(repo: str) -> None:
     :param repo: student repo path
     :return: -
     """
-    get_logger(__name__).log(f"Cloning {repo} repo")
+    get_logger(__name__).info(f"Cloning {repo} repo")
     if not os.path.exists(local_path(repo_to_uid(repo))):
         os.makedirs(local_path(repo_to_uid(repo)))
 
@@ -44,7 +44,7 @@ def pull(repo: str) -> None:
     :param repo: student repo path
     :return: -
     """
-    get_logger(__name__).log(f"Pulling {repo} repo")
+    get_logger(__name__).info(f"Pulling {repo} repo")
     try:
         repo = git.Repo(local_path(repo_to_uid(repo)))
         repo.git.pull()
@@ -55,7 +55,7 @@ def pull(repo: str) -> None:
 def update_all() -> None:
     """Pull every repo from config list (or clone if not downloaded)"""
     repos = get_repos()
-    get_logger(__name__).log(f"Updating all repos")
+    get_logger(__name__).info(f"Updating all repos")
     for repo in repos:
         if not os.path.exists(local_path(repo_to_uid(repo))):
             clone(repo)
@@ -63,30 +63,36 @@ def update_all() -> None:
             pull(repo)
 
 
-def get_homework_content(path: str) -> defaultdict:
+def get_file_content(path: str) -> bytes:
+    """
+
+    :param path:
+    :return:
+    """
+    with open(path, "rb") as file:
+        content = file.read()
+
+    return content
+
+
+def get_homework_content(root: str) -> dict:
     """Extracts tests, solution and URLS from homework and pack into dict
 
-    :param path: local path to homework
+    :param root: local path to homework
     :return: dict with "prog", "tests" and "urls" keys
     """
-    get_logger(__name__).log(f"Getting {path} content")
-    content = defaultdict(None)
-    content["tests"] = {}
+    get_logger(__name__).info(f"Getting {root} content")
 
-    if os.path.isfile(os.path.join(path, "prog.py")):
-        with open(os.path.join(path, "prog.py"), "rb") as prog:
-            content["prog.py"] = prog.read()
-
-    tests_path = os.path.join(path, "tests")
-    if os.path.isdir(tests_path):
-        for test_name in os.listdir(tests_path):
-            with open(os.path.join(tests_path, test_name), "rb") as test:
-                content["tests"][test_name] = test.read()
-
-    if os.path.isfile(os.path.join(path, "URLS")):
-        with open(os.path.join(path, "URLS"), "rb") as urls:
-            content["urls"] = urls.read()
-
+    # Modified https://code.activestate.com/recipes/577879-create-a-nested-dictionary-from-oswalk/
+    content = {}
+    root = root.rstrip(os.sep)
+    start = root.rfind(os.sep) + 1
+    for path, dirs, files in os.walk(root):
+        if all(map(lambda s: not s.startswith("."), path.split(os.sep))):
+            folders = path[start:].split(os.sep)
+            subdir = {file: get_file_content(os.path.join(path, file)) for file in files}
+            parent = reduce(dict.get, folders[:-1], content)
+            parent[folders[-1]] = subdir
     return content
 
 
@@ -96,7 +102,7 @@ def get_commits(path: str) -> list[tuple[str, str]]:
     :param path: homework local path
     :return: list of (commit hash, timestamp) pairs
     """
-    get_logger(__name__).log(f"Getting {path} commits")
+    get_logger(__name__).info(f"Getting {path} commits")
     g = git.cmd.Git(path)
     commits = [tuple(_.split()) for _ in g.log("--format=%H %ct", "--date=default").split("\n")]
     return commits
@@ -107,7 +113,7 @@ class GitBackend(Backend):
 
     def download_all(self) -> None:
         """Update all solutions and store every version in depot"""
-        get_logger(__name__).log(f"Downloading (or updating) all repos and store them")
+        get_logger(__name__).info(f"Downloading (or updating) all repos and store them")
         update_all()
         for student_id in get_uids():
             repo = git.Repo(local_path(student_id))

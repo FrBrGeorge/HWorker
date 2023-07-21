@@ -1,5 +1,5 @@
 from ..log import get_logger
-from ..config import get_max_test_szie
+from ..config import get_max_test_size
 
 from typing import Union
 from difflib import unified_diff
@@ -30,7 +30,7 @@ def exact_test_check(actual: str, initial: str) -> Union[unified_diff, None]:
     if act_lines == init_lines:
         return None
     act_size, init_size = getsize(actual), getsize(initial)
-    if act_size > get_max_test_szie() or init_size > get_max_test_szie():
+    if act_size > get_max_test_size() or init_size > get_max_test_size():
         init_lines, act_lines = [f"Size differs: {init_size}\n"], ["Size differs: <output>\n"]
     return unified_diff(init_lines, act_lines, basename(initial), "<output>")
 
