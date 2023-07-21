@@ -2,6 +2,7 @@
 """
 """
 
-from ..multiback import init_backends
+from hworker.multiback import init_backends
+from .A import method  # NoQA F401
 
 init_backends(["A", "B"], ["method"], uniform=True)
