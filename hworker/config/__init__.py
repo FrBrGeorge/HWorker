@@ -11,31 +11,27 @@ LoggerInfo = namedtuple("LoggerInfo", ["file", "console"])
 
 _default_config_name = "hworker.toml"
 _default_config_content = {
-    "logging": {
-        "console level": "INFO",
-        "file level": "DEBUG"},
+    "logging": {"console level": "INFO", "file level": "DEBUG"},
     "git": {
         "directory": "~/.cache/hworker_git",
         "repos": {"username": "repo (example, fill it)"},
     },
     "IMAP": {
         "host": "host (example, fill it)",
-        "port": "port (example, fill it)",
+        "port": "993",
         "folder": "folder (example, fill it)",
         "username": "username (example, fill it)",
-        "password": "password (example, fill it)"
+        "password": "password (example, fill it)",
     },
     "tasks": {
         "task name": {
             "task ID": "20240101 (example, fill it)",
             "open date": "20240101 (example, fill it)",
             "soft deadline": "20240108 (example, fill it)",
-            "hard deadline": "20240401 (example, fill it)"
+            "hard deadline": "20240401 (example, fill it)",
         }
     },
-    "tests": {
-        "max size": 100
-    }
+    "tests": {"max size": 100},
 }
 
 
@@ -67,7 +63,7 @@ def check_config(content: dict = None, config_name: str = _default_config_name) 
             for subkey, subvalue in value.items():
                 cur_content[key].setdefault(subkey, subvalue)
     with open(_default_config_name, "wb") as cfg:
-        dump(content, cfg)
+        dump(cur_content, cfg)
 
 
 @cache
