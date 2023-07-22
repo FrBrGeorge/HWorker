@@ -41,7 +41,7 @@ class Homework(StoreObject):
         self.content = content
 
 
-class Test(StoreObject):
+class Check(StoreObject):
     content: dict[str, str]  # just dict object, for storage just pickled
     category: str  # needs to be enum
     _is_versioned = True
@@ -49,11 +49,11 @@ class Test(StoreObject):
 
 class Solution(StoreObject):
     content: dict[str, str]  # filename with path: file text
-    tests: list[str]  # ?? or list[Test]?
+    tests: list[str]  # ?? or list[Check]?
     _is_versioned = True
 
 
-class TestResult(StoreObject):
+class CheckResult(StoreObject):
     content: float
     category: str
     _is_versioned = False
