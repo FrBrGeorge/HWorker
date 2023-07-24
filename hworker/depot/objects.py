@@ -81,3 +81,28 @@ class Formula(StoreObject):
 class Score(StoreObject):
     content: str
     _is_versioned = False
+
+
+class Criteria:
+    _pos_conditions: dict[str, str] = {
+        "==": "__eq__",
+        "!=": "__ne__",
+        "<": "__lt__",
+        "<=": "__le__",
+        ">": "__gt__",
+        ">=": "__ge__",
+    }
+
+    field_name: str
+    condition: str
+    field_value: Any
+
+    def __init__(self, field_name, condition, field_value):
+        if condition not in self._pos_conditions:
+            raise ValueError(f"Condition is not possible. Possible is {self._pos_conditions}")
+        self.field_name = field_name
+        self.condition = condition
+        self.field_value = field_value
+
+    def get_condition_function(self):
+        return self._pos_conditions[self.condition]

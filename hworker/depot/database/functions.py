@@ -4,20 +4,18 @@ import pickle
 from typing import Iterable, Union, Type
 
 import sqlalchemy.exc
+from sqlalchemy.sql.elements import BinaryExpression
 
 from .common import Session
 from .models import *
 
 import hworker.depot.objects as objects
-
 from hworker.log import get_logger
 
-my_logger = get_logger(__name__)
-
-_object_to_model_class: dict[Type[objects.StoreObject] : Type[Base]] = {
+_object_to_model_class: dict[Type[objects.StoreObject]: Type[Base]] = {
     objects.Homework: Homework,
 }
-_model_class_to_object: dict[Type[Base] : Type[objects.StoreObject]] = {
+_model_class_to_object: dict[Type[Base]: Type[objects.StoreObject]] = {
     value: key for key, value in _object_to_model_class.items()
 }
 
@@ -66,6 +64,14 @@ def _translate_model_to_object(model: Base, field_filter: list[str] = None) -> o
     return obj
 
 
+def _parse_criteria(model: Type[Base], criteria: objects.Criteria) -> BinaryExpression:
+    model_field = getattr(model, criteria.field_name)
+
+    model_method = getattr(model_field, criteria.get_condition_function())
+
+    return model_method(criteria.field_value)
+
+
 def store(obj: objects.StoreObject) -> None:
     """Store object into database
     :param obj: object to store
@@ -105,7 +111,9 @@ def store(obj: objects.StoreObject) -> None:
 
 
 def search(
-    obj_type: Union[objects.StoreObject, Type[objects.StoreObject]], criteria: object = None, return_fields: list[str] = None
+        obj_type: Union[objects.StoreObject, Type[objects.StoreObject]],
+        *criteria: Iterable[objects.Criteria],
+        return_fields: list[str] = None,
 ) -> Iterable[objects.StoreObject]:
     """Search for object in database
     :param obj_type: type of object to search or its instance
@@ -114,18 +122,19 @@ def search(
     :return: iterator for found objects
     """
     get_logger(__name__).debug(f"Tried to search {obj_type}")
+    print(criteria, return_fields)
 
     model_type = type(_translate_object_to_model(obj_type))
     with Session.begin() as session:
-        if criteria is None:
-            # TODO add search criteria
-            func = functools.partial(_translate_model_to_object, field_filter=return_fields)
-            return map(func, session.query(model_type))
+        search_result = session.query(model_type)
+        if len(criteria) != 0:
+            search_result = search_result.filter(*list(map(functools.partial(_parse_criteria, model_type), criteria)))
 
-    return iter([])
+        func = functools.partial(_translate_model_to_object, field_filter=return_fields)
+        return map(func, search_result)
 
 
-def delete(obj_type: objects.StoreObject, criteria=None) -> None:
+def delete(obj_type: objects.StoreObject, *criteria: Iterable[objects.Criteria]) -> None:
     """
     Delete object from database
     :param obj_type: type of object to delete or its instance
@@ -135,5 +144,8 @@ def delete(obj_type: objects.StoreObject, criteria=None) -> None:
 
     model_type = type(_translate_object_to_model(obj_type))
     with Session.begin() as session:
-        if criteria is None:
-            session.query(model_type).delete()
+        search_result = session.query(model_type)
+        if len(criteria) != 0:
+            search_result = search_result.filter(*list(map(functools.partial(_parse_criteria, model=model_type), criteria)))
+
+        search_result.delete()
