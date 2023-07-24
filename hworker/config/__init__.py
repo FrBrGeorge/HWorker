@@ -153,3 +153,11 @@ def get_task_info(task_name: str) -> dict:
     :return: task info dict
     """
     return read_config()["tasks"].get(task_name, None)
+
+
+def get_check_directory() -> str:
+    """Get a dir for check
+
+    :return: check dir
+    """
+    return read_config()["check"]["directory"]

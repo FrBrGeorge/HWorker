@@ -43,4 +43,7 @@ _default_config_content = {
             "check ID": {"taskID_1, taskID_2, ... (optional field)"}
         }
     },
+    "check": {
+        "directory": "~/.cache/hworker_check"
+    }
 }
