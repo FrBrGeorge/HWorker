@@ -2,8 +2,6 @@
 
 from .default_config import _default_config_content, _default_config_name
 
-# from ..log import get_logger
-
 from functools import cache
 from tomllib import load
 import os
@@ -17,7 +15,6 @@ def create_config(content: dict = None, config_name: str = _default_config_name)
     :param content: config content dict
     :param config_name: config file name
     """
-    # get_logger(__name__).warn("Config file doesn't exist, so it has been created.")
     if content is None:
         content = _default_config_content
     with open(config_name, "wb") as cfg:
@@ -30,7 +27,6 @@ def check_config(content: dict = None, config_name: str = _default_config_name) 
     :param content: config content dict
     :param config_name: config file name
     """
-    # get_logger(__name__).info("Check config fields.")
     if content is None:
         content = _default_config_content
     with open(config_name, "rb") as cfg:
@@ -51,7 +47,6 @@ def read_config(config_name: str = _default_config_name) -> dict:
     :param config_name: config file name
     :return: config info dict
     """
-    # get_logger(__name__).info("Read config fields.")
     if os.path.isfile(config_name):
         check_config(config_name=config_name)
         with open(config_name, "rb") as cfg:
@@ -128,33 +123,33 @@ def get_imap_info() -> dict:
 
 
 def get_max_test_size() -> int:
-    """
+    """Get maximum test rows size
 
-    :return:
+    :return: maximum test rows size
     """
     return int(read_config()["tests"]["max size"])
 
 
 def get_default_time_limit() -> int:
-    """
+    """Get task default time limit
 
-    :return:
+    :return: task default time limit
     """
     return int(read_config()["tests"]["default time limit"])
 
 
 def get_default_resource_limit() -> int:
-    """
+    """Get task default resource limit
 
-    :return:
+    :return: task default resource limit
     """
     return int(read_config()["tests"]["default resource limit"])
 
 
 def get_task_info(task_name: str) -> dict:
-    """
+    """Get dict with task info: deadlines, special limits, special checks etc.
 
-    :param task_name:
-    :return:
+    :param task_name: task name from config
+    :return: task info dict
     """
     return read_config()["tasks"].get(task_name, None)
