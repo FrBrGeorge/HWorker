@@ -1,7 +1,4 @@
-"""Delivery interface"""
-from abc import ABC
+from ..config import get_deliver_modules
+from ..multiback import init_backends
 
-
-class Backend(ABC):
-    def download_all(self):
-        pass
+init_backends(backends=get_deliver_modules(), methods=["download_all"])

@@ -5,7 +5,6 @@ import tarfile
 import tempfile
 import datetime
 
-from ...deliver import Backend
 from .mailer_utilities import get_mailbox
 from ...log import get_logger
 from ... import depot
@@ -33,37 +32,36 @@ def parse_tar_file(filename: str, content: bytes):
     return max(timestamps), contents
 
 
-class IMAPBackend(Backend):
-    def download_all(self):
-        box = get_mailbox()
+def download_all():
+    box = get_mailbox()
 
-        for mail in box.fetch("ALL", limit=47):
-            # TODO should take from config
-            TASK_ID = None
-            USER_ID = mail.from_
-            timestamps = []
-            contents = {}
+    for mail in box.fetch("ALL", limit=47):
+        # TODO should take from config
+        TASK_ID = None
+        USER_ID = mail.from_
+        timestamps = []
+        contents = {}
 
-            for attachment in mail.attachments:
-                task_name = re.findall(r"(?<=report\.).+(?=\.)", attachment.filename)
-                task_name = task_name[0] if len(task_name) == 1 else None
+        for attachment in mail.attachments:
+            task_name = re.findall(r"(?<=report\.).+(?=\.)", attachment.filename)
+            task_name = task_name[0] if len(task_name) == 1 else None
 
-                if task_name is not None:
-                    # TODO should take from config
-                    TASK_ID = task_name
+            if task_name is not None:
+                # TODO should take from config
+                TASK_ID = task_name
 
-                    timestamp, content = parse_tar_file(filename=attachment.filename, content=attachment.payload)
-                    timestamps.append(timestamp)
-                    contents.update(content)
+                timestamp, content = parse_tar_file(filename=attachment.filename, content=attachment.payload)
+                timestamps.append(timestamp)
+                contents.update(content)
 
-                    get_logger(__name__).warn(f"Find {attachment.filename} for email {USER_ID}")
-            if TASK_ID is not None:
-                depot.store(
-                    Homework(
-                        ID=mail.uid,
-                        USER_ID=mail.from_,
-                        TASK_ID=TASK_ID,
-                        timestamp=max(timestamps),
-                        content=contents,
-                    )
+                get_logger(__name__).warn(f"Find {attachment.filename} for email {USER_ID}")
+        if TASK_ID is not None:
+            depot.store(
+                Homework(
+                    ID=mail.uid,
+                    USER_ID=mail.from_,
+                    TASK_ID=TASK_ID,
+                    timestamp=max(timestamps),
+                    content=contents,
                 )
+            )

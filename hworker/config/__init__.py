@@ -1,6 +1,7 @@
 """Read and parse config"""
 
 from .default_config import _default_config_content, _default_config_name
+
 # from ..log import get_logger
 
 from functools import cache
@@ -16,7 +17,7 @@ def create_config(content: dict = None, config_name: str = _default_config_name)
     :param content: config content dict
     :param config_name: config file name
     """
-    # get_logger(__name__).warn("Config file doesnt exist, so it has been created.")
+    # get_logger(__name__).warn("Config file doesn't exist, so it has been created.")
     if content is None:
         content = _default_config_content
     with open(config_name, "wb") as cfg:
@@ -108,6 +109,14 @@ def get_logger_info() -> dict:
     :return: file-console logger info dict
     """
     return read_config()["logging"]
+
+
+def get_deliver_modules() -> list:
+    """Get modules for deliver
+
+    :return: list of modules
+    """
+    return read_config()["modules"]["deliver"]
 
 
 def get_imap_info() -> dict:
