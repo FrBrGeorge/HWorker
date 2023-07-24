@@ -32,11 +32,18 @@ _default_config_content = {
             "hard deadline": "20240401 (example, fill it)",
             "time limit": f"{DEFAULT_TIME_LIMIT} (optional field)",
             "resource limit": f"{DEFAULT_RESOURCE_LIMIT} (optional field)",
+            "checks": "check ID (optional field)"
         }
     },
     "tests": {
         "max size": MAX_SIZE,
         "default time limit": DEFAULT_TIME_LIMIT,
         "default resource limit": DEFAULT_RESOURCE_LIMIT,
+        "master checks": {
+            "check ID": {"taskID_1, taskID_2, ... (optional field)"}
+        }
     },
+    "check": {
+        "directory": "~/.cache/hworker_check"
+    }
 }

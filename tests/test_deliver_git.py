@@ -1,6 +1,6 @@
 """Tests for deliver.git"""
 
-from hworker.deliver.git.git import get_homework_content
+from hworker.deliver.git import get_homework_content
 
 from unittest.mock import patch
 import os

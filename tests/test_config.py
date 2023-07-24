@@ -26,6 +26,6 @@ def test_git_backend(example_config):
     """"""
     assert get_git_directory() == "~/.cache/hworker_git"
     assert get_repos() == ["repo (example, fill it)", ]
-    assert get_uids() == ["username",]
+    assert get_uids() == ["username", ]
     assert uid_to_repo("username") == "repo (example, fill it)"
     assert repo_to_uid("repo (example, fill it)") == "username"
