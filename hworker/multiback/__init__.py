@@ -34,7 +34,7 @@ def aggregate(seq: list) -> Any:
 def init_backends(
     backends: list[str],
     methods: list[str],
-    backpath: str = ".back",
+    backpath: str = "",
     uniform: bool = False,
 ) -> None:
     """Wrap every method from each backend to single one and store it to module namespace.
