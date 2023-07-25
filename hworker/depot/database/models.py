@@ -3,7 +3,7 @@ from sqlalchemy import *
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 import datetime
 
-from ..objects import CheckCategoryEnum
+from ..objects import CheckCategoryEnum, VerdictEnum
 
 _default_datetime = datetime.datetime.fromisoformat("2009-05-17 20:09:00")
 
@@ -36,7 +36,7 @@ class Homework(Base):
 
     # noinspection PyTypeChecker
     def __init__(self, content: dict = None, is_broken: bool = None, **kwargs):
-        """Initialise homework object"""
+        """Initialise Homework object"""
         super().__init__(**kwargs)
         self.content = content
         self.is_broken = is_broken
@@ -52,7 +52,7 @@ class Check(Base):
 
     # noinspection PyTypeChecker
     def __init__(self, content: dict = None, category: CheckCategoryEnum = None, **kwargs):
-        """Initialise homework object"""
+        """Initialise Check object"""
         super().__init__(**kwargs)
         self.content = content
         self.category = category
@@ -68,7 +68,43 @@ class Solution(Base):
 
     # noinspection PyTypeChecker
     def __init__(self, content: dict = None, checks: list = None, **kwargs):
-        """Initialise homework object"""
+        """Initialise Solution object"""
         super().__init__(**kwargs)
         self.content = content
         self.checks = checks
+
+
+class CheckResult(Base):
+    """Class for homework from one student for one task"""
+
+    __tablename__ = "check_result"
+
+    rating: Mapped[float] = mapped_column(Float)
+    category: Mapped[CheckCategoryEnum] = mapped_column(Enum(CheckCategoryEnum))
+    check_ID: Mapped[str] = mapped_column(String)
+    solution_ID: Mapped[str] = mapped_column(String)
+    verdict: Mapped[VerdictEnum] = mapped_column(Enum(VerdictEnum))
+    stdout: Mapped[bytes] = mapped_column(LargeBinary)
+    stderr: Mapped[bytes] = mapped_column(LargeBinary)
+
+    # noinspection PyTypeChecker
+    def __init__(
+        self,
+        rating: float = None,
+        category: CheckCategoryEnum = None,
+        check_ID: str = None,
+        solution_ID: str = None,
+        verdict: VerdictEnum = None,
+        stdout: bytes = None,
+        stderr: bytes = None,
+        **kwargs
+    ):
+        """Initialise CheckResult object"""
+        super().__init__(**kwargs)
+        self.rating = rating
+        self.category = category
+        self.check_ID = check_ID
+        self.solution_ID = solution_ID
+        self.verdict = verdict
+        self.stdout = stdout
+        self.stderr = stderr

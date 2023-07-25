@@ -52,7 +52,7 @@ class CheckCategoryEnum(enum.Enum):
 
 class Check(StoreObject):
     content: dict[str, bytes]  # filename : file_content
-    category: CheckCategoryEnum  # should be enum
+    category: CheckCategoryEnum
     _is_versioned: bool = True
 
     def __init__(self, content: dict[str, bytes] = None, category: CheckCategoryEnum = None, **kwargs):
@@ -72,10 +72,39 @@ class Solution(StoreObject):
         self.checks = checks
 
 
+class VerdictEnum(enum.Enum):
+    failed = 1
+
+
 class CheckResult(StoreObject):
-    content: float
-    category: str
+    rating: float
+    category: CheckCategoryEnum
+    check_ID: str
+    solution_ID: str
+    verdict: VerdictEnum
+    stdout: bytes
+    stderr: bytes
     _is_versioned: bool = False
+
+    def __init__(
+        self,
+        rating: float = None,
+        category: CheckCategoryEnum = None,
+        check_ID: str = None,
+        solution_ID: str = None,
+        verdict: VerdictEnum = None,
+        stdout: bytes = None,
+        stderr: bytes = None,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.rating = rating
+        self.category = category
+        self.check_ID = check_ID
+        self.solution_ID = solution_ID
+        self.verdict = verdict
+        self.stdout = stdout
+        self.stderr = stderr
 
 
 class Plagiary(StoreObject):

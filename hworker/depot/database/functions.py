@@ -16,6 +16,7 @@ _object_to_model_class: dict[Type[objects.StoreObject] : Type[Base]] = {
     objects.Homework: Homework,
     objects.Check: Check,
     objects.Solution: Solution,
+    objects.CheckResult: CheckResult,
 }
 _model_class_to_object: dict[Type[Base] : Type[objects.StoreObject]] = {
     value: key for key, value in _object_to_model_class.items()
