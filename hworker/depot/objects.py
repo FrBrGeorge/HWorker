@@ -1,4 +1,5 @@
 """Interface objects for depot management"""
+import enum
 from typing import Any
 
 
@@ -33,30 +34,48 @@ class StoreObject:
 
 
 class Homework(StoreObject):
-    content: dict[str, bytes]  # filename : file_content
-    _is_versioned = True
+    content: dict[str, bytes]  # filepath : file_content
+    is_broken: bool
+    _is_versioned: bool = True
 
-    def __init__(self, content: dict[str, bytes] = None, **kwargs):
+    def __init__(self, content: dict[str, bytes] = None, is_broken: bool = None, **kwargs):
         super().__init__(**kwargs)
         self.content = content
+        self.is_broken = is_broken
+
+
+class CheckCategoryEnum(enum.Enum):
+    runtime = 1
+    validate = 2
+    plagiary = 3
 
 
 class Check(StoreObject):
-    content: dict[str, str]  # just dict object, for storage just pickled
-    category: str  # needs to be enum
-    _is_versioned = True
+    content: dict[str, bytes]  # filename : file_content
+    category: CheckCategoryEnum  # should be enum
+    _is_versioned: bool = True
+
+    def __init__(self, content: dict[str, bytes] = None, category: CheckCategoryEnum = None, **kwargs):
+        super().__init__(**kwargs)
+        self.content = content
+        self.category = category
 
 
 class Solution(StoreObject):
-    content: dict[str, str]  # filename with path: file text
-    tests: list[str]  # ?? or list[Check]?
-    _is_versioned = True
+    content: dict[str, bytes]  # filepath : file_content
+    checks: list[str]  # list[ID]
+    _is_versioned: bool = True
+
+    def __init__(self, content: dict[str, bytes] = None, checks: list[str] = None, **kwargs):
+        super().__init__(**kwargs)
+        self.content = content
+        self.checks = checks
 
 
 class CheckResult(StoreObject):
     content: float
     category: str
-    _is_versioned = False
+    _is_versioned: bool = False
 
 
 class Plagiary(StoreObject):
@@ -65,22 +84,22 @@ class Plagiary(StoreObject):
 
 class ScoreFunction(StoreObject):
     content: str
-    _is_versioned = False
+    _is_versioned: bool = False
 
 
 class PartialScore(StoreObject):
     content: float
-    _is_versioned = False
+    _is_versioned: bool = False
 
 
 class Formula(StoreObject):
     content: str
-    _is_versioned = False
+    _is_versioned: bool = False
 
 
 class Score(StoreObject):
     content: str
-    _is_versioned = False
+    _is_versioned: bool = False
 
 
 class Criteria:

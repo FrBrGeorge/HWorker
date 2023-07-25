@@ -12,10 +12,12 @@ from .models import *
 import hworker.depot.objects as objects
 from hworker.log import get_logger
 
-_object_to_model_class: dict[Type[objects.StoreObject]: Type[Base]] = {
+_object_to_model_class: dict[Type[objects.StoreObject] : Type[Base]] = {
     objects.Homework: Homework,
+    objects.Check: Check,
+    objects.Solution: Solution,
 }
-_model_class_to_object: dict[Type[Base]: Type[objects.StoreObject]] = {
+_model_class_to_object: dict[Type[Base] : Type[objects.StoreObject]] = {
     value: key for key, value in _object_to_model_class.items()
 }
 
@@ -35,10 +37,6 @@ def _translate_object_to_model(obj: Union[objects.StoreObject, Type[objects.Stor
     fields = get_field_from_object(obj)
     model_obj = _object_to_model_class[type(obj)]()
 
-    # deal with class specific fields
-    if isinstance(obj, objects.Homework) and "content" in fields:
-        fields["content"] = pickle.dumps(fields["content"])
-
     for name, value in fields.items():
         setattr(model_obj, name, value)
 
@@ -53,10 +51,6 @@ def _translate_model_to_object(model: Base, field_filter: list[str] = None) -> o
         if field_filter not in fields:
             raise ValueError("Requested field not found in object")
         [fields.pop(name) for name in field_filter]
-
-    # deal with class specific fields
-    if isinstance(model, Homework) and "content" in fields:
-        fields["content"] = pickle.loads(fields["content"])
 
     for name, value in fields.items():
         setattr(obj, name, value)
@@ -111,9 +105,9 @@ def store(obj: objects.StoreObject) -> None:
 
 
 def search(
-        obj_type: Union[objects.StoreObject, Type[objects.StoreObject]],
-        *criteria: Iterable[objects.Criteria],
-        return_fields: list[str] = None,
+    obj_type: Union[objects.StoreObject, Type[objects.StoreObject]],
+    *criteria: Iterable[objects.Criteria],
+    return_fields: list[str] = None,
 ) -> Iterable[objects.StoreObject]:
     """Search for object in database
     :param obj_type: type of object to search or its instance
