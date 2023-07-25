@@ -1,34 +1,37 @@
 """Read and parse config"""
 
-from .default_config import _default_config_content, _default_config_name
-
+from typing import Final
 from functools import cache
 from tomllib import load
 import os
 
 from tomli_w import dump
 
+_config_name: Final = "default_hworker.toml"
+_default_name: Final = "default_hworker.toml"
 
-def create_config(content: dict = None, config_name: str = _default_config_name) -> None:
+
+def create_config(content: dict = None, config_name: str = _config_name) -> None:
     """Creates config file
 
     :param content: config content dict
     :param config_name: config file name
     """
     if content is None:
-        content = _default_config_content
+        with open(_config_name, mode="rb") as default:
+            content = load(default)
     with open(config_name, "wb") as cfg:
         dump(content, cfg)
 
 
-def check_config(content: dict = None, config_name: str = _default_config_name) -> None:
+def check_config(content: dict = None, config_name: str = _config_name) -> None:
     """Check field of current config file and add default values for missing ones
 
     :param content: config content dict
     :param config_name: config file name
     """
     if content is None:
-        content = _default_config_content
+        content = _default_name
     with open(config_name, "rb") as cfg:
         cur_content = load(cfg)
     for key, value in content.items():
@@ -36,12 +39,12 @@ def check_config(content: dict = None, config_name: str = _default_config_name) 
         if isinstance(value, dict):
             for subkey, subvalue in value.items():
                 cur_content[key].setdefault(subkey, subvalue)
-    with open(_default_config_name, "wb") as cfg:
+    with open(_config_name, "wb") as cfg:
         dump(cur_content, cfg)
 
 
 @cache
-def read_config(config_name: str = _default_config_name) -> dict:
+def read_config(config_name: str = _default_name) -> dict:
     """Reads config
 
     :param config_name: config file name
@@ -127,7 +130,7 @@ def get_max_test_size() -> int:
 
     :return: maximum test rows size
     """
-    return int(read_config()["tests"]["max size"])
+    return int(read_config()["tests"]["max_size"])
 
 
 def get_default_time_limit() -> int:
@@ -135,7 +138,7 @@ def get_default_time_limit() -> int:
 
     :return: task default time limit
     """
-    return int(read_config()["tests"]["default time limit"])
+    return int(read_config()["tests"]["default_time_limit"])
 
 
 def get_default_resource_limit() -> int:
@@ -143,7 +146,7 @@ def get_default_resource_limit() -> int:
 
     :return: task default resource limit
     """
-    return int(read_config()["tests"]["default resource limit"])
+    return int(read_config()["tests"]["default_resource_limit"])
 
 
 def get_task_info(task_name: str) -> dict:
