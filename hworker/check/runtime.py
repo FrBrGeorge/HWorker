@@ -5,6 +5,7 @@ from ..depot.objects import Check, CheckResult
 import sys
 import io
 import os
+from random import randint
 from typing import Union
 from difflib import diff_bytes, unified_diff
 from os.path import getsize, basename
@@ -13,8 +14,13 @@ import subprocess
 from subprocess import CompletedProcess, TimeoutExpired
 
 
+def python_set_limits(time_limit: int = None, resource_limit: int = None) -> None:
+    """Set limits for python program run
 
-def python_set_limits(time_limit: int = None, resource_limit: int = None):
+    :param time_limit: time limit in seconds, will be taken from config if not specified
+    :param resource_limit: resource limit in bytes, will be taken from config if not specified
+    """
+    # TODO: limits for various platforms
     if time_limit is None:
         time_limit = get_default_time_limit()
     if resource_limit is None:
@@ -26,12 +32,12 @@ def python_set_limits(time_limit: int = None, resource_limit: int = None):
     resource.setrlimit(resource.RLIMIT_NOFILE, (30, 30))
 
 
-def python_runner(prog_path: str, prog_input: io.BytesIO) -> tuple[io.BytesIO | None, bytes, int]:
-    """
+def python_runner(prog_path: str, prog_input: io.BytesIO) -> tuple[bytes | None, bytes, int]:
+    """Runs python program with given input and returns output info
 
-    :param prog_path:
-    :param prog_input:
-    :return:
+    :param prog_path: python program path
+    :param prog_input: program input in io format
+    :return: tuple of program output, stderr and exit code
     """
     # TODO
     with prog_input, io.BytesIO() as prog_output:
@@ -42,18 +48,17 @@ def python_runner(prog_path: str, prog_input: io.BytesIO) -> tuple[io.BytesIO | 
         except TimeoutExpired as time_error:
             result = CompletedProcess(time_error.args, -1, stderr=str(time_error).encode(errors='replace'))
         exit_code = result.wait()
-        return prog_output if prog_output else None, result.stderr.read(), exit_code
+        return prog_output.read() if prog_output else None, result.stderr.read(), exit_code
 
 
+def checker(check: Check, check_num: int = None) -> None:
+    """ Run checker on a given check
 
-
-def checker(check: Check, check_num: int) -> float:
+    :param check: check object
+    :param check_num: number of check for parallel work
     """
-    
-    :param check:
-    :param check_num:
-    :return:
-    """
+    if check_num is None:
+        check_num = randint()
     prog = check.content["prog.py"]
     checks = check.content["tests"]
     for check in checks:
