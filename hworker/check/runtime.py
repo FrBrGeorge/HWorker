@@ -7,6 +7,8 @@ import sys
 import io
 import os
 import platform
+from math import isclose
+from itertools import zip_longest
 from typing import Iterator
 from random import randint
 from difflib import diff_bytes, unified_diff
@@ -83,8 +85,9 @@ def checker(check: Check, check_num: int = None) -> None:
 
     runner = choose_runner(check)
     actual_output, stderr, exit_code = runner(prog_path, prog_input)
-    score = choose_test_score(actual_output, initial_output, check.category)
-    check_result = CheckResult(content=score, category=check.category)
+    diff, score = choose_diff_score(actual_output, initial_output, check.category)
+    content = score(diff(actual_output, initial_output))
+    check_result = CheckResult(content=content, category=check.category)
     store(check_result)
 
 
@@ -94,7 +97,7 @@ def choose_runner(check: Check):
     return python_runner
 
 
-def test_check(actual: bytes, initial: bytes) -> Iterator[bytes] | None:
+def bytes_diff(actual: bytes, initial: bytes) -> Iterator[bytes] | None:
     """Compares two test file without insignificant whitespaces
 
     :param actual: Output from program
@@ -121,7 +124,30 @@ def exact_score(diff: Iterator[bytes] | None) -> float:
     return 1.0 if diff is None else 0.0
 
 
-def choose_test_score(actual: bytes, initial: bytes, test_type: CheckCategoryEnum):
+def float_diff(actual: bytes, initial: bytes, relative: int = 1e-09) -> Iterator[bytes] | None:
+    """
+
+    :param actual:
+    :param initial:
+    :param relative:
+    :return:
+    """
+    for actual_num, initial_num in zip_longest(actual.split(), initial.split(), fillvalue=None):
+        yield f"{actual_num} " \
+              f"{'=' if isclose(actual_num, initial_num, rel_tol=relative) else '!='} " \
+              f"{initial_num}".encode("utf-8")
+
+
+def float_score(diff: Iterator[bytes]) -> float:
+    """
+
+    :param diff:
+    :return:
+    """
+    return 1.0 if all(map(lambda s: "!" not in s, diff)) else 0.0
+
+
+def choose_diff_score(actual: bytes, initial: bytes, test_type: CheckCategoryEnum):
     """Chooses checker based on test type"""
     # TODO
-    return test_check
+    return bytes_diff, exact_score
