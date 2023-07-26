@@ -1,11 +1,14 @@
 from ..log import get_logger
 from ..config import get_max_test_size, get_check_directory, get_default_time_limit, get_default_resource_limit
-from ..depot.objects import Check, CheckResult
+from ..depot.objects import Check, CheckResult, CheckCategoryEnum
+from ..depot.database.functions import store
 
 import sys
 import io
 import os
-from typing import Union
+import platform
+from typing import Iterator
+from random import randint
 from difflib import diff_bytes, unified_diff
 from os.path import getsize, basename
 import resource
@@ -13,8 +16,14 @@ import subprocess
 from subprocess import CompletedProcess, TimeoutExpired
 
 
+def python_set_limits(time_limit: int = None, resource_limit: int = None) -> None:
+    """Set limits for python program run
 
-def python_set_limits(time_limit: int = None, resource_limit: int = None):
+    :param time_limit: time limit in seconds, will be taken from config if not specified
+    :param resource_limit: resource limit in bytes, will be taken from config if not specified
+    """
+    # TODO: limits for various platforms
+    get_logger(__name__).info("Set limits for python runner")
     if time_limit is None:
         time_limit = get_default_time_limit()
     if resource_limit is None:
@@ -25,15 +34,19 @@ def python_set_limits(time_limit: int = None, resource_limit: int = None):
     resource.setrlimit(resource.RLIMIT_STACK, (resource_limit, resource_limit))
     resource.setrlimit(resource.RLIMIT_NOFILE, (30, 30))
 
+    if platform.system() == "Linux" or platform.system() == "Linux2":
+        resource.setrlimit(resource.RLIMIT_AS, (1024 * 1024 * 15, 1024 * 1024 * 15))
+        resource.setrlimit(resource.RLIMIT_FSIZE, (2048, 2048))
 
-def python_runner(prog_path: str, prog_input: io.BytesIO) -> tuple[io.BytesIO | None, bytes, int]:
-    """
 
-    :param prog_path:
-    :param prog_input:
-    :return:
+def python_runner(prog_path: str, prog_input: io.BytesIO) -> tuple[bytes | None, bytes, int]:
+    """Runs python program with given input and returns output info
+
+    :param prog_path: python program path
+    :param prog_input: program input in io format
+    :return: tuple of program output, stderr and exit code
     """
-    # TODO
+    get_logger(__name__).info(f"{prog_path} run")
     with prog_input, io.BytesIO() as prog_output:
         try:
             result = subprocess.Popen([sys.executable, prog_path], preexec_fn=python_set_limits(), stdin=prog_input,
@@ -42,20 +55,20 @@ def python_runner(prog_path: str, prog_input: io.BytesIO) -> tuple[io.BytesIO | 
         except TimeoutExpired as time_error:
             result = CompletedProcess(time_error.args, -1, stderr=str(time_error).encode(errors='replace'))
         exit_code = result.wait()
-        return prog_output if prog_output else None, result.stderr.read(), exit_code
+        return prog_output.read() if prog_output else None, result.stderr.read(), exit_code
 
 
+def checker(check: Check, check_num: int = None) -> None:
+    """ Run checker on a given check
 
-
-def checker(check: Check, check_num: int) -> float:
+    :param check: check object
+    :param check_num: number of check for parallel work
     """
-    
-    :param check:
-    :param check_num:
-    :return:
-    """
-    prog = check.content["prog.py"]
-    checks = check.content["tests"]
+    get_logger(__name__).info(f"Checking check: f{check.ID}")
+    if check_num is None:
+        check_num = randint(1, 1000000)
+    prog, checks = check.content["prog.py"], check.content["tests"]
+    prog_input, initial_output = io.BytesIO(), bytes()
     for check in checks:
         if check.endswith(".in"):
             prog_input = io.BytesIO(check)
@@ -68,6 +81,12 @@ def checker(check: Check, check_num: int) -> float:
     with open(prog_path, mode="rb") as p:
         p.write(prog)
 
+    runner = choose_runner(check)
+    actual_output, stderr, exit_code = runner(prog_path, prog_input)
+    score = choose_test_score(actual_output, initial_output, check.category)
+    check_result = CheckResult(content=score, category=check.category)
+    store(check_result)
+
 
 def choose_runner(check: Check):
     """Choose runner based on program type"""
@@ -75,7 +94,7 @@ def choose_runner(check: Check):
     return python_runner
 
 
-def test_check(actual: bytes, initial: bytes) -> Union[unified_diff, None]:
+def test_check(actual: bytes, initial: bytes) -> Iterator[bytes] | None:
     """Compares two test file without insignificant whitespaces
 
     :param actual: Output from program
@@ -93,9 +112,16 @@ def test_check(actual: bytes, initial: bytes) -> Union[unified_diff, None]:
     return diff_bytes(unified_diff, init_lines, act_lines, basename(initial), b"<output>")
 
 
-def choose_test_checker(actual: str, initial: str, test_type: str):
+def exact_score(diff: Iterator[bytes] | None) -> float:
+    """Score exact tests similarity
+
+    :param diff: actual and initial outputs diff (result of test_check work)
+    :return: score [0, 1]
+    """
+    return 1.0 if diff is None else 0.0
+
+
+def choose_test_score(actual: bytes, initial: bytes, test_type: CheckCategoryEnum):
     """Chooses checker based on test type"""
     # TODO
     return test_check
-
-
