@@ -47,6 +47,7 @@ class Check(Base):
 
     __tablename__ = "check"
 
+    name: Mapped[str] = mapped_column(String)
     content: Mapped[dict] = mapped_column(PickleType)
     category: Mapped[CheckCategoryEnum] = mapped_column(Enum(CheckCategoryEnum))
 

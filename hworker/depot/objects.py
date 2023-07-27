@@ -51,6 +51,7 @@ class CheckCategoryEnum(enum.Enum):
 
 
 class Check(StoreObject):
+    name: str  # name of this check for searching
     content: dict[str, bytes]  # filename : file_content
     category: CheckCategoryEnum
     _is_versioned: bool = True

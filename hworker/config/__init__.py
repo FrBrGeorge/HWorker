@@ -66,6 +66,14 @@ def get_git_directory() -> str:
     return read_config()["git"]["directory"]
 
 
+def get_file_root_path() -> str:
+    """Get a user-repo dict
+
+    :return: user-repo dict
+    """
+    return read_config()["file"]["root_path"]
+
+
 def get_repos() -> list[str]:
     """Get all repos list
 

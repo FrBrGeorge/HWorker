@@ -6,6 +6,7 @@
 deliver = [
     "imap",
     "git",
+    "file",
 ]
 
 [git]
@@ -20,6 +21,9 @@ port = "993"
 folder = "folder (example, fill it)"
 username = "username (example, fill it)"
 password = "password (example, fill it)"
+
+[file]
+root_path = "files"
 
 [tasks.task_name]
 task_ID = "20240101 (example, fill it)"
