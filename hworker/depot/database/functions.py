@@ -141,6 +141,6 @@ def delete(obj_type: objects.StoreObject, *criteria: Iterable[objects.Criteria])
     with Session.begin() as session:
         search_result = session.query(model_type)
         if len(criteria) != 0:
-            search_result = search_result.filter(*list(map(functools.partial(_parse_criteria, model=model_type), criteria)))
+            search_result = search_result.filter(*list(map(functools.partial(_parse_criteria, model_type), criteria)))
 
         search_result.delete()
