@@ -92,7 +92,7 @@ def check(checker: Check, solution: Solution, check_num: int = 0) -> None:
     store(check_result)
 
 
-def choose_runner(check: Check):
+def choose_runner(checker: Check):
     """Choose runner based on program type"""
     # TODO
     return python_runner
@@ -153,4 +153,3 @@ def choose_diff_score(actual: bytes, initial: bytes, test_type: CheckCategoryEnu
     """Chooses checker based on test type"""
     # TODO
     return bytes_diff, exact_score
-

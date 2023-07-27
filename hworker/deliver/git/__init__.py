@@ -107,7 +107,7 @@ def get_commits(path: str) -> list[tuple[str, str]]:
     return commits
 
 
-def download_all() -> None:
+def download_all() -> None:  # task_id from config
     """Update all solutions and store every version in depot"""
     get_logger(__name__).info(f"Downloading (or updating) all repos and store them")
     update_all()

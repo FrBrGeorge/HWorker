@@ -11,37 +11,43 @@ deliver = [
 [git]
 directory = "~/.cache/hworker_git"
 
-[git.repos]
-username = "repo (example, fill it)"
+# list of users - repos
+[git.users]
+username = "repo" # example, fill it
 
 [IMAP]
-host = "host (example, fill it)"
+host = "host"  # example, fill it
 port = "993"
-folder = "folder (example, fill it)"
-username = "username (example, fill it)"
-password = "password (example, fill it)"
+folder = "folder"  # example, fill it
+username = "username"  # example, fill it
+password = "password"  # example, fill it
+
+[tasks]
 
 [tasks.task_name]
-task_ID = "20240101 (example, fill it)"
-open_date = "20240101 (example, fill it)"
-soft_deadline = "20240108 (example, fill it)"
-hard_deadline = "20240401 (example, fill it)"
-time_limit = "2 (optional field)"
-resource_limit = "3145728 (optional field)"
-checks = "check ID (optional field)"
+task_ID = "20240101"  # example, fill it
+open_date = "20240101"  # example, fill it
+soft_deadline = "20240108"  # example, fill it
+hard_deadline = "20240401"  # example, fill it
+time_limit = 2 # example, fill it
+resource_limit = 3145728  # optional field
+checks = [  # optional field
+    "check_name_1",
+    "check_name_2",
+    "...",
+]
+comparison_type = "exact"
 
 [tests]
 max_size = 100
 default_time_limit = 2
 default_resource_limit = 3145728
 
-[tests.master_checks]
-check_ID = [
-    "taskID_1",
-    "taskID_2",
-    "...",
-    "(optional field)",
-]
-
 [check]
 directory = "~/.cache/hworker_check"
+
+[formalization]
+prog_name = "prog.py"
+urls_name = "remotes"
+tests_name = "checks"
+test_suffix = "in/out"
