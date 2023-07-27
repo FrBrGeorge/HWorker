@@ -140,6 +140,8 @@ class Criteria:
         "<=": "__le__",
         ">": "__gt__",
         ">=": "__ge__",
+        "like": "like",
+        "startswith": "startswith",
     }
 
     field_name: str
