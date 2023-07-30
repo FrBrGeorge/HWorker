@@ -1,12 +1,14 @@
 from ..log import get_logger
 from ..config import get_max_test_size, get_check_directory, get_default_time_limit, get_default_resource_limit
-from ..depot.objects import Check, CheckResult, CheckCategoryEnum
+from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum
 from ..depot.database.functions import store
 
 import sys
 import io
 import os
 import platform
+from math import isclose
+from itertools import zip_longest
 from typing import Iterator
 from random import randint
 from difflib import diff_bytes, unified_diff
@@ -58,22 +60,23 @@ def python_runner(prog_path: str, prog_input: io.BytesIO) -> tuple[bytes | None,
         return prog_output.read() if prog_output else None, result.stderr.read(), exit_code
 
 
-def checker(check: Check, check_num: int = None) -> None:
-    """ Run checker on a given check
+def check(checker: Check, solution: Solution, check_num: int = 0) -> None:
+    """ Run checker on a given solution
 
-    :param check: check object
+    :param checker: check object
+    :param solution:
     :param check_num: number of check for parallel work
     """
-    get_logger(__name__).info(f"Checking check: f{check.ID}")
-    if check_num is None:
+    get_logger(__name__).info(f"Checking checker with: f{checker.ID} ID")
+    if check_num == 0:
         check_num = randint(1, 1000000)
-    prog, checks = check.content["prog.py"], check.content["tests"]
+    prog = solution.content["prog.py"]
     prog_input, initial_output = io.BytesIO(), bytes()
-    for check in checks:
-        if check.endswith(".in"):
-            prog_input = io.BytesIO(check)
-        elif check.endswith(".out"):
-            initial_output = check
+    for name, b in checker.content:
+        if name.endswith(".in"):
+            prog_input = io.BytesIO(b)
+        elif name.endswith(".out"):
+            initial_output = b
 
     if not os.path.exists(get_check_directory()):
         os.makedirs(get_check_directory())
@@ -81,20 +84,21 @@ def checker(check: Check, check_num: int = None) -> None:
     with open(prog_path, mode="rb") as p:
         p.write(prog)
 
-    runner = choose_runner(check)
+    runner = choose_runner(checker)
     actual_output, stderr, exit_code = runner(prog_path, prog_input)
-    score = choose_test_score(actual_output, initial_output, check.category)
-    check_result = CheckResult(content=score, category=check.category)
+    diff, score = choose_diff_score(actual_output, initial_output, checker.category)
+    content = score(diff(actual_output, initial_output))
+    check_result = CheckResult(content=content, category=checker.category)
     store(check_result)
 
 
-def choose_runner(check: Check):
+def choose_runner(checker: Check):
     """Choose runner based on program type"""
     # TODO
     return python_runner
 
 
-def test_check(actual: bytes, initial: bytes) -> Iterator[bytes] | None:
+def bytes_diff(actual: bytes, initial: bytes) -> Iterator[bytes] | None:
     """Compares two test file without insignificant whitespaces
 
     :param actual: Output from program
@@ -121,7 +125,31 @@ def exact_score(diff: Iterator[bytes] | None) -> float:
     return 1.0 if diff is None else 0.0
 
 
-def choose_test_score(actual: bytes, initial: bytes, test_type: CheckCategoryEnum):
+def float_diff(actual: bytes, initial: bytes, relative: int = 1e-09) -> Iterator[bytes] | None:
+    """
+
+    :param actual:
+    :param initial:
+    :param relative:
+    :return:
+    """
+    # TODO: clear non-digit symbols
+    for actual_num, initial_num in zip_longest(actual.split(), initial.split(), fillvalue=None):
+        yield f"{actual_num} " \
+              f"{'=' if isclose(float(actual_num), float(initial_num), rel_tol=relative) else '!='} " \
+              f"{initial_num}".encode("utf-8")
+
+
+def float_score(diff: Iterator[bytes]) -> float:
+    """
+
+    :param diff:
+    :return:
+    """
+    return 1.0 if all(map(lambda s: "!" not in s, diff)) else 0.0
+
+
+def choose_diff_score(actual: bytes, initial: bytes, test_type: CheckCategoryEnum):  # go to check.comparison_type
     """Chooses checker based on test type"""
     # TODO
-    return test_check
+    return bytes_diff, exact_score
