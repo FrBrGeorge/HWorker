@@ -6,6 +6,7 @@
 deliver = [
     "imap",
     "git",
+    "file",
 ]
 
 [git]
@@ -23,6 +24,9 @@ username = "username"  # example, fill it
 password = "password"  # example, fill it
 
 [tasks]
+
+[file]
+root_path = "files"
 
 [tasks.task_name]
 task_ID = "20240101"  # example, fill it
