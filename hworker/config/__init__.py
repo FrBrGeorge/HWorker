@@ -3,12 +3,27 @@
 from typing import Final
 from functools import cache
 from tomllib import load
+from pathlib import Path
 import os
 
 from tomli_w import dump
 
 _config_name: Final = "hworker.toml"
 _default_name: Final = "default_hworker.toml"
+
+
+def read_default_config(default_config: str = _default_name) -> dict:
+    """Read built-in default config
+
+    :param default_config: default config name
+    :return: config info dict
+    """
+    content = {}
+    for path in __path__:
+        if (cfg := Path(path) / default_config).is_file():
+            with cfg.open(mode="rb") as default:
+                content |= load(default)
+    return content
 
 
 def create_config(content: dict = None, default_config: str = _default_name, config_name: str = _config_name) -> None:
@@ -19,8 +34,7 @@ def create_config(content: dict = None, default_config: str = _default_name, con
     :param config_name: config file name
     """
     if content is None:
-        with open(default_config, mode="rb") as default:
-            content = load(default)
+        content = read_default_config(default_config)
     with open(config_name, "wb") as cfg:
         dump(content, cfg)
 
@@ -31,8 +45,7 @@ def check_config(default_config: str = _default_name, config_name: str = _config
     :param default_config: default config file name
     :param config_name: config file name
     """
-    with open(default_config, "rb") as dflt:
-        content = load(dflt)
+    content = read_default_config(default_config)
     with open(config_name, "rb") as cfg:
         cur_content = load(cfg)
     for key, value in content.items():
