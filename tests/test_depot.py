@@ -3,8 +3,8 @@ import datetime
 
 import pytest
 
-from hworker.depot import *
-from hworker.depot.objects import *
+from hworker.depot import store, delete, search
+from hworker.depot.objects import Homework, Criteria
 
 
 class TestDepotFunctions:
@@ -37,6 +37,20 @@ def homeworks():
     delete(Homework)
 
 
+class TestComparison:
+    def test_equals(self, homeworks):
+        hw, hw2 = list(search(Homework))[:2]
+        assert hw == hw
+        assert hw != hw2
+        assert hw @ hw
+
+    def test_almost_equal(self, homeworks):
+        hw = list(search(Homework))[0]
+        newhw = Homework(**hw, content={"No": b"Way"}, is_broken=False)
+        assert hw != newhw
+        assert hw @ newhw
+
+
 class TestDepotFunctionsWithCriteria:
     def test_get_all_homework(self, homeworks):
         assert len(list(search(Homework))) == 9
@@ -54,8 +68,7 @@ class TestDepotFunctionsWithCriteria:
                         Criteria("timestamp", "<=", datetime.datetime(2023, 6, 30).timestamp()),
                     )
                 )
-            )
-            == 6
+            ) == 6
         )
 
     def test_del_all_homework_from_user(self, homeworks):
