@@ -71,7 +71,7 @@ def store(obj: objects.StoreObject) -> None:
     """Store object into database
     :param obj: object to store
     """
-    get_logger(__name__).debug(f"Tried to store {obj}")
+    get_logger(__name__).debug(f"Tried to store {str(obj)[:100]}")
 
     if not isinstance(obj, objects.StoreObject) or type(obj) == objects.StoreObject:
         raise ValueError("Incorrect object input")
@@ -116,7 +116,7 @@ def search(
     :param return_fields: filter for return fields
     :return: iterator for found objects
     """
-    get_logger(__name__).debug(f"Tried to search {obj_type}")
+    get_logger(__name__).debug(f"Tried to search {str(obj_type)[:100]}")
     print(criteria, return_fields)
 
     model_type = type(_translate_object_to_model(obj_type))
@@ -135,7 +135,7 @@ def delete(obj_type: objects.StoreObject, *criteria: Iterable[objects.Criteria])
     :param obj_type: type of object to delete or its instance
     :param criteria: criteria for searching objects for delete
     """
-    get_logger(__name__).debug(f"Tried to delete {obj_type}")
+    get_logger(__name__).debug(f"Tried to delete {str(obj_type)[:100]}")
 
     model_type = type(_translate_object_to_model(obj_type))
     with Session.begin() as session:
