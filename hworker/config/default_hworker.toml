@@ -10,7 +10,7 @@ deliver = [
 ]
 
 [git]
-directory = "~/.cache/hworker_git"
+directory = "/tmp/hworker_git"
 
 # list of users - repos
 [git.users]
