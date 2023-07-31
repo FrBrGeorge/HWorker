@@ -22,6 +22,7 @@ port = "993"
 folder = "folder"  # example, fill it
 username = "username"  # example, fill it
 password = "password"  # example, fill it
+letter_limit = -1
 
 [tasks]
 
