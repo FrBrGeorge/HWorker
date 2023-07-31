@@ -2,6 +2,7 @@
 import glob
 import os
 import datetime
+from pathlib import Path
 
 from ...log import get_logger
 from ...config import get_file_root_path
@@ -21,19 +22,21 @@ def download_all():
             USER_ID = username
             timestamps = []
             contents = {}
-            for filename in glob.glob(task_path := user_path + os.sep + task_name, recursive=True):
-                file_path = filename + os.sep + filename
-                with open(file_path, "rb") as file:
-                    contents[filename] = file.read()
-                timestamps.append(os.path.getmtime(file_path))
+            for file in Path(task_path := user_path + os.sep + task_name).rglob("**/*"):
+                if file.is_file():
+                    with open(file, "rb") as file_in:
+                        contents[str(file.relative_to(get_file_root_path()))] = file_in.read()
+                    timestamps.append(os.path.getmtime(file))
 
-            depot.store(
-                Homework(
-                    ID=task_path,
-                    USER_ID=USER_ID,
-                    TASK_ID=TASK_ID,
-                    timestamp=max(timestamps),
-                    content=contents,
+            if len(contents) != 0:
+                depot.store(
+                    Homework(
+                        ID="f" + task_path,
+                        USER_ID=USER_ID,
+                        TASK_ID=TASK_ID,
+                        timestamp=max(timestamps),
+                        content=contents,
+                        is_broken=False,
+                    )
                 )
-            )
-            get_logger(__name__).warn(f"Added task {TASK_ID} for user {USER_ID}")
+                get_logger(__name__).warn(f"Added task {TASK_ID} for user {USER_ID}")
