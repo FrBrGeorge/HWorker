@@ -162,6 +162,3 @@ def choose_diff_score(actual: bytes, initial: bytes, test_type: CheckCategoryEnu
     """Chooses checker based on test type"""
     # TODO
     return bytes_diff, exact_score
-
-
-print(python_runner("test.py", "test.in"))
