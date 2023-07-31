@@ -13,6 +13,7 @@ from typing import Iterator
 from random import randint
 from difflib import diff_bytes, unified_diff
 from os.path import getsize, basename
+from tempfile import NamedTemporaryFile
 import resource
 import subprocess
 from subprocess import CompletedProcess, TimeoutExpired
@@ -41,23 +42,30 @@ def python_set_limits(time_limit: int = None, resource_limit: int = None) -> Non
         resource.setrlimit(resource.RLIMIT_FSIZE, (2048, 2048))
 
 
-def python_runner(prog_path: str, prog_input: io.BytesIO) -> tuple[bytes | None, bytes, int]:
+def python_runner(prog_path: str, input_path: str) -> tuple[bytes | None, bytes, int]:
     """Runs python program with given input and returns output info
 
     :param prog_path: python program path
-    :param prog_input: program input in io format
+    :param input_path: program input in io format
     :return: tuple of program output, stderr and exit code
     """
     get_logger(__name__).info(f"{prog_path} run")
-    with prog_input, io.BytesIO() as prog_output:
+    if not os.path.exists(get_check_directory()):
+        os.makedirs(get_check_directory())
+    with open(input_path, encoding="utf-8") as prog_input, \
+            NamedTemporaryFile(dir=get_check_directory(), delete=False) as prog_output:
         try:
-            result = subprocess.Popen([sys.executable, prog_path], preexec_fn=python_set_limits(), stdin=prog_input,
+            result = subprocess.Popen([sys.executable, prog_path],
+                                      # preexec_fn=python_set_limits(),
+                                      stdin=prog_input,
                                       stdout=prog_output,
                                       stderr=subprocess.PIPE)
         except TimeoutExpired as time_error:
             result = CompletedProcess(time_error.args, -1, stderr=str(time_error).encode(errors='replace'))
-        exit_code = result.wait()
-        return prog_output.read() if prog_output else None, result.stderr.read(), exit_code
+    exit_code = result.wait()
+    with open(prog_output.name, "rb") as po:
+        po = po.read()
+    return po, result.stderr.read(), exit_code
 
 
 def check(checker: Check, solution: Solution, check_num: int = 0) -> None:
@@ -153,3 +161,6 @@ def choose_diff_score(actual: bytes, initial: bytes, test_type: CheckCategoryEnu
     """Chooses checker based on test type"""
     # TODO
     return bytes_diff, exact_score
+
+
+print(python_runner("test.py", "test.in"))

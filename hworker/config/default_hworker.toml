@@ -48,10 +48,10 @@ default_time_limit = 2
 default_resource_limit = 3145728
 
 [check]
-directory = "~/.cache/hworker_check"
+directory = "/tmp/hworker_check"
 
 [formalization]
 prog_name = "prog.py"
-urls_name = "remotes"
-tests_name = "checks"
-test_suffix = "in/out"
+remotes_name = "remotes"
+checks_dir = "checks"
+checks_suffix = "in/out"

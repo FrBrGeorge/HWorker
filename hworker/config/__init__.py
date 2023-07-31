@@ -187,3 +187,35 @@ def get_check_directory() -> str:
     :return: check dir
     """
     return read_config()["check"]["directory"]
+
+
+def get_prog_name() -> str:
+    """
+
+    :return:
+    """
+    return read_config()["formalization"]["prog_name"]
+
+
+def get_urls_name() -> str:
+    """
+
+    :return:
+    """
+    return read_config()["formalization"]["remotes_name"]
+
+
+def get_checks_dir() -> str:
+    """
+
+    :return:
+    """
+    return read_config()["formalization"]["checks_dir"]
+
+
+def get_checks_suffix() -> str:
+    """
+
+    :return:
+    """
+    return read_config()["formalization"]["checks_suffix"]
