@@ -48,6 +48,7 @@ def check_config(default_config: str = _default_name, config_name: str = _config
     content = read_default_config(default_config)
     with open(config_name, "rb") as cfg:
         cur_content = load(cfg)
+    # TODO: add recursive default config check
     for key, value in content.items():
         cur_content.setdefault(key, value)
         if isinstance(value, dict):
@@ -97,7 +98,8 @@ def get_repos() -> list[str]:
     return list(read_config()["git"]["users"].values())
 
 
-def get_uids() -> list[str]:  # add multiback get uids  and get uids for every back
+# TODO: add multiback get uids  and get uids for every back
+def get_uids() -> list[str]:
     """Get all user ids list
 
     :return: all user ids list

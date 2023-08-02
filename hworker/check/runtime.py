@@ -157,10 +157,8 @@ def float_score(diff: Iterator[bytes]) -> float:
     return 1.0 if all(map(lambda s: "!" not in s, diff)) else 0.0
 
 
-def choose_diff_score(actual: bytes, initial: bytes, test_type: CheckCategoryEnum):  # go to check.comparison_type
+# TODO: go to check.comparison_type
+def choose_diff_score(actual: bytes, initial: bytes, test_type: CheckCategoryEnum):
     """Chooses checker based on test type"""
     # TODO
     return bytes_diff, exact_score
-
-
-print(python_runner("test.py", "test.in"))
