@@ -1,10 +1,12 @@
 """Interface objects for depot management"""
 import enum
+from inspect import getmembers_static
 from typing import Any
+from collections.abc import Iterator
 
 
-def get_field_from_object(obj: Any):
-    return {name: value for name, value in obj.__dict__.items() if not name.startswith("_") and value is not None}
+def is_field(name, obj):
+    return not (name.startswith("_") or callable(obj))
 
 
 class StoreObject:
@@ -13,6 +15,7 @@ class StoreObject:
     TASK_ID: str  # Task name
     timestamp: int  # Timestamp
     _is_versioned: bool
+    _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
 
     def __init__(self, ID: str = None, USER_ID: str = None, TASK_ID: str = None, timestamp: int = None, **kwargs):
         super().__init__(**kwargs)
@@ -21,16 +24,38 @@ class StoreObject:
         self.TASK_ID = TASK_ID
         self.timestamp = timestamp
 
+    def keys(self) -> Iterator[str]:
+        yield from self.items(0)
+
+    def values(self) -> Iterator:
+        yield from self.items(1)
+
+    def items(self, idx: int | slice = slice(0, 2)) -> Iterator:
+        return (kv[idx] for kv in getmembers_static(self) if kv[0] in self._public_fields)
+
+    def __iter__(self):
+        return (kv for kv in getmembers_static(self) if is_field(*kv))
+
+    def __getitem__(self, idx: int | str) -> Any:
+        match idx:
+            case int(index):
+                return list(self)[index]
+            case str(name):
+                return getattr(self, name)
+        raise KeyError(f"Index type must be int ot str, not {idx.__class__}")
+
     def __str__(self):
-        return ", ".join([f"{key}={value}" for key, value in get_field_from_object(self).items()])
+        return ", ".join(f"{key}={value}" for key, value in self.items())
 
     def __repr__(self):
-        return self.__str__()
+        return ", ".join(f"{key}={value}" for key, value in self)
 
     def __eq__(self, other):
-        self_fields = get_field_from_object(self)
-        other_fields = get_field_from_object(other)
-        return self_fields == other_fields
+        return list(self) == list(other)
+
+    def __matmul__(self, other):
+        """Return True if self is almost equal (by comparing public fields only) to other"""
+        return list(self.items()) == list(other.items())
 
 
 class Homework(StoreObject):
@@ -55,6 +80,7 @@ class Check(StoreObject):
     content: dict[str, bytes]  # filename : file_content
     category: CheckCategoryEnum
     _is_versioned: bool = True
+    _public_fields: set[str] = StoreObject._public_fields | {"category"}
 
     def __init__(self, content: dict[str, bytes] = None, category: CheckCategoryEnum = None, **kwargs):
         super().__init__(**kwargs)
@@ -85,6 +111,7 @@ class CheckResult(StoreObject):
     verdict: VerdictEnum
     stdout: bytes
     stderr: bytes
+    _public_fields: set[str] = StoreObject._public_fields | {"category"}
     _is_versioned: bool = False
 
     def __init__(
