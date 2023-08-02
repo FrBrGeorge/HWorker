@@ -4,7 +4,7 @@ import datetime
 import pytest
 
 from hworker.depot import store, delete, search
-from hworker.depot.objects import Homework, Criteria
+from hworker.depot.objects import Homework, Criteria, is_field
 
 
 class TestDepotFunctions:
@@ -38,6 +38,12 @@ def homeworks():
 
 
 class TestComparison:
+    def test_is_field(self):
+        assert is_field("field", None)
+        assert not is_field("", 1)
+        assert not is_field("method", bin)
+        assert not is_field("_special", 1)
+
     def test_equals(self, homeworks):
         hw, hw2 = list(search(Homework))[:2]
         assert hw == hw

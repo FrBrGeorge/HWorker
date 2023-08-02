@@ -5,8 +5,15 @@ from typing import Any
 from collections.abc import Iterator
 
 
-def is_field(name, obj):
-    return not (name.startswith("_") or callable(obj))
+def is_field(name: str, obj: Any) -> bool:
+    """Check if the object woth certain name can be treated as "public data field"
+
+    @param name: Name of the object
+    @obj: The object itself
+    @return: If the object seems to be data field
+
+    For now it just check fo obj not to be a callable and name not to start with '_'"""
+    return bool(name) and not (name.startswith("_") or callable(obj))
 
 
 class StoreObject:
