@@ -1,10 +1,10 @@
 """Database functions"""
 import functools
-import pickle
+from inspect import getmembers_static
+from operator import itemgetter
 from typing import Iterable, Union, Type
 
 import sqlalchemy.exc
-from sqlalchemy.sql.elements import BinaryExpression
 
 from .common import Session
 from .models import *
@@ -23,8 +23,8 @@ _model_class_to_object: dict[Type[Base] : Type[objects.StoreObject]] = {
 }
 
 
-def get_field_from_object(obj: Any):
-    return {name: value for name, value in obj.__dict__.items() if not name.startswith("_") and value is not None}
+def _get_fields_from_object(obj: Any):
+    return {name: value for name, value in obj.__dict__.items() if not name.startswith("_") and not callable(value)}
 
 
 def _translate_object_to_model(obj: Union[objects.StoreObject, Type[objects.StoreObject]]) -> Base:
@@ -35,7 +35,7 @@ def _translate_object_to_model(obj: Union[objects.StoreObject, Type[objects.Stor
     else:
         raise ValueError("Incorrect object input")
 
-    fields = get_field_from_object(obj)
+    fields = _get_fields_from_object(obj)
     model_obj = _object_to_model_class[type(obj)]()
 
     for name, value in fields.items():
@@ -45,7 +45,7 @@ def _translate_object_to_model(obj: Union[objects.StoreObject, Type[objects.Stor
 
 
 def _translate_model_to_object(model: Base, field_filter: list[str] = None) -> objects.StoreObject:
-    fields = get_field_from_object(model)
+    fields = _get_fields_from_object(model)
     obj = _model_class_to_object[type(model)]()
 
     if field_filter is not None:
@@ -77,12 +77,16 @@ def store(obj: objects.StoreObject) -> None:
         raise ValueError("Incorrect object input")
     if obj.ID is None or obj.timestamp is None:
         raise ValueError("ID and timestamp cannot be None")
+    none_field = list(filter(lambda x: x[1] is None, _get_fields_from_object(obj).items()))
+    if len(none_field) != 0:
+        raise ValueError(
+            f"Found None fields in object. Please fill correct value in: {', '.join(map(itemgetter(0), none_field))}"
+        )
 
     try:
         with Session.begin() as session:
             model_obj: Base = _translate_object_to_model(obj)
 
-            # TODO maybe should use later defined search
             if obj._is_versioned:
                 # should delete by obj.ID and obj.timestamp
                 search_result = (
@@ -117,7 +121,6 @@ def search(
     :return: iterator for found objects
     """
     get_logger(__name__).debug(f"Tried to search {str(obj_type)[:100]}")
-    print(criteria, return_fields)
 
     model_type = type(_translate_object_to_model(obj_type))
     with Session.begin() as session:

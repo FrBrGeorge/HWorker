@@ -1,7 +1,11 @@
 """Tests for depot"""
 import datetime
+import os
 
 import pytest
+
+_test_database_filename = "test.db"
+os.environ["HWORKER_DATABASE_FILENAME"] = _test_database_filename
 
 from hworker.depot import store, delete, search
 from hworker.depot.objects import Homework, Criteria
@@ -13,6 +17,14 @@ class TestDepotFunctions:
     def test_store(self):
         store(self.h1)
         assert self.h1 in list(search(Homework))
+
+    def test_store_fail(self):
+        with pytest.raises(ValueError):
+            store(Homework())
+        with pytest.raises(ValueError):
+            store(Homework(ID="10", USER_ID="11", TASK_ID="12", timestamp=12345))
+        with pytest.raises(ValueError):
+            store(Homework(ID="10", USER_ID="11", TASK_ID="12", timestamp=12345, content={"lalala": b"dasdada"}))
 
     def test_delete(self):
         delete(Homework)
@@ -60,15 +72,16 @@ class TestDepotFunctionsWithCriteria:
 
     def test_get_all_homework_for_current_year(self, homeworks):
         assert (
-            len(
-                list(
-                    search(
-                        Homework,
-                        Criteria("timestamp", ">=", datetime.datetime(2023, 2, 1).timestamp()),
-                        Criteria("timestamp", "<=", datetime.datetime(2023, 6, 30).timestamp()),
+                len(
+                    list(
+                        search(
+                            Homework,
+                            Criteria("timestamp", ">=", datetime.datetime(2023, 2, 1).timestamp()),
+                            Criteria("timestamp", "<=", datetime.datetime(2023, 6, 30).timestamp()),
+                        )
                     )
                 )
-            ) == 6
+                == 6
         )
 
     def test_del_all_homework_from_user(self, homeworks):

@@ -4,6 +4,7 @@ venv/
 *.cfg
 logs/
 
+test.db
 data.db
 hworker/_version.py
 hworker.toml

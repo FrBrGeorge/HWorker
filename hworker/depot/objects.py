@@ -25,15 +25,19 @@ class StoreObject:
         self.timestamp = timestamp
 
     def keys(self) -> Iterator[str]:
+        """Returns all names of only public fields"""
         yield from self.items(0)
 
     def values(self) -> Iterator:
+        """Returns all values of only public fields"""
         yield from self.items(1)
 
     def items(self, idx: int | slice = slice(0, 2)) -> Iterator:
+        """Returns generator that yields only public fields"""
         return (kv[idx] for kv in getmembers_static(self) if kv[0] in self._public_fields)
 
     def __iter__(self):
+        """Returns generator that yields ALL fields"""
         return (kv for kv in getmembers_static(self) if is_field(*kv))
 
     def __getitem__(self, idx: int | str) -> Any:
@@ -45,12 +49,15 @@ class StoreObject:
         raise KeyError(f"Index type must be int ot str, not {idx.__class__}")
 
     def __str__(self):
+        """Object representation with only public fields"""
         return ", ".join(f"{key}={value}" for key, value in self.items())
 
     def __repr__(self):
+        """Object representation with ALL fields"""
         return ", ".join(f"{key}={value}" for key, value in self)
 
     def __eq__(self, other):
+        """Compares objects by ALL fields"""
         return list(self) == list(other)
 
     def __matmul__(self, other):
