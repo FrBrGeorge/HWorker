@@ -44,7 +44,7 @@ def parse_tar_file(filename: str, content: bytes):
 def download_all():
     box = get_mailbox()
 
-    # TODO should only get new latter, not all
+    # TODO maybe should only get new latter, not all. Fow know this works really fast, just skip it.
     # print(box.uids("ALL"))
 
     found_mails = 0
