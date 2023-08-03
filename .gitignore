@@ -8,6 +8,7 @@ test.db
 data.db
 hworker/_version.py
 hworker.toml
+final_hworker.toml
 
 Pipfile.lock
 

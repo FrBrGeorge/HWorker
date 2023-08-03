@@ -7,7 +7,7 @@ import git
 
 from ...depot.objects import Homework
 from ...depot import store
-from ...config import get_git_directory, get_repos, get_uids, repo_to_uid
+from ...config import get_git_directory, get_repos, get_git_uids, repo_to_uid, get_tasks_list
 from ...log import get_logger
 
 
@@ -34,7 +34,7 @@ def clone(repo: str) -> None:
     try:
         git.Repo.clone_from(repo, local_path(repo_to_uid(repo)))
     except git.GitError as git_error:
-        get_logger(__name__).warn(f"Can't clone {repo} repo: {git_error}")
+        get_logger(__name__).warning(f"Can't clone {repo} repo: {git_error}")
 
 
 def pull(repo: str) -> None:
@@ -47,8 +47,11 @@ def pull(repo: str) -> None:
     try:
         repo = git.Repo(local_path(repo_to_uid(repo)))
         repo.git.pull("origin", "main")
-    except git.GitError as git_error:
-        get_logger(__name__).warn(f"Can't pull {repo} repo: {git_error}")
+    except git.GitError:
+        try:
+            repo.git.pull("origin", "master")
+        except git.GitError as git_error:
+            get_logger(__name__).warning(f"Can't pull {repo} repo: {git_error}")
 
 
 def update_all() -> None:
@@ -113,30 +116,22 @@ def download_all() -> None:
     """Update all solutions and store every version in depot"""
     get_logger(__name__).info(f"Downloading (or updating) all repos and store them")
     update_all()
-    for student_id in get_uids():
+    for student_id in get_git_uids():
         repo = git.Repo(local_path(student_id))
-        for lesson in os.listdir(local_path(student_id)):
-            if lesson.isnumeric():
-                repo.git.checkout("main")
-                for task in os.listdir(os.path.join(local_path(student_id), lesson)):
-                    task_path = os.path.join(local_path(student_id), lesson, task)
-                    repo.git.checkout("main")
-                    commits = get_commits(repo, task_path)
-                    for commit in commits:
-                        repo.git.checkout(commit[0])
-                        content = get_homework_content(task_path)
-                        # get_logger(__name__).info(content)
-                        store(
-                            Homework(
-                                content=content,
-                                ID=commit[0],
-                                USER_ID=student_id,
-                                TASK_ID=os.path.join(task, lesson),
-                                timestamp=commit[1],
-                                is_broken=False
+        for task in get_tasks_list():
+            if os.path.isdir((task_path := os.path.join(local_path(student_id), task))):
+                        commits = get_commits(repo, task_path)
+                        for commit in commits:
+                            repo.git.checkout(commit[0])
+                            content = get_homework_content(task_path)
+                            # get_logger(__name__).info(content)
+                            store(
+                                Homework(
+                                    content=content,
+                                    ID=commit[0],
+                                    USER_ID=student_id,
+                                    TASK_ID=os.path.join(task),
+                                    timestamp=commit[1],
+                                    is_broken=False
+                                )
                             )
-                        )
-
-
-
-download_all()
