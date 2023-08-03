@@ -7,7 +7,7 @@ import git
 
 from ...depot.objects import Homework
 from ...depot import store
-from ...config import get_git_directory, get_repos, get_uids, repo_to_uid
+from ...config import get_git_directory, get_repos, get_git_uids, repo_to_uid
 from ...log import get_logger
 
 
@@ -113,7 +113,7 @@ def download_all() -> None:
     """Update all solutions and store every version in depot"""
     get_logger(__name__).info(f"Downloading (or updating) all repos and store them")
     update_all()
-    for student_id in get_uids():
+    for student_id in get_git_uids():
         repo = git.Repo(local_path(student_id))
         for lesson in os.listdir(local_path(student_id)):
             if lesson.isnumeric():
