@@ -1,3 +1,5 @@
+"""Isolated runtime tests and check results"""
+
 from ..log import get_logger
 from ..config import get_max_test_size, get_check_directory, get_default_time_limit, get_default_resource_limit
 from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum

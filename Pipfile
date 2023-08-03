@@ -8,6 +8,7 @@ gitpython = "*"
 imap-tools = "*"
 tomli_w = "*"
 sqlalchemy = "*"
+mergedeep = "*"
 
 [dev-packages]
 pipenv = "*"
