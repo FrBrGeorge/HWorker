@@ -14,7 +14,7 @@ directory = "/tmp/hworker_git"
 
 # list of users - repos
 [git.users]
-username = "repo" # example, fill it
+user_ID = "repo" # example, fill it
 
 [IMAP]
 host = "host"  # example, fill it
@@ -24,13 +24,19 @@ username = "username"  # example, fill it
 password = "password"  # example, fill it
 letter_limit = -1
 
-[tasks]
+[IMAP.users]
+user_ID = "mail address"
 
 [file]
 root_path = "files"
 
-[tasks.task_name]
-task_ID = "20240101"  # example, fill it
+[file.users]
+user_ID = "path"
+
+[tasks]
+
+[tasks.task_ID]
+deliver_ID = "20240101/01"  # example, fill it
 open_date = "20240101"  # example, fill it
 soft_deadline = "20240108"  # example, fill it
 hard_deadline = "20240401"  # example, fill it
