@@ -125,7 +125,7 @@ class CheckResult(StoreObject):
     verdict: VerdictEnum
     stdout: bytes
     stderr: bytes
-    _public_fields: set[str] = StoreObject._public_fields | {"category"}
+    _public_fields: set[str] = StoreObject._public_fields | {"category", "rating"}
     _is_versioned: bool = False
 
     def __init__(
@@ -153,23 +153,42 @@ class Plagiary(StoreObject):
     content: list[str]  # ID's ?? or list[Homework] or list[Solution]
 
 
-class ScoreFunction(StoreObject):
+class TaskQualify(StoreObject):
+    """Calculates a TaskScore from all CheckResult's for certain TASK_ID, USER_ID pair"""
     content: str
     _is_versioned: bool = False
 
 
-class PartialScore(StoreObject):
-    content: float
+class TaskScore(StoreObject):
+    """Scoring some aspect for TASK_ID, USER_ID"""
+    rating: float
+    _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp", "content"}
+    _is_versioned: bool = False
+
+
+class UserQualify(StoreObject):
+    """Calculates a userScore from all TaskScores's for certain USER_ID"""
+    content: str
+    _is_versioned: bool = False
+
+
+class UserScore(StoreObject):
+    """Scoring some aspect for USER_ID"""
+    rating: float
+    _public_fields: set[str] = {"ID", "USER_ID", "timestamp", "content"}
     _is_versioned: bool = False
 
 
 class Formula(StoreObject):
+    """Overall formulae over all UserScore's for certain USER_ID"""
     content: str
     _is_versioned: bool = False
 
 
 class Score(StoreObject):
-    content: str
+    """Final user verdict"""
+    rating: str
+    _public_fields: set[str] = {"ID", "USER_ID", "timestamp", "content"}
     _is_versioned: bool = False
 
 
