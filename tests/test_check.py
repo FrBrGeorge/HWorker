@@ -1,12 +1,9 @@
 """Tests for check.runtime"""
 
-from hworker.check.runtime import python_runner, check_wo_save
+from hworker.check.runtime import python_runner, check_wo_store
 from hworker.depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
 
-from io import BytesIO
-from unittest.mock import patch
 import os
-import shutil
 
 import pytest
 
@@ -38,18 +35,17 @@ class TestCheckRuntime:
     def test_checker(self):
         """"""
         # TODO: Change to parametrize
-        checker = Check(
-            content={"1.in": b"123, 345",
-                     "1.out": b"345\n"},
-            category=CheckCategoryEnum.runtime,
-            ID="checker_ID")
+        checker = Check(content={"1.in": b"123, 345",
+                                 "1.out": b"345\n"},
+                        category=CheckCategoryEnum.runtime,
+                        ID="checker_ID")
         solution = Solution(content={"prog.py": b"a, b = eval(input())\n"
                                                 b"print(max(a, b))"},
                             checks=[checker.ID, ],
                             ID="solution_ID",
                             USER_ID="user_ID",
                             TASK_ID="task_Id")
-        result = check_wo_save(checker, solution)
+        result = check_wo_store(checker, solution)
 
         assert result == CheckResult(ID=checker.ID + solution.ID,
                                      USER_ID=solution.USER_ID,
@@ -62,3 +58,10 @@ class TestCheckRuntime:
                                      check_ID=checker.ID,
                                      solution_ID=solution.ID,
                                      verdict=VerdictEnum.passed)
+
+
+class TestCheckValidate:
+    """"""
+
+    def test_validate(self):
+        pass

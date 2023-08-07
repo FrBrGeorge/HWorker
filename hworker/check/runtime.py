@@ -72,7 +72,7 @@ def python_runner(prog_path: str, input_path: str) -> tuple[bytes | None, bytes,
     return po, result.stderr.read(), exit_code
 
 
-def check_wo_save(checker: Check, solution: Solution, check_num: int = 0) -> CheckResult:
+def check_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> CheckResult:
     """ Run checker on a given solution and returns result object
 
     :param checker: check object

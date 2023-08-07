@@ -2,8 +2,6 @@
 
 import os
 
-import pytest
-
 from hworker.config import get_git_directory, get_repos, get_git_uids, repo_to_uid, uid_to_repo, \
     _default_config_name, _user_config_name, _final_config_name, get_final_config, deliverid_to_taskid, \
     taskid_to_deliverid, uid_to_email, email_to_uid
