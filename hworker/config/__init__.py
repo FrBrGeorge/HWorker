@@ -172,6 +172,16 @@ def taskid_to_deliverid(task_id: str) -> str | None:
     return get_final_config()["tasks"].get(task_id, {}).get("deliver_ID", None)
 
 
+def deliverid_to_taskid(deliver_id: str) -> str | None:
+    """Converts deliver id to task id
+
+    :param deliver_id: task name in config
+    :return: task name for specific deliver backend
+    """
+    reverse = {t_dict["deliver_ID"]: t_id for t_id, t_dict in get_final_config()["tasks"].items()}
+    return reverse.get(deliver_id, None)
+
+
 def get_logger_info() -> dict[str, str]:
     """Get file-console logger info dict
 
