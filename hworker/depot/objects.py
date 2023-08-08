@@ -186,7 +186,7 @@ class Formula(StoreObject):
     _is_versioned: bool = False
 
 
-class Score(StoreObject):
+class FinalScore(StoreObject):
     """Final user verdict"""
     rating: str
     _public_fields: set[str] = {"ID", "USER_ID", "timestamp", "content"}
