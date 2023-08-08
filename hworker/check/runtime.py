@@ -103,7 +103,6 @@ def check_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> Ch
     actual_output, stderr, exit_code = runner(prog_path, input_path)
     diff, score = choose_diff_score(actual_output, initial_output, checker.category)
     content = score(diff(actual_output, initial_output))
-    # ID and timestamp?
     return CheckResult(ID=checker.ID + solution.ID,
                        USER_ID=solution.USER_ID,
                        TASK_ID=solution.TASK_ID,

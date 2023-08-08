@@ -1,9 +1,12 @@
 """Tests for check.runtime"""
 
 from hworker.check.runtime import python_runner, check_wo_store
+from hworker.check.validate import validate_wo_store
 from hworker.depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
 
 import os
+import time
+from datetime import date
 
 import pytest
 
@@ -62,6 +65,59 @@ class TestCheckRuntime:
 
 class TestCheckValidate:
     """"""
+    # TODO: change to parametrize
+    def test_timestamp(self):
+        """"""
+        validator = Check(content={"timestamp_validator": b"def timestamp_validator(solution) -> float:\n"
+                                                          b"    return 1.0 if solution.timestamp else 0.0"},
+                          category=CheckCategoryEnum.validate,
+                          ID="checker_ID")
 
-    def test_validate(self):
-        pass
+        solution = Solution(content={"prog.py": b"a, b = eval(input())\n"
+                                                b"print(max(a, b))"},
+                            timestamp=date.fromtimestamp(time.time()),
+                            checks=[validator.ID, ],
+                            ID="solution_ID",
+                            USER_ID="user_ID",
+                            TASK_ID="task_ID")
+        result = validate_wo_store(validator, solution)
+
+        assert result == CheckResult(ID=validator.ID + solution.ID,
+                                     USER_ID=solution.USER_ID,
+                                     TASK_ID=solution.TASK_ID,
+                                     timestamp=date.fromtimestamp(time.time()),
+                                     rating=1.0,
+                                     category=validator.category,
+                                     stderr=b"",
+                                     check_ID=validator.ID,
+                                     solution_ID=solution.ID,
+                                     verdict=VerdictEnum.passed)
+
+    def test_regexp(self):
+        validator = Check(content={"timestamp_validator": b"def regexp_validator(solution) -> float:\n"
+                                                          b"    return 1.0 if b'import itertools' in "
+                                                          b"list(solution.content.values())[0] else 0.0"},
+                          category=CheckCategoryEnum.validate,
+                          ID="checker_ID")
+
+        solution = Solution(content={"prog.py": b"import itertools\n"
+                                                b"a, b = eval(input())\n"
+                                                b"print(max(a, b))"},
+                            timestamp=date.fromtimestamp(time.time()),
+                            checks=[validator.ID, ],
+                            ID="solution_ID",
+                            USER_ID="user_ID",
+                            TASK_ID="task_ID")
+        result = validate_wo_store(validator, solution)
+
+        assert result == CheckResult(ID=validator.ID + solution.ID,
+                                     USER_ID=solution.USER_ID,
+                                     TASK_ID=solution.TASK_ID,
+                                     timestamp=date.fromtimestamp(time.time()),
+                                     rating=1.0,
+                                     category=validator.category,
+                                     stderr=b"",
+                                     check_ID=validator.ID,
+                                     solution_ID=solution.ID,
+                                     verdict=VerdictEnum.passed)
+
