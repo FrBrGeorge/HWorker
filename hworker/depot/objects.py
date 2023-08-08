@@ -156,12 +156,14 @@ class Plagiary(StoreObject):
 
 class TaskQualify(StoreObject):
     """Calculates a TaskScore from all CheckResult's for certain TASK_ID, USER_ID pair"""
+
     content: str
     _is_versioned: bool = False
 
 
 class TaskScore(StoreObject):
     """Scoring some aspect for TASK_ID, USER_ID"""
+
     rating: float
     _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp", "content"}
     _is_versioned: bool = False
@@ -169,12 +171,14 @@ class TaskScore(StoreObject):
 
 class UserQualify(StoreObject):
     """Calculates a userScore from all TaskScores's for certain USER_ID"""
+
     content: str
     _is_versioned: bool = False
 
 
 class UserScore(StoreObject):
     """Scoring some aspect for USER_ID"""
+
     rating: float
     _public_fields: set[str] = {"ID", "USER_ID", "timestamp", "content"}
     _is_versioned: bool = False
@@ -182,12 +186,14 @@ class UserScore(StoreObject):
 
 class Formula(StoreObject):
     """Overall formulae over all UserScore's for certain USER_ID"""
+
     content: str
     _is_versioned: bool = False
 
 
 class FinalScore(StoreObject):
     """Final user verdict"""
+
     rating: str
     _public_fields: set[str] = {"ID", "USER_ID", "timestamp", "content"}
     _is_versioned: bool = False
