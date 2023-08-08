@@ -2,13 +2,15 @@
 
 from ..log import get_logger
 from ..config import get_max_test_size, get_check_directory, get_default_time_limit, get_default_resource_limit
-from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum
+from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
 from ..depot.database.functions import store
 
 import sys
 import io
 import os
 import platform
+import time
+from datetime import date
 from math import isclose
 from itertools import zip_longest
 from typing import Iterator
@@ -27,7 +29,6 @@ def python_set_limits(time_limit: int = None, resource_limit: int = None) -> Non
     :param time_limit: time limit in seconds, will be taken from config if not specified
     :param resource_limit: resource limit in bytes, will be taken from config if not specified
     """
-    # TODO: limits for various platforms
     get_logger(__name__).info("Set limits for python runner")
     if time_limit is None:
         time_limit = get_default_time_limit()
@@ -35,7 +36,8 @@ def python_set_limits(time_limit: int = None, resource_limit: int = None) -> Non
         resource_limit = get_default_resource_limit()
 
     resource.setrlimit(resource.RLIMIT_CPU, (time_limit, time_limit))
-    resource.setrlimit(resource.RLIMIT_NPROC, (0, 0))
+    # TODO: Causes Memory Error
+    # resource.setrlimit(resource.RLIMIT_NPROC, (0, 0))
     resource.setrlimit(resource.RLIMIT_STACK, (resource_limit, resource_limit))
     resource.setrlimit(resource.RLIMIT_NOFILE, (30, 30))
 
@@ -70,36 +72,64 @@ def python_runner(prog_path: str, input_path: str) -> tuple[bytes | None, bytes,
     return po, result.stderr.read(), exit_code
 
 
-def check(checker: Check, solution: Solution, check_num: int = 0) -> None:
-    """ Run checker on a given solution
+def check_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> CheckResult:
+    """ Run checker on a given solution and returns result object
 
     :param checker: check object
     :param solution:
     :param check_num: number of check for parallel work
     """
-    get_logger(__name__).info(f"Checking checker with: f{checker.ID} ID")
     if check_num == 0:
         check_num = randint(1, 1000000)
     prog = solution.content["prog.py"]
     prog_input, initial_output = io.BytesIO(), bytes()
-    for name, b in checker.content:
+    for name, b in checker.content.items():
         if name.endswith(".in"):
-            prog_input = io.BytesIO(b)
+            prog_input = b
         elif name.endswith(".out"):
             initial_output = b
 
     if not os.path.exists(get_check_directory()):
         os.makedirs(get_check_directory())
     prog_path = os.path.join(get_check_directory(), f"prog_{check_num}.py")
-    with open(prog_path, mode="rb") as p:
+    with open(prog_path, mode="wb") as p:
         p.write(prog)
 
+    input_path = os.path.join(get_check_directory(), f"{check_num}.in")
+    with open(input_path, mode="wb") as i:
+        i.write(prog_input)
+
     runner = choose_runner(checker)
-    actual_output, stderr, exit_code = runner(prog_path, prog_input)
+    actual_output, stderr, exit_code = runner(prog_path, input_path)
     diff, score = choose_diff_score(actual_output, initial_output, checker.category)
     content = score(diff(actual_output, initial_output))
-    check_result = CheckResult(content=content, category=checker.category)
-    store(check_result)
+    # ID and timestamp?
+    return CheckResult(ID=checker.ID + solution.ID,
+                       USER_ID=solution.USER_ID,
+                       TASK_ID=solution.TASK_ID,
+                       timestamp=date.fromtimestamp(time.time()),
+                       rating=content,
+                       category=checker.category,
+                       stderr=stderr,
+                       stdout=actual_output,
+                       check_ID=checker.ID,
+                       solution_ID=solution.ID,
+                       verdict=VerdictEnum.passed if not exit_code else VerdictEnum.failed)
+
+
+def check(checker: Check, solution: Solution, check_num: int = 0) -> None:
+    """ Run checker on a given solution and save result object
+
+    :param checker: check object
+    :param solution:
+    :param check_num: number of check for parallel work
+    """
+    get_logger(__name__).info(f"Checking solution {solution.ID} with {checker.ID} checker")
+    if checker.category == CheckCategoryEnum.runtime:
+        result = check_wo_save(checker, solution, check_num)
+        store(result)
+    else:
+        get_logger(__name__).warning(f"The {checker.ID} object given to check is not a checker")
 
 
 def choose_runner(checker: Check):
@@ -115,9 +145,8 @@ def bytes_diff(actual: bytes, initial: bytes) -> Iterator[bytes] | None:
     :param initial: Supposed output
     :return: unified_diff of files or None if outputs are the same
     """
-    with open(actual, "rb") as act, open(initial, "rb") as init:
-        act_lines = [line.strip() + b"\n" for line in act.readlines()]
-        init_lines = [line.strip() + b"\n" for line in init.readlines()]
+    act_lines = [line.strip() + b"\n" for line in actual.split()]
+    init_lines = [line.strip() + b"\n" for line in initial.split()]
     if act_lines == init_lines:
         return None
     act_size, init_size = getsize(actual), getsize(initial)
