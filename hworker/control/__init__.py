@@ -1,13 +1,10 @@
-from ..deliver import git
+import hworker.deliver as deliver
+import hworker.publish as publish
 
 
-def test():
-    print("I AM ALIVE!!!")
+def download_all():
+    deliver.download_all()
 
 
-def git_download_all():
-    git.download_all()
-
-
-if __name__ == "__main__":
-    git_download_all()
+def start_publish():
+    publish.run_server()
