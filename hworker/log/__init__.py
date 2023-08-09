@@ -12,14 +12,14 @@ def set_up_logger(logger: logging.Logger, true_name: str):
     logger.setLevel(logging.DEBUG)
 
     Path("./logs").mkdir(exist_ok=True)
-    file_handler = logging.FileHandler(f"./logs/{true_name}.log")
+    file_handler = logging.FileHandler(f"./logs/{true_name}.log", encoding="UTF-8")
     file_handler.setLevel(get_logger_info()["file level"])
 
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(get_logger_info()["console level"])
 
     formatter = logging.Formatter(
-        fmt="{asctime} [{name:>15}]: |{levelname:>7}|: {message}", datefmt="%H:%M:%S %d.%m.%Y", style="{"
+        fmt="{asctime} [{name:>25}]: |{levelname:>7}|: {message}", datefmt="%H:%M:%S %d.%m.%Y", style="{"
     )
     file_handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
