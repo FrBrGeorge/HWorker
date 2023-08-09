@@ -1,4 +1,5 @@
 """Tasks meta-information checks and check results"""
+import os
 
 from ..depot import store
 from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
@@ -22,12 +23,15 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
     # TODO: change check parsing
     validators = {}
     for name, b in validator.content.items():
+        with open(f"{name}.py", "wb") as n:
+            n.write(b)
         module = import_module(name)
+        os.remove(f"{name}.py")
         for f in dir(module):
             if not f.startswith("_"):
                 validators[f"{name}.{f}"] = getattr(module, name)
 
-    for name, v in validators:
+    for name, v in validators.items():
         stderr, result = b"", 0.0
         try:
             result = v(solution)
