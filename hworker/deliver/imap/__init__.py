@@ -1,4 +1,4 @@
-"""IMAP backend"""
+"""imap backend"""
 import os
 import re
 import tarfile

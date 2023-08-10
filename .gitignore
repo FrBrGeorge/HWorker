@@ -3,6 +3,7 @@
 venv/
 *.cfg
 logs/
+t_*.py
 
 test.db
 data.db

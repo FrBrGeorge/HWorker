@@ -55,9 +55,9 @@ def create_config(config_name: str, content: dict = None) -> None:
 
 
 @cache
-def get_final_config(default_config: str = _default_config_name,
-                     user_config: str = _user_config_name,
-                     final_config: str = _final_config_name) -> dict:
+def get_final_config(
+    default_config: str = _default_config_name, user_config: str = _user_config_name, final_config: str = _final_config_name
+) -> dict:
     """Get final config info and create user config if it doesn't exist
 
     :param default_config: default config name
@@ -118,7 +118,7 @@ def get_uids() -> list[str]:
 
 
 def get_tasks_list() -> list[str]:
-    """ Get all tasks list
+    """Get all tasks list
 
     :return: all tasks list
     """
@@ -150,7 +150,7 @@ def uid_to_email(uid: str) -> str | None:
     :param uid: user id
     :return: email address
     """
-    return get_final_config()["IMAP"]["users"].get(uid, None)
+    return get_final_config()["imap"]["users"].get(uid, None)
 
 
 def email_to_uid(email: str) -> str | None:
@@ -159,7 +159,7 @@ def email_to_uid(email: str) -> str | None:
     :param email: email address
     :return: user id
     """
-    reverse = {email: uid for uid, email in get_final_config()["IMAP"]["users"].items()}
+    reverse = {email: uid for uid, email in get_final_config()["imap"]["users"].items()}
     return reverse.get(email, None)
 
 
@@ -190,6 +190,14 @@ def get_logger_info() -> dict[str, str]:
     return get_final_config()["logging"]
 
 
+def get_publish_info() -> dict[str, str]:
+    """Get publish info dict
+
+    :return: publish info dict
+    """
+    return get_final_config()["publish"]
+
+
 def get_deliver_modules() -> list:
     """Get modules for deliver
 
@@ -199,11 +207,11 @@ def get_deliver_modules() -> list:
 
 
 def get_imap_info() -> dict[str, str]:
-    """Get IMAP info dict
+    """Get imap info dict
 
-    :return: IMAP info dict
+    :return: imap info dict
     """
-    return get_final_config()["IMAP"]
+    return get_final_config()["imap"]
 
 
 def get_max_test_size() -> int:
