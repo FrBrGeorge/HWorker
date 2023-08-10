@@ -5,6 +5,7 @@ Commandline interface
 import cmd
 import shlex
 import sys
+import io
 from .. import deliver, config, control     # NoQA: F401
 from ..log import get_logger
 
@@ -38,7 +39,15 @@ class HWorker(cmd.Cmd):
     def do_list(self, arg):
         "TODO"
         args = self.shplit(arg)
-        print(args)
+        match args:
+            case ["users", *tail]:
+                print(tail)
+
+
+    def complete_list(self, text, line, begidx, endidx):
+        objnames = "users",
+        return [obj for obj in objnames if obj.startswith(text)]
+
 
     def do_EOF(self, arg):
         """Press Ctrl+D to exit"""
@@ -53,13 +62,21 @@ class HWorker(cmd.Cmd):
 
 
 def shell():
-    for errors in range(100):
-        try:
-            HWorker().cmdloop()
-            break
-        except KeyboardInterrupt:
-            print("^C", file=sys.stderr)
-        else:
-            break
+    # TODO optparse
+    if len(sys.argv) > 1 and sys.argv[1] == "-c":
+        with io.StringIO("\n".join(sys.argv[2:]) + "\n") as stdin:
+            runner = HWorker(stdin=stdin)
+            runner.use_rawinput = False
+            runner.prompt = ""
+            res = runner.cmdloop(intro="")
     else:
-        log("Too many errors")
+        for errors in range(100):
+            try:
+                HWorker().cmdloop()
+                break
+            except KeyboardInterrupt:
+                print("^C", file=sys.stderr)
+            else:
+                break
+        else:
+            log("Too many errors")
