@@ -56,7 +56,9 @@ def create_config(config_name: str, content: dict = None) -> None:
 
 @cache
 def get_final_config(
-    default_config: str = _default_config_name, user_config: str = _user_config_name, final_config: str = _final_config_name
+    default_config: str = _default_config_name,
+    user_config: str = _user_config_name,
+    final_config: str = _final_config_name,
 ) -> dict:
     """Get final config info and create user config if it doesn't exist
 

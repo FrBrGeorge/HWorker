@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-'''
+"""
 Commandline interface
-'''
+"""
 import cmd
 import shlex
 import sys
-from .. import deliver, config, control     # NoQA: F401
+from .. import deliver, config, control  # NoQA: F401
 from ..log import get_logger
 
 logger = get_logger(__name__)

@@ -45,10 +45,7 @@ def init_backends(
     @param uniform: do we need to aggregate the results
     """
     module = inspect.getmodule(inspect.stack()[1][0])
-    backends = [
-        importlib.import_module(f"{backpath}.{modname}", module.__name__)
-        for modname in backends
-    ]
+    backends = [importlib.import_module(f"{backpath}.{modname}", module.__name__) for modname in backends]
     for m in methods:
         proto = getattr(backends[0], m)
         assign = tuple(set(functools.WRAPPER_ASSIGNMENTS) - {"__module__"})

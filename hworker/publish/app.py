@@ -21,7 +21,6 @@ def info():
         depot.objects.Check,
         depot.objects.Solution,
         depot.objects.CheckResult,
-        depot.objects.TaskScore,
     ]
 
     tables = dict()
@@ -29,7 +28,7 @@ def info():
         find_objects = [
             *depot.search(
                 cur_object,
-                depot.objects.Criteria("USER_ID", "==", username),
+                depot.objects.Criteria("USER_ID", "==", username.replace("\xa0", " ")),
                 depot.objects.Criteria("TASK_ID", "==", taskname),
             )
         ]

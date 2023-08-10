@@ -17,5 +17,16 @@
     </div>
     {% endfor %}
     {% endif %}
+    <script>
+        $(function () {
+            $("table").dataTable({
+                "paging": false,
+                "searching": false,
+                "info": false,
+                scrollX: true,
+            });
+        });
+    </script>
+
 </div>
 {% endblock %}
