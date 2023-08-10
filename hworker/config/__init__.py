@@ -5,7 +5,9 @@ from functools import cache
 from tomllib import load
 from pathlib import Path
 import os
+import datetime
 
+from pytimeparse import parse
 from mergedeep import merge
 from tomli_w import dump
 
@@ -68,8 +70,32 @@ def get_final_config(default_config: str = _default_config_name,
     if not os.path.isfile(user_config):
         create_config(user_config, read_default_config(default_config))
     dflt, usr = read_default_config(default_config), read_config(user_config)
-    create_config(final_config, dict(merge(dflt, usr)))
+    final_content = fill_final_config(dict(merge(dflt, usr)))
+    create_config(final_config, final_content)
     return read_config(final_config)
+
+
+def fill_final_config(final_content: dict) -> dict:
+    """
+
+    :param final_content:
+    :return:
+    """
+    for task_ID, task in final_content.get("tasks", {}).items():
+        for dflt_name, dflt in final_content["tasks"]["default"]:
+            if dflt_name not in task.keys():
+                task[dflt_name] = dflt
+
+        for key, val in task.items():
+            if key.endswith("delta"):
+                open_date, delta = val.split("+")
+                field = key.rsplit("_", 1)[-1]
+                if field not in task.keys():
+                    time_delta = datetime.timedelta(seconds=parse(delta))
+                    open_date = datetime.datetime.strptime(open_date, '%m/%d/%y %H:%M:%S')
+                    task[field] = open_date + time_delta
+
+    return final_content
 
 
 def get_git_directory() -> str:
@@ -211,7 +237,7 @@ def get_max_test_size() -> int:
 
     :return: maximum test rows size
     """
-    return int(get_final_config()["tests"]["max_size"])
+    return int(get_final_config()["check"]["default"]["max_size"])
 
 
 def get_default_time_limit() -> int:
@@ -219,7 +245,7 @@ def get_default_time_limit() -> int:
 
     :return: task default time limit
     """
-    return int(get_final_config()["tests"]["default_time_limit"])
+    return int(get_final_config()["check"]["default"]["time_limit"])
 
 
 def get_default_resource_limit() -> int:
@@ -227,7 +253,7 @@ def get_default_resource_limit() -> int:
 
     :return: task default resource limit
     """
-    return int(get_final_config()["tests"]["default_resource_limit"])
+    return int(get_final_config()["check"]["default"]["resource_limit"])
 
 
 def get_task_info(task_name: str) -> dict:

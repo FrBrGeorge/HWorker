@@ -14,48 +14,52 @@ directory = "/tmp/hworker_git"
 
 # list of users - repos
 [git.users]
-# user_ID = "repo" # example, fill it
+# user_ID = "repo"
 
 [IMAP]
-host = "host"  # example, fill it
+# host = "host"
 port = "993"
-folder = "folder"  # example, fill it
-username = "username"  # example, fill it
-password = "password"  # example, fill it
-letter_limit = -1
+# folder = "folder"
+# username = "username"
+# password = "password"
+# letter_limit = -1
 
 [IMAP.users]
-user_ID = "mail address"
+# user_ID = "mail address"
 
 [file]
 root_path = "files"
 
 [file.users]
-user_ID = "path"
+# user_ID = "path"
 
 [tasks]
 
-[tasks.task_ID]
-deliver_ID = "20240101/01"  # example, fill it
-open_date = "20240101"  # example, fill it
-soft_deadline = "20240108"  # example, fill it
-hard_deadline = "20240401"  # example, fill it
-time_limit = 2 # example, fill it
-resource_limit = 3145728  # optional field
-checks = [  # optional field
-    "check_name_1",
-    "check_name_2",
-    "...",
-]
-comparison_type = "exact"
+[tasks.default]
+soft_deadline_delta = "open_date+6d"
+hard_deadline_delta = "open_date+13d"
 
-[tests]
-max_size = 100
-default_time_limit = 2
-default_resource_limit = 3145728
+# [tasks.task_ID]
+# deliver_ID = "20240101/01"
+# open_date = 2024-01-01
+# soft_deadline_delta = "open_date+8d"
+# hard_deadline_delta = "open_date+15d"
+# time_limit = 2
+# resource_limit = 3145728
+# checks = [
+#    "check_name_1",
+#    "check_name_2",
+#    "...",
+# ]
+# comparison_type = "exact"
 
 [check]
 directory = "/tmp/hworker_check"
+
+[check.default]
+max_size = 100
+default_time_limit = 2
+default_resource_limit = 3145728
 
 [formalization]
 prog_name = "prog.py"
