@@ -18,11 +18,11 @@ directory = "/tmp/hworker_git"
 
 [IMAP]
 # host = "host"
-port = "993"
+port = 993
 # folder = "folder"
 # username = "username"
 # password = "password"
-# letter_limit = -1
+letter_limit = -1
 
 [IMAP.users]
 # user_ID = "mail address"
@@ -35,9 +35,12 @@ root_path = "files"
 
 [tasks]
 
-[tasks.default]
+[tasks._default]
 soft_deadline_delta = "open_date+6d"
 hard_deadline_delta = "open_date+13d"
+max_size = 100
+time_limit = 2
+resource_limit = 3145728
 
 # [tasks.task_ID]
 # deliver_ID = "20240101/01"
@@ -55,11 +58,6 @@ hard_deadline_delta = "open_date+13d"
 
 [check]
 directory = "/tmp/hworker_check"
-
-[check.default]
-max_size = 100
-default_time_limit = 2
-default_resource_limit = 3145728
 
 [formalization]
 prog_name = "prog.py"

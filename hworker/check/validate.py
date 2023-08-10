@@ -5,7 +5,6 @@ from ..depot import store
 from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
 from ..log import get_logger
 
-from importlib import import_module
 import time
 from datetime import date
 from importlib import import_module

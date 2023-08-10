@@ -1,5 +1,6 @@
 """Read and parse config"""
 
+from copy import copy
 from typing import Final
 from functools import cache
 from tomllib import load
@@ -70,32 +71,49 @@ def get_final_config(default_config: str = _default_config_name,
     if not os.path.isfile(user_config):
         create_config(user_config, read_default_config(default_config))
     dflt, usr = read_default_config(default_config), read_config(user_config)
-    final_content = fill_final_config(dict(merge(dflt, usr)))
+    final_content = dict(merge(dflt, usr))
+    fill_final_config(final_content)
+    clear_underscores(final_content)
     create_config(final_config, final_content)
     return read_config(final_config)
 
 
-def fill_final_config(final_content: dict) -> dict:
+def fill_final_config(final_content: dict) -> None:
     """
 
     :param final_content:
     :return:
     """
     for task_ID, task in final_content.get("tasks", {}).items():
-        for dflt_name, dflt in final_content["tasks"]["default"]:
-            if dflt_name not in task.keys():
-                task[dflt_name] = dflt
+        if not task_ID.startswith("_"):
+            for dflt_name, dflt in final_content["tasks"]["_default"].items():
+                if dflt_name not in task.keys():
+                    task[dflt_name] = dflt
 
-        for key, val in task.items():
-            if key.endswith("delta"):
-                open_date, delta = val.split("+")
-                field = key.rsplit("_", 1)[-1]
-                if field not in task.keys():
-                    time_delta = datetime.timedelta(seconds=parse(delta))
-                    open_date = datetime.datetime.strptime(open_date, '%m/%d/%y %H:%M:%S')
-                    task[field] = open_date + time_delta
+            for key, val in copy(task).items():
+                if key.endswith("delta"):
+                    open_date, delta = val.split("+")
+                    field = key.rsplit("_", 1)[0]
+                    print(field)
+                    if field not in task.keys():
+                        time_delta = datetime.timedelta(seconds=parse(delta))
+                        open_date = task[open_date]
+                        print(time_delta, open_date)
+                        task[field] = open_date + time_delta
 
-    return final_content
+
+def clear_underscores(final_content: dict) -> None:
+    """
+
+    :param final_content:
+    :return:
+    """
+    for k, v in copy(final_content).items():
+        if k.startswith("_"):
+            final_content.pop(k)
+        elif isinstance(v, dict):
+            clear_underscores(v)
+
 
 
 def get_git_directory() -> str:
@@ -237,7 +255,7 @@ def get_max_test_size() -> int:
 
     :return: maximum test rows size
     """
-    return int(get_final_config()["check"]["default"]["max_size"])
+    return int(get_final_config()["tasks"]["_default"]["max_size"])
 
 
 def get_default_time_limit() -> int:
@@ -245,7 +263,7 @@ def get_default_time_limit() -> int:
 
     :return: task default time limit
     """
-    return int(get_final_config()["check"]["default"]["time_limit"])
+    return int(get_final_config()["tasks"]["_default"]["time_limit"])
 
 
 def get_default_resource_limit() -> int:
@@ -253,7 +271,7 @@ def get_default_resource_limit() -> int:
 
     :return: task default resource limit
     """
-    return int(get_final_config()["check"]["default"]["resource_limit"])
+    return int(get_final_config()["tasks"]["_default"]["resource_limit"])
 
 
 def get_task_info(task_name: str) -> dict:

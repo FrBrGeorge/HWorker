@@ -9,6 +9,7 @@ imap-tools = "*"
 tomli_w = "*"
 sqlalchemy = "*"
 mergedeep = "*"
+pytimeparse = "*"
 
 [dev-packages]
 pipenv = "*"
