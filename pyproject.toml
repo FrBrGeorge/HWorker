@@ -31,3 +31,6 @@ hworker = "hworker.control.cli:shell"
 [tool.pytest.ini_options]
 tmp_path_retention_policy = "failed"
 
+[tool.black]
+line-length = 120
+
