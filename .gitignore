@@ -9,6 +9,7 @@ data.db
 hworker/_version.py
 hworker.toml
 final_hworker.toml
+.history
 
 Pipfile.lock
 

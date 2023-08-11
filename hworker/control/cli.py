@@ -2,14 +2,22 @@
 '''
 Commandline interface
 '''
+import atexit
 import cmd
 import shlex
 import sys
 import io
+from pathlib import Path
 from .. import deliver, config, control     # NoQA: F401
 from ..log import get_logger
+from ..config import get_uids
+try:
+    import readline
+except ModuleNotFoundError:
+    from unittest.mock import MagicMock as readline
 
 logger = get_logger(__name__)
+HISTFILE = ".history"
 
 
 def log(message, severity="error"):
@@ -37,11 +45,11 @@ class HWorker(cmd.Cmd):
         deliver.download_all()
 
     def do_list(self, arg):
-        "TODO"
+        "List some data TODO"
         args = self.shplit(arg)
         match args:
             case ["users", *tail]:
-                print(tail)
+                print("\n".join(get_uids()))
 
 
     def complete_list(self, text, line, begidx, endidx):
@@ -51,14 +59,14 @@ class HWorker(cmd.Cmd):
 
     def do_EOF(self, arg):
         """Press Ctrl+D to exit"""
+        if self.use_rawinput:
+            print()
         return True
 
     doexit = do_EOF
 
     def emptyline(self):
         pass
-
-    # TODO history
 
 
 def shell():
@@ -70,6 +78,10 @@ def shell():
             runner.prompt = ""
             res = runner.cmdloop(intro="")
     else:
+        if not (hist := Path(HISTFILE)).is_file():
+            hist.write_bytes(b'')
+        readline.read_history_file(HISTFILE)
+        atexit.register(lambda: readline.write_history_file(HISTFILE))
         for errors in range(100):
             try:
                 HWorker().cmdloop()
