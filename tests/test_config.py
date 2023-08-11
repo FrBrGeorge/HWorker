@@ -21,21 +21,20 @@ from hworker.config import (
 )
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def make_user_config(request):
     create_config(_user_config_name, request.param)
     yield
     os.remove(_user_config_name)
+    get_final_config.cache_clear()
 
 
-# TODO: cache_clear doesn't work in teardown (why?)
 class TestConfig:
     """"""
 
     @pytest.mark.parametrize("make_user_config", [{"imap": {"host": "host", "folder": "folder"}}], indirect=True)
     def test_imap_info(self, make_user_config):
         assert get_imap_info() == {"letter_limit": -1, "port": 993, "users": {}}
-        get_final_config.cache_clear()
 
     def test_get_names(self):
         assert (get_prog_name(), get_urls_name(), get_checks_suffix(), get_checks_dir()) == (
@@ -49,12 +48,10 @@ class TestConfig:
     @pytest.mark.parametrize("make_user_config", [{"imap": {"users": {"user_ID": "mail address"}}}], indirect=True)
     def test_mail_users(self, make_user_config):
         assert (uid_to_email("user_ID"), email_to_uid("mail address")) == ("mail address", "user_ID")
-        get_final_config.cache_clear()
 
     @pytest.mark.parametrize("make_user_config", [{"git": {"users": {"user_ID": "repo"}}}], indirect=True)
     def test_git_users(self, make_user_config):
         assert (uid_to_repo("user_ID"), repo_to_uid("repo")) == ("repo", "user_ID")
-        get_final_config.cache_clear()
 
     @pytest.mark.parametrize(
         "make_user_config",
@@ -70,4 +67,3 @@ class TestConfig:
             "soft_deadline": datetime(2024, 1, 7, 0, 0),
             "soft_deadline_delta": "open_date+6d",
         }
-        get_final_config.cache_clear()
