@@ -9,6 +9,7 @@ test.db
 data.db
 hworker/_version.py
 hworker.toml
+test_hworker.toml
 final_hworker.toml
 .history
 

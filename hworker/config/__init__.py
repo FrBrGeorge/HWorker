@@ -31,7 +31,7 @@ def read_default_config(config_name: str = _default_config_name) -> dict:
     return content
 
 
-def read_config(config_name: str) -> dict:
+def read_config(config_name: str | Path) -> dict:
     """
 
     :param config_name:
@@ -52,31 +52,40 @@ def create_config(config_name: str, content: dict = None) -> None:
     :param config_name: config file name
     """
     if content is None:
-        content = get_final_config(Path(__path__[0]) / _default_config_name)
+        content = read_config(Path(__path__[0]) / _default_config_name)
     with open(config_name, "wb") as cfg:
         dump(content, cfg)
 
 
-@cache
-def get_final_config(
+def make_final_config(
     default_config: str = _default_config_name,
     user_config: str = _user_config_name,
     final_config: str = _final_config_name,
-) -> dict:
-    """Get final config info and create user config if it doesn't exist
+) -> str:
+    """Merge default and user configs to final and create user config if it doesn't exist
 
-    :param default_config: default config name
-    :param user_config: user config name
-    :param final_config: final config name
-    :return: config info dict
+    :param default_config:
+    :param user_config:
+    :param final_config:
+    :return:
     """
     if not os.path.isfile(user_config):
-        create_config(user_config, read_default_config(default_config))
+        create_config(user_config, {})
     dflt, usr = read_default_config(default_config), read_config(user_config)
     final_content = dict(merge(dflt, usr))
     fill_final_config(final_content)
     clear_underscores(final_content)
     create_config(final_config, final_content)
+    return final_config
+
+
+@cache
+def get_final_config() -> dict:
+    """Get final config info
+
+    :return: config info dict
+    """
+    final_config = make_final_config(_default_config_name, _user_config_name, _final_config_name)
     return read_config(final_config)
 
 
@@ -96,11 +105,9 @@ def fill_final_config(final_content: dict) -> None:
                 if key.endswith("delta"):
                     open_date, delta = val.split("+")
                     field = key.rsplit("_", 1)[0]
-                    print(field)
                     if field not in task.keys():
                         time_delta = datetime.timedelta(seconds=parse(delta))
                         open_date = task[open_date]
-                        print(time_delta, open_date)
                         task[field] = open_date + time_delta
 
 
@@ -115,7 +122,6 @@ def clear_underscores(final_content: dict) -> None:
             final_content.pop(k)
         elif isinstance(v, dict):
             clear_underscores(v)
-
 
 
 def get_git_directory() -> str:
