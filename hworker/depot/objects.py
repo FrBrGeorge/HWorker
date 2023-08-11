@@ -149,53 +149,98 @@ class CheckResult(StoreObject):
         self.stderr = stderr
 
 
-class Plagiary(StoreObject):
-    content: list[str]  # ID's ?? or list[Homework] or list[Solution]
-
-
 class TaskQualify(StoreObject):
     """Calculates a TaskScore from all CheckResult's for certain TASK_ID, USER_ID pair"""
 
+    name: str
     content: str
+    _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
     _is_versioned: bool = False
+
+    def __init__(self, name: str = None, content: str = None, **kwargs):
+        kwargs["USER_ID"] = ""
+        super().__init__(**kwargs)
+        self.name = name
+        self.content = content
 
 
 class TaskScore(StoreObject):
     """Scoring some aspect for TASK_ID, USER_ID"""
 
+    name: str
     rating: float
-    _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp", "content"}
+    _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
     _is_versioned: bool = False
+
+    def __init__(self, name: str = None, rating: float = None, **kwargs):
+        super().__init__(**kwargs)
+        self.name = name
+        self.rating = rating
 
 
 class UserQualify(StoreObject):
     """Calculates a userScore from all TaskScores's for certain USER_ID"""
 
+    name: str
     content: str
+    _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
     _is_versioned: bool = False
+
+    def __init__(self, name: str = None, content: str = None, **kwargs):
+        kwargs["USER_ID"] = ""
+        kwargs["TASK_ID"] = ""
+        super().__init__(**kwargs)
+        self.name = name
+        self.content = content
 
 
 class UserScore(StoreObject):
     """Scoring some aspect for USER_ID"""
 
+    name: str
     rating: float
-    _public_fields: set[str] = {"ID", "USER_ID", "timestamp", "content"}
+    _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
     _is_versioned: bool = False
+
+    def __init__(self, name: str = None, rating: float = None, **kwargs):
+        kwargs["TASK_ID"] = ""
+        super().__init__(**kwargs)
+        self.name = name
+        self.rating = rating
 
 
 class Formula(StoreObject):
     """Overall formulae over all UserScore's for certain USER_ID"""
 
+    name: str
     content: str
+    _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
     _is_versioned: bool = False
+
+    def __init__(self, content: str = None, **kwargs):
+        kwargs["USER_ID"] = ""
+        kwargs["TASK_ID"] = ""
+        super().__init__(**kwargs)
+        self.name = "Final mark"
+        self.content = content
 
 
 class FinalScore(StoreObject):
     """Final user verdict"""
 
     rating: str
-    _public_fields: set[str] = {"ID", "USER_ID", "timestamp", "content"}
+    _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
     _is_versioned: bool = False
+
+    def __init__(self, rating: str = None, **kwargs):
+        kwargs["TASK_ID"] = ""
+        super().__init__(**kwargs)
+        self.name = "Final mark"
+        self.rating = rating
+
+
+class Plagiary(StoreObject):
+    content: list[str]  # ID's ?? or list[Homework] or list[Solution]
 
 
 class Criteria:

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %} {{ config.get("course_name") }} {% endblock %}
+
+{% block main %}
+<div class="text-center form-control-general">
+    <h1 class="h3 mb-3 fw-normal">{{ config.get("course_name") }} Progress Check</h1>
+    <div class="row justify-content-center">
+        <div class="col">
+            <label for="cookie_textarea"></label><textarea id="cookie_textarea" placeholder="Type your cookie here"></textarea>
+        </div>
+        <div class="col">
+            <text class="p-2 bg-success">Passed on time</text>
+        </div>
+        <div class="col">
+            <text class="p-2 bg-warning">Overdue for a week</text>
+        </div>
+        <div class="col">
+            <text class="p-2 bg-danger">Overdue for a fortnight</text>
+        </div>
+        <div class="col">
+            <text class="p-2 bg-primary">Plagiarism</text>
+        </div>
+        <div class="col">
+            <text class="p-2 bg-info">Bad archive</text>
+        </div>
+        <div class="col">
+            <button class="btn bg-purple" id="cookie-button" type="button">Set cookie</button>
+        </div>
+        <script>
+            $(function () {
+                let cookie_textarea = $("#cookie_textarea");
+                let cookie_button = $("#cookie-button");
+
+                function change_super_secret_cookie(event) {
+                    if (event.which === 13) {
+                        if (!event.repeat) {
+                            document.cookie = "secret_cookie=" + cookie_textarea.val() + ";";
+                            window.location.reload();
+                        }
+                        event.preventDefault(); // Prevents the addition of a new line in the text field
+                    }
+                }
+
+                cookie_textarea.on("keydown", change_super_secret_cookie);
+                cookie_button.on("click", change_super_secret_cookie);
+            });
+        </script>
+    </div>
+    <div class="my_fit overflow-scroll">
+        {{ table|safe }}
+    </div>
+    <script>
+        $(function () {
+            $("table").dataTable({
+                "paging": false,
+                "searching": false,
+                "info": false,
+                // scrollX: true,
+                // scrollY: true,
+            });
+        });
+    </script>
+    {% if request.cookies.get("secret_cookie","") == config.get("secret_cookie") %}
+    <form action="/info" method="POST" target="_blank" id="data_form" hidden>
+        <input id="form_username" name="username" type="text"/>
+        <input id="form_taskname" name="taskname" type="text"/>
+        <input name="form_submit" type="submit"/>
+    </form>
+    <input hidden id="skip_prefix" type="number" value="{% if skip_prefix is defined %}{{ skip_prefix }}{% else %}1{% endif %}"/>
+    <input hidden id="skip_suffix" type="number" value="{% if skip_suffix is defined %}{{ skip_suffix }}{% else %}0{% endif %}"/>
+    <script>
+        $(function () {
+            $("tbody > tr > th").on("click", function (e) {
+                let username = $(e.currentTarget).parent().children()[0].innerText.replace("&nbsp;", " ")
+                let col_index = $(e.currentTarget).index($(e.currentTarget).innerText);
+                let total_cols = $(e.currentTarget).parent().children().length;
+                const skip_prefix = $("#skip_prefix").val();
+                const skip_suffix = $("#skip_suffix").val();
+                // console.log(total_cols);
+                // console.log(col_index);
+                if (col_index > skip_prefix && col_index < total_cols - skip_suffix) {
+                    $("#form_username").val(username);
+                    $("#form_taskname").val($("thead > tr > th")[col_index].innerText);
+                    $("#data_form").trigger("submit");
+                    // console.log($("thead > tr > th")[col_index].innerText);
+                    // console.log(username);
+                }
+            });
+        });
+    </script>
+    {% endif %}
+
+    <h6 id="update-time"></h6>
+</div>
+{% endblock %}

@@ -56,16 +56,19 @@ def python_runner(prog_path: str, input_path: str) -> tuple[bytes | None, bytes,
     get_logger(__name__).info(f"{prog_path} run")
     if not os.path.exists(get_check_directory()):
         os.makedirs(get_check_directory())
-    with open(input_path, encoding="utf-8") as prog_input, \
-            NamedTemporaryFile(dir=get_check_directory(), delete=False) as prog_output:
+    with open(input_path, encoding="utf-8") as prog_input, NamedTemporaryFile(
+        dir=get_check_directory(), delete=False
+    ) as prog_output:
         try:
-            result = subprocess.Popen([sys.executable, prog_path],
-                                      # preexec_fn=python_set_limits(),
-                                      stdin=prog_input,
-                                      stdout=prog_output,
-                                      stderr=subprocess.PIPE)
+            result = subprocess.Popen(
+                [sys.executable, prog_path],
+                # preexec_fn=python_set_limits(),
+                stdin=prog_input,
+                stdout=prog_output,
+                stderr=subprocess.PIPE,
+            )
         except TimeoutExpired as time_error:
-            result = CompletedProcess(time_error.args, -1, stderr=str(time_error).encode(errors='replace'))
+            result = CompletedProcess(time_error.args, -1, stderr=str(time_error).encode(errors="replace"))
     exit_code = result.wait()
     with open(prog_output.name, "rb") as po:
         po = po.read()
@@ -73,7 +76,7 @@ def python_runner(prog_path: str, input_path: str) -> tuple[bytes | None, bytes,
 
 
 def check_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> CheckResult:
-    """ Run checker on a given solution and returns result object
+    """Run checker on a given solution and returns result object
 
     :param checker: check object
     :param solution:
@@ -103,21 +106,23 @@ def check_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> Ch
     actual_output, stderr, exit_code = runner(prog_path, input_path)
     diff, score = choose_diff_score(actual_output, initial_output, checker.category)
     content = score(diff(actual_output, initial_output))
-    return CheckResult(ID=checker.ID + solution.ID,
-                       USER_ID=solution.USER_ID,
-                       TASK_ID=solution.TASK_ID,
-                       timestamp=date.fromtimestamp(time.time()),
-                       rating=content,
-                       category=checker.category,
-                       stderr=stderr,
-                       stdout=actual_output,
-                       check_ID=checker.ID,
-                       solution_ID=solution.ID,
-                       verdict=VerdictEnum.passed if not exit_code else VerdictEnum.failed)
+    return CheckResult(
+        ID=checker.ID + solution.ID,
+        USER_ID=solution.USER_ID,
+        TASK_ID=solution.TASK_ID,
+        timestamp=date.fromtimestamp(time.time()),
+        rating=content,
+        category=checker.category,
+        stderr=stderr,
+        stdout=actual_output,
+        check_ID=checker.ID,
+        solution_ID=solution.ID,
+        verdict=VerdictEnum.passed if not exit_code else VerdictEnum.failed,
+    )
 
 
 def check(checker: Check, solution: Solution, check_num: int = 0) -> None:
-    """ Run checker on a given solution and save result object
+    """Run checker on a given solution and save result object
 
     :param checker: check object
     :param solution:
@@ -173,9 +178,9 @@ def float_diff(actual: bytes, initial: bytes, relative: int = 1e-09) -> Iterator
     """
     # TODO: clear non-digit symbols
     for actual_num, initial_num in zip_longest(actual.split(), initial.split(), fillvalue=None):
-        yield f"{actual_num} " \
-              f"{'=' if isclose(float(actual_num), float(initial_num), rel_tol=relative) else '!='} " \
-              f"{initial_num}".encode("utf-8")
+        yield f"{actual_num} " f"{'=' if isclose(float(actual_num), float(initial_num), rel_tol=relative) else '!='} " f"{initial_num}".encode(
+            "utf-8"
+        )
 
 
 def float_score(diff: Iterator[bytes]) -> float:

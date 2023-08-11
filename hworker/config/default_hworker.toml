@@ -16,7 +16,7 @@ directory = "/tmp/hworker_git"
 [git.users]
 # user_ID = "repo" # example, fill it
 
-[IMAP]
+[imap]
 host = "host"  # example, fill it
 port = "993"
 folder = "folder"  # example, fill it
@@ -24,7 +24,7 @@ username = "username"  # example, fill it
 password = "password"  # example, fill it
 letter_limit = -1
 
-[IMAP.users]
+[imap.users]
 user_ID = "mail address"
 
 [file]
@@ -42,7 +42,7 @@ soft_deadline = "20240108"  # example, fill it
 hard_deadline = "20240401"  # example, fill it
 time_limit = 2 # example, fill it
 resource_limit = 3145728  # optional field
-checks = [  # optional field
+checks = [# optional field
     "check_name_1",
     "check_name_2",
     "...",
@@ -62,3 +62,7 @@ prog_name = "prog.py"
 remotes_name = "remotes"
 checks_dir = "checks"
 checks_suffix = "in/out"
+
+[publish]
+course_name = "Kapibarology"
+secret_cookie = "kapibara"

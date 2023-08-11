@@ -1,5 +1,4 @@
-"""IMAP backend"""
-import glob
+"""file backend"""
 import os
 import datetime
 from pathlib import Path

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-'''
+"""
 Commandline interface
-'''
+"""
 import atexit
 import cmd
 import shlex

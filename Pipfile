@@ -9,8 +9,11 @@ imap-tools = "*"
 tomli_w = "*"
 sqlalchemy = "*"
 mergedeep = "*"
+flask = "*"
+bs4 = "*"
 
 [dev-packages]
+build = "*"
 pipenv = "*"
 black = {version = "*", extras = ["d"]}
 pytest = "*"

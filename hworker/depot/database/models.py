@@ -27,8 +27,6 @@ class Base(DeclarativeBase):
 
 
 class Homework(Base):
-    """Class for homework from one student for one task"""
-
     __tablename__ = "homework"
 
     content: Mapped[dict] = mapped_column(PickleType)
@@ -36,15 +34,12 @@ class Homework(Base):
 
     # noinspection PyTypeChecker
     def __init__(self, content: dict = None, is_broken: bool = None, **kwargs):
-        """Initialise Homework object"""
         super().__init__(**kwargs)
         self.content = content
         self.is_broken = is_broken
 
 
 class Check(Base):
-    """Class for homework from one student for one task"""
-
     __tablename__ = "check"
 
     name: Mapped[str] = mapped_column(String)
@@ -53,15 +48,12 @@ class Check(Base):
 
     # noinspection PyTypeChecker
     def __init__(self, content: dict = None, category: CheckCategoryEnum = None, **kwargs):
-        """Initialise Check object"""
         super().__init__(**kwargs)
         self.content = content
         self.category = category
 
 
 class Solution(Base):
-    """Class for homework from one student for one task"""
-
     __tablename__ = "solution"
 
     content: Mapped[dict] = mapped_column(PickleType)
@@ -69,15 +61,12 @@ class Solution(Base):
 
     # noinspection PyTypeChecker
     def __init__(self, content: dict = None, checks: list = None, **kwargs):
-        """Initialise Solution object"""
         super().__init__(**kwargs)
         self.content = content
         self.checks = checks
 
 
 class CheckResult(Base):
-    """Class for homework from one student for one task"""
-
     __tablename__ = "check_result"
 
     rating: Mapped[float] = mapped_column(Float)
@@ -98,9 +87,8 @@ class CheckResult(Base):
         verdict: VerdictEnum = None,
         stdout: bytes = None,
         stderr: bytes = None,
-        **kwargs
+        **kwargs,
     ):
-        """Initialise CheckResult object"""
         super().__init__(**kwargs)
         self.rating = rating
         self.category = category
@@ -109,3 +97,81 @@ class CheckResult(Base):
         self.verdict = verdict
         self.stdout = stdout
         self.stderr = stderr
+
+
+class TaskQualify(Base):
+    __tablename__ = "task_qualify"
+
+    name: Mapped[str] = mapped_column(String)
+    content: Mapped[str] = mapped_column(String)
+
+    # noinspection PyTypeChecker
+    def __init__(self, name: str = None, content: str = None, **kwargs):
+        super().__init__(**kwargs)
+        self.name = name
+        self.content = content
+
+
+class TaskScore(Base):
+    __tablename__ = "task_score"
+
+    name: Mapped[str] = mapped_column(String)
+    rating: Mapped[float] = mapped_column(Float)
+
+    # noinspection PyTypeChecker
+    def __init__(self, name: str = None, rating: float = None, **kwargs):
+        super().__init__(**kwargs)
+        self.name = name
+        self.rating = rating
+
+
+class UserQualify(Base):
+    __tablename__ = "user_qualify"
+
+    name: Mapped[str] = mapped_column(String)
+    content: Mapped[str] = mapped_column(String)
+
+    # noinspection PyTypeChecker
+    def __init__(self, name: str = None, content: str = None, **kwargs):
+        super().__init__(**kwargs)
+        self.name = name
+        self.content = content
+
+
+class UserScore(Base):
+    __tablename__ = "user_score"
+
+    name: Mapped[str] = mapped_column(String)
+    rating: Mapped[float] = mapped_column(Float)
+
+    # noinspection PyTypeChecker
+    def __init__(self, name: str = None, rating: float = None, **kwargs):
+        super().__init__(**kwargs)
+        self.name = name
+        self.rating = rating
+
+
+class Formula(Base):
+    __tablename__ = "formula"
+
+    name: Mapped[str] = mapped_column(String)
+    content: Mapped[str] = mapped_column(String)
+
+    # noinspection PyTypeChecker
+    def __init__(self, name: str = None, content: str = None, **kwargs):
+        super().__init__(**kwargs)
+        self.name = name
+        self.content = content
+
+
+class FinalScore(Base):
+    __tablename__ = "final_score"
+
+    name: Mapped[str] = mapped_column(String)
+    rating: Mapped[str] = mapped_column(String)
+
+    # noinspection PyTypeChecker
+    def __init__(self, name: str = None, rating: str = None, **kwargs):
+        super().__init__(**kwargs)
+        self.name = name
+        self.rating = rating
