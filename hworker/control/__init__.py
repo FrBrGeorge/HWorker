@@ -43,3 +43,19 @@ def generate_scores():
             objects.UserScore(ID=f"{user_id}", USER_ID=user_id, name="User total", timestamp=123, rating=user_total)
         )
         depot.store(objects.FinalScore(ID=f"{user_id}", USER_ID=user_id, timestamp=123, rating=f"--{user_total}--"))
+
+
+def generate_homeworks_with_versions():
+    for user_id in ["Vania", "Petya", "Vasili"]:
+        for task_id in ["01", "02", "03"]:
+            for ts in range(10, 31, 10):
+                depot.store(
+                    depot.objects.Homework(
+                        ID=f"t{user_id}{task_id}",
+                        USER_ID=user_id,
+                        TASK_ID=task_id,
+                        timestamp=ts,
+                        content={},
+                        is_broken=False,
+                    )
+                )

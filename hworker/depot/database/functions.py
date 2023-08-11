@@ -49,19 +49,24 @@ def _translate_object_to_model(obj: Union[objects.StoreObject, Type[objects.Stor
     return model_obj
 
 
-def _translate_model_to_object(model: Base, field_filter: list[str] = None) -> objects.StoreObject:
-    fields = _get_fields_from_object(model)
-    obj = _model_class_to_object[type(model)]()
+def _create_object(
+    to_parse: Union[Base, sqlalchemy.engine.Row],
+    return_type: Type[objects.StoreObject],
+    return_fields: list[str] = None,
+) -> objects.StoreObject:
+    if isinstance(to_parse, Base):
+        fields = [item.name for item in inspect(Homework).columns]
+    else:
+        fields = list(to_parse._fields)
 
-    if field_filter is not None:
-        if field_filter not in fields:
+    if return_fields is not None:
+        if not all(name in fields for name in return_fields):
             raise ValueError("Requested field not found in object")
-        [fields.pop(name) for name in field_filter]
+        fields = return_fields
 
-    for name, value in fields.items():
-        setattr(obj, name, value)
+    vals = {name: getattr(to_parse, name) for name in fields}
 
-    return obj
+    return return_type(**vals)
 
 
 def _parse_criteria(model: Type[Base], criteria: objects.Criteria) -> BinaryExpression:
@@ -115,36 +120,42 @@ def store(obj: objects.StoreObject) -> None:
 
 
 def search(
-    obj_type: Union[objects.StoreObject, Type[objects.StoreObject]],
+    obj_type: Type[objects.StoreObject],
     *criteria: objects.Criteria,
     return_fields: list[str] = None,
     first: bool = False,
+    actual: bool = False,
 ) -> Union[Iterable[objects.StoreObject], Optional[objects.StoreObject]]:
     """Search for object in database
-    :param obj_type: type of object to search or its instance
+    :param obj_type: type of object to search
     :param criteria: criteria for searching
     :param return_fields: filter for return fields
     :param first: return only first elem
+    :param actual: return only latest version of object (grouping them by id)
     :return: iterator for found objects
     """
     get_logger(__name__).debug(f"Tried to search {str(obj_type)[:100]}")
 
     model_type = type(_translate_object_to_model(obj_type))
-    with Session.begin() as session:
-        search_result = session.query(model_type)
+    with Session() as session:
+        search_result = session.query(model_type).order_by(model_type.timestamp.desc())
 
         if len(criteria) != 0:
             search_result = search_result.filter(*list(map(functools.partial(_parse_criteria, model_type), criteria)))
 
-        func = functools.partial(_translate_model_to_object, field_filter=return_fields)
+        if actual and obj_type().is_versioned():
+            # wrap base query and subquery and then execute group_by on it for getting most old object
+            search_result = session.query(search_result.subquery()).group_by("ID")
+
+        translator = functools.partial(_create_object, return_type=obj_type, return_fields=return_fields)
 
         if first:
-            return None if search_result.first() is None else func(search_result.first())
+            return None if search_result.first() is None else translator(search_result.first())
 
-        return map(func, search_result)
+        return map(translator, search_result)
 
 
-def delete(obj_type: objects.StoreObject, *criteria: Iterable[objects.Criteria]) -> None:
+def delete(obj_type: Type[objects.StoreObject], *criteria: objects.Criteria) -> None:
     """
     Delete object from database
     :param obj_type: type of object to delete or its instance
