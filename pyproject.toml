@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2", "setuptools-pipfile"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -15,11 +15,10 @@ requires-python = ">=3.11"
 license = { text = "GPL-3.0 license" }
 dynamic = ["version", "dependencies"]
 
+[tool.setuptools-pipfile]
+
 [tool.setuptools_scm]
 write_to = "hworker/_version.py"
-
-#[tool.setuptools.dynamic]
-#dependencies = {file = ["README.rst", "USAGE.rst"]}
 
 [tool.setuptools]
 packages = ["hworker"]
