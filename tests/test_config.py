@@ -8,8 +8,8 @@ from hworker.config import (
     create_config,
     repo_to_uid,
     uid_to_repo,
-    _user_config_name,
     uid_to_email,
+    _user_config_name,
     email_to_uid,
     get_imap_info,
     get_checks_suffix,
@@ -19,10 +19,12 @@ from hworker.config import (
     get_task_info,
     get_final_config,
 )
+import hworker.config
 
 
 @pytest.fixture(scope="function")
-def make_user_config(request):
+def make_user_config(monkeypatch, request):
+    monkeypatch.setattr(hworker.config, "_user_config_name", _user_config_name)  # Will be changed
     create_config(_user_config_name, request.param)
     yield
     os.remove(_user_config_name)
