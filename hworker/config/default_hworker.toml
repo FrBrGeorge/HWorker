@@ -16,7 +16,7 @@ directory = "/tmp/hworker_git"
 [git.users]
 # user_ID = "repo"
 
-[IMAP]
+[imap]
 host = "host"  # example, fill it
 port = "993"
 folder = "folder"  # example, fill it
@@ -24,7 +24,7 @@ username = "username"  # example, fill it
 password = "password"  # example, fill it
 letter_limit = -1
 
-[IMAP.users]
+[imap.users]
 # user_ID = "mail address"
 
 [file]
