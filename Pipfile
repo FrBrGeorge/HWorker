@@ -12,6 +12,7 @@ mergedeep = "*"
 pytimeparse = "*"
 flask = "*"
 bs4 = "*"
+setuptools-scm = "*"
 
 [dev-packages]
 build = "*"
