@@ -3,12 +3,14 @@
 venv/
 *.cfg
 logs/
+t_*.py
 
 test.db
 data.db
 hworker/_version.py
 hworker.toml
 final_hworker.toml
+.history
 
 Pipfile.lock
 

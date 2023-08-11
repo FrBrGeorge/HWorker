@@ -1,0 +1,101 @@
+html {
+    min-height: 100vh;
+}
+
+body {
+    max-width: 100vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 5rem;
+}
+
+.form-control-general {
+    max-width: 90%;
+    margin: auto;
+}
+
+@media screen and (max-width: 800px) {
+    .form-control-general {
+        max-width: 100%;
+        margin: auto;
+    }
+
+    tbody tr th:first-child {
+        max-width: 40vw;
+        overflow: hidden;
+    }
+}
+
+.bg-purple {
+    background-color: #7B68EE !important;
+}
+
+/* Night mode */
+.night-button {
+    float: right;
+    filter: invert(100%);
+}
+
+.night-mode {
+    filter: invert(100%);
+    background-color: #000;
+}
+
+.night-mode img {
+    filter: invert(100%);
+}
+
+.night-mode .btn {
+    filter: invert(100%);
+}
+
+.fixed-bottom-right {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    z-index: 1030;
+}
+
+.night-mode .bg-success {
+    filter: invert(100%);
+}
+
+.night-mode .bg-purple {
+    filter: invert(100%);
+}
+
+.night-mode .bg-warning {
+    filter: invert(100%);
+}
+
+.night-mode .bg-danger {
+    filter: invert(100%);
+}
+
+.night-mode .bg-primary {
+    filter: invert(100%);
+}
+
+.night-mode .bg-info {
+    filter: invert(100%);
+}
+
+/*slippery trs*/
+thead tr:first-child th {
+    position: sticky;
+    top: 0;
+    background: #FFFFFF;
+    z-index: 1;
+}
+
+tbody tr th:first-child {
+    position: sticky;
+    left: 0;
+    background: #FFFFFF;
+    z-index: 1;
+}
+
+.my_fit {
+    height: 80vh !important;
+}

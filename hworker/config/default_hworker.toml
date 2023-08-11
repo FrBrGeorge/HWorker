@@ -16,15 +16,15 @@ directory = "/tmp/hworker_git"
 [git.users]
 # user_ID = "repo"
 
-[IMAP]
-# host = "host"
-port = 993
-# folder = "folder"
-# username = "username"
-# password = "password"
+[imap]
+host = "host"  # example, fill it
+port = "993"
+folder = "folder"  # example, fill it
+username = "username"  # example, fill it
+password = "password"  # example, fill it
 letter_limit = -1
 
-[IMAP.users]
+[imap.users]
 # user_ID = "mail address"
 
 [file]
@@ -38,23 +38,25 @@ root_path = "files"
 [tasks._default]
 soft_deadline_delta = "open_date+6d"
 hard_deadline_delta = "open_date+13d"
+
+# [tasks.task_ID]
+# deliver_ID = "20240101/01"  # example, fill it
+# open_date = "20240101"  # example, fill it
+# soft_deadline = "20240108"  # example, fill it
+# hard_deadline = "20240401"  # example, fill it
+# time_limit = 2 # example, fill it
+# resource_limit = 3145728  # optional field
+# checks = [# optional field
+#     "check_name_1",
+#     "check_name_2",
+#     "...",
+# ]
+# comparison_type = "exact"
+
+[tests]
 max_size = 100
 time_limit = 2
 resource_limit = 3145728
-
-# [tasks.task_ID]
-# deliver_ID = "20240101/01"
-# open_date = 2024-01-01
-# soft_deadline_delta = "open_date+8d"
-# hard_deadline_delta = "open_date+15d"
-# time_limit = 2
-# resource_limit = 3145728
-# checks = [
-#    "check_name_1",
-#    "check_name_2",
-#    "...",
-# ]
-# comparison_type = "exact"
 
 [check]
 directory = "/tmp/hworker_check"
@@ -64,3 +66,7 @@ prog_name = "prog.py"
 remotes_name = "remotes"
 checks_dir = "checks"
 checks_suffix = "in/out"
+
+[publish]
+course_name = "Kapibarology"
+secret_cookie = "kapibara"

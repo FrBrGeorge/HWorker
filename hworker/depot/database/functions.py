@@ -1,8 +1,7 @@
 """Database functions"""
 import functools
-from inspect import getmembers_static
 from operator import itemgetter
-from typing import Iterable, Union, Type
+from typing import Iterable, Union, Type, Optional
 
 import sqlalchemy.exc
 
@@ -17,6 +16,12 @@ _object_to_model_class: dict[Type[objects.StoreObject] : Type[Base]] = {
     objects.Check: Check,
     objects.Solution: Solution,
     objects.CheckResult: CheckResult,
+    objects.TaskQualify: TaskQualify,
+    objects.TaskScore: TaskScore,
+    objects.UserQualify: UserQualify,
+    objects.UserScore: UserScore,
+    objects.Formula: Formula,
+    objects.FinalScore: FinalScore,
 }
 _model_class_to_object: dict[Type[Base] : Type[objects.StoreObject]] = {
     value: key for key, value in _object_to_model_class.items()
@@ -111,13 +116,15 @@ def store(obj: objects.StoreObject) -> None:
 
 def search(
     obj_type: Union[objects.StoreObject, Type[objects.StoreObject]],
-    *criteria: Iterable[objects.Criteria],
+    *criteria: objects.Criteria,
     return_fields: list[str] = None,
-) -> Iterable[objects.StoreObject]:
+    first: bool = False,
+) -> Union[Iterable[objects.StoreObject], Optional[objects.StoreObject]]:
     """Search for object in database
     :param obj_type: type of object to search or its instance
     :param criteria: criteria for searching
     :param return_fields: filter for return fields
+    :param first: return only first elem
     :return: iterator for found objects
     """
     get_logger(__name__).debug(f"Tried to search {str(obj_type)[:100]}")
@@ -125,10 +132,15 @@ def search(
     model_type = type(_translate_object_to_model(obj_type))
     with Session.begin() as session:
         search_result = session.query(model_type)
+
         if len(criteria) != 0:
             search_result = search_result.filter(*list(map(functools.partial(_parse_criteria, model_type), criteria)))
 
         func = functools.partial(_translate_model_to_object, field_filter=return_fields)
+
+        if first:
+            return None if search_result.first() is None else func(search_result.first())
+
         return map(func, search_result)
 
 

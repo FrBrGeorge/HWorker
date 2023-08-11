@@ -78,16 +78,16 @@ class TestDepotFunctionsWithCriteria:
 
     def test_get_all_homework_for_current_year(self, homeworks):
         assert (
-                len(
-                    list(
-                        search(
-                            Homework,
-                            Criteria("timestamp", ">=", datetime.datetime(2023, 2, 1).timestamp()),
-                            Criteria("timestamp", "<=", datetime.datetime(2023, 6, 30).timestamp()),
-                        )
+            len(
+                list(
+                    search(
+                        Homework,
+                        Criteria("timestamp", ">=", datetime.datetime(2023, 2, 1).timestamp()),
+                        Criteria("timestamp", "<=", datetime.datetime(2023, 6, 30).timestamp()),
                     )
                 )
-                == 6
+            )
+            == 6
         )
 
     def test_del_all_homework_from_user(self, homeworks):

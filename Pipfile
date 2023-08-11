@@ -10,8 +10,11 @@ tomli_w = "*"
 sqlalchemy = "*"
 mergedeep = "*"
 pytimeparse = "*"
+flask = "*"
+bs4 = "*"
 
 [dev-packages]
+build = "*"
 pipenv = "*"
 black = {version = "*", extras = ["d"]}
 pytest = "*"

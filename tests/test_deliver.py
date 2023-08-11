@@ -15,8 +15,7 @@ def example_git_repo():
     os.mkdir(repo_path)
     repo = Repo.init(repo_path)
     with open(os.path.join(repo_path, "prog.py"), "wb") as p:
-        p.write(b"a, b = eval(input())\n"
-                b"print(max(a, b))")
+        p.write(b"a, b = eval(input())\n" b"print(max(a, b))")
     with open(os.path.join(repo_path, "URLS"), "wb") as urls:
         urls.write(b"https://github.com/Test/test/tree/main/20220913/1/tests")
     test_path = os.path.join(repo_path, "tests")
@@ -35,11 +34,13 @@ def example_git_repo():
 
 class TestDeliverGit:
     """"""
+
     def test_get_homework_content(self, example_git_repo):
         """"""
-        assert get_homework_content(example_git_repo) == {"test_repo": {
-            "prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
-            "URLS": b"https://github.com/Test/test/tree/main/20220913/1/tests",
-            "tests": {"1.in": b"123, 345", "1.out": b"345"},
-        }
+        assert get_homework_content(example_git_repo) == {
+            "test_repo": {
+                "prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
+                "URLS": b"https://github.com/Test/test/tree/main/20220913/1/tests",
+                "tests": {"1.in": b"123, 345", "1.out": b"345"},
+            }
         }

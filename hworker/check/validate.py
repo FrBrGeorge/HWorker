@@ -37,16 +37,18 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
         except Exception as error:
             stderr = str(error).encode()
 
-        return CheckResult(ID=validator.ID + solution.ID,
-                           USER_ID=solution.USER_ID,
-                           TASK_ID=solution.TASK_ID,
-                           timestamp=date.fromtimestamp(time.time()),
-                           rating=result,
-                           category=validator.category,
-                           stderr=stderr,
-                           check_ID=validator.ID,
-                           solution_ID=solution.ID,
-                           verdict=VerdictEnum.passed if not stderr else VerdictEnum.failed)
+        return CheckResult(
+            ID=validator.ID + solution.ID,
+            USER_ID=solution.USER_ID,
+            TASK_ID=solution.TASK_ID,
+            timestamp=date.fromtimestamp(time.time()),
+            rating=result,
+            category=validator.category,
+            stderr=stderr,
+            check_ID=validator.ID,
+            solution_ID=solution.ID,
+            verdict=VerdictEnum.passed if not stderr else VerdictEnum.failed,
+        )
 
 
 def validate(validator: Check, solution: Solution, check_num: int = 0) -> None:
