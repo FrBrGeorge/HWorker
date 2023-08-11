@@ -19,6 +19,7 @@ build = "*"
 pipenv = "*"
 black = {version = "*", extras = ["d"]}
 pytest = "*"
+setuptools-pipfile = "*"
 
 [requires]
 python_version = "3.11"
