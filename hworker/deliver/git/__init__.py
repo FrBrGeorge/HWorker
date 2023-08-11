@@ -120,18 +120,18 @@ def download_all() -> None:
         repo = git.Repo(local_path(student_id))
         for task in get_tasks_list():
             if os.path.isdir((task_path := os.path.join(local_path(student_id), task))):
-                        commits = get_commits(repo, task_path)
-                        for commit in commits:
-                            repo.git.checkout(commit[0])
-                            content = get_homework_content(task_path)
-                            # get_logger(__name__).info(content)
-                            store(
-                                Homework(
-                                    content=content,
-                                    ID=commit[0],
-                                    USER_ID=student_id,
-                                    TASK_ID=os.path.join(task),
-                                    timestamp=commit[1],
-                                    is_broken=False
-                                )
-                            )
+                commits = get_commits(repo, task_path)
+                for commit in commits:
+                    repo.git.checkout(commit[0])
+                    content = get_homework_content(task_path)
+                    # get_logger(__name__).info(content)
+                    store(
+                        Homework(
+                            content=content,
+                            ID=commit[0],
+                            USER_ID=student_id,
+                            TASK_ID=os.path.join(task),
+                            timestamp=commit[1],
+                            is_broken=False,
+                        )
+                    )

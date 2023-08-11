@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 """
-Simple if / import backend selector
+Just import
 """
-from importlib import import_module
 
-backend = import_module(f".database", __name__)
-store = backend.store
-search = backend.search
-delete = backend.delete
+from .database import store, search, delete
+from . import objects
