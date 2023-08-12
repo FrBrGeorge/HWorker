@@ -2,7 +2,12 @@
 """
 """
 
-from hworker.multiback import init_backends
-from .A import method  # NoQA F401
+from hworker import multiback
 
-init_backends(["A", "B"], ["method"], uniform=True)
+
+def method(par: str) -> int:
+    """Sample method"""
+    return -1
+
+
+multiback.init_backends(["A", "B"], uniform=True)

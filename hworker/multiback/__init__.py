@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 """
 Multi-backend infrastructure
+
+Function init_backends() provided here does following:
+- Scans module from which it was called and collect list of it's methods,
+  eliminating names started with "_".
+- Replaces each of those methods with a new one. The new method determines a list of
+  backends available and calls a method with the same name from each of them.
+- Backend list can be determined by list of strings or by callable returning a list of strings.
+  In latter case backand determitation is deferred until corresponded method is called.
+- Wrapper method can optionally aggregate list of retuirned values into one appropriate object.
 """
 
 from typing import Any, Callable
@@ -12,6 +21,11 @@ import inspect
 
 def aggregate(seq: list) -> Any:
     """Convert list of backend results to single result, if possible.
+    Aggregation supported:
+    - list[list] → list
+    - list[dict] → dict
+    - list[None] → None
+    - list[Numeric] → sum(list)
 
     :param seq: List of backend results
     :return: Possibly aggregated results"""
@@ -33,20 +47,23 @@ def aggregate(seq: list) -> Any:
 
 def init_backends(
     backends: Callable[[], list[str]] | list[str],
-    methods: list[str],
     backpath: str = "",
     uniform: bool = False,
 ) -> None:
-    """Wrap every method from each backend to single one and store it to module namespace.
+    """Replace each method from caller module with multiple calls
+    of backend methods with the same name.
 
     @param backends: list of backend names or function returning that list
-    @param methods: list of methods to be wrapped
     @param backpath: path to backends location
     @param uniform: do we need to aggregate the results
     """
     module = inspect.getmodule(inspect.stack()[1][0])
-    for m in methods:
+    for m in dir(module):
+        if m.startswith("_"):
+            continue
         proto = getattr(module, m)
+        if not callable(proto):
+            continue
         assign = tuple(set(functools.WRAPPER_ASSIGNMENTS) - {"__module__"})
 
         def wrapper(*args, **kwds):

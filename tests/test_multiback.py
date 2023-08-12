@@ -27,7 +27,7 @@ def method(arg: int) -> int:
     "{DOCSTRING}"
     return arg
 
-init_backends({request.param[0]}, ["method"], uniform=True)
+init_backends({request.param[0]}, uniform=True)
 """
     )
     for n, back in enumerate(request.param[0]):

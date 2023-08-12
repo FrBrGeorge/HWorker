@@ -1,4 +1,4 @@
-from ..config import get_deliver_modules as _backends
+from .. import config
 from .. import multiback
 
 
@@ -6,4 +6,4 @@ def download_all() -> None:
     """Download all homeworks from all backends"""
 
 
-multiback.init_backends(backends=_backends, methods=["download_all"])
+multiback.init_backends(backends=config.get_deliver_modules)
