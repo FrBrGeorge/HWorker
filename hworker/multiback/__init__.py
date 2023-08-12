@@ -3,7 +3,7 @@
 Multi-backend infrastructure
 """
 
-from typing import Any
+from typing import Any, Callable
 import itertools
 import functools
 import importlib
@@ -32,28 +32,31 @@ def aggregate(seq: list) -> Any:
 
 
 def init_backends(
-    backends: list[str],
+    backends: Callable[[], list[str]] | list[str],
     methods: list[str],
     backpath: str = "",
     uniform: bool = False,
 ) -> None:
     """Wrap every method from each backend to single one and store it to module namespace.
 
-    @param backends: list of backend names
+    @param backends: list of backend names or function returning that list
     @param methods: list of methods to be wrapped
     @param backpath: path to backends location
     @param uniform: do we need to aggregate the results
     """
     module = inspect.getmodule(inspect.stack()[1][0])
-    backends = [importlib.import_module(f"{backpath}.{modname}", module.__name__) for modname in backends]
     for m in methods:
-        proto = getattr(backends[0], m)
+        proto = getattr(module, m)
         assign = tuple(set(functools.WRAPPER_ASSIGNMENTS) - {"__module__"})
 
         def wrapper(*args, **kwds):
+            backlist = [
+                importlib.import_module(f"{backpath}.{modname}", module.__name__)
+                for modname in (backends() if callable(backends) else backends)
+            ]
             if uniform:
-                return aggregate([getattr(back, m)(*args, **kwds) for back in backends])
+                return aggregate([getattr(back, m)(*args, **kwds) for back in backlist])
             else:
-                return [getattr(back, m)(*args, **kwds) for back in backends]
+                return [getattr(back, m)(*args, **kwds) for back in backlist]
 
         module.__dict__[m] = functools.update_wrapper(wrapper, proto, assign)
