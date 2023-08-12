@@ -56,6 +56,17 @@ class HWorker(cmd.Cmd):
         objnames = ("users",)
         return [obj for obj in objnames if obj.startswith(text)]
 
+    def do_shell(self, arg):
+        "Execute python code"
+        print(eval(arg))
+
+    def complete_shell(self, text, line, begidx, endidx):
+        objname, _, prefix = text.rpartition(".")
+        if objname:
+            return [f"{objname}.{w}" for w in dir(eval(objname)) if w.startswith(prefix)]
+        else:
+            return [w for w in globals() if w.startswith(prefix)]
+
     def do_EOF(self, arg):
         """Press Ctrl+D to exit"""
         if self.use_rawinput:
