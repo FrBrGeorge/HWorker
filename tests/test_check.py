@@ -4,7 +4,6 @@ from hworker.check.runtime import python_runner, check_wo_store
 from hworker.check.validate import validate_wo_store
 from hworker.depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
 
-import os
 import time
 from datetime import date
 
@@ -12,19 +11,13 @@ import pytest
 
 
 @pytest.fixture()
-def tmp_prog():
+def tmp_prog(tmp_path_factory):
     """"""
-    prog_path = os.path.join(os.path.join(os.path.abspath(os.sep), "tmp", "prog.py"))
-    test_path = os.path.join(os.path.join(os.path.abspath(os.sep), "tmp", "test.in"))
-    with open(prog_path, "wb") as prog:
-        prog.write(b"a, b = eval(input())\n" b"print(max(a, b))")
-    with open(test_path, "wb") as test:
-        test.write(b"123, 345")
-
-    yield prog_path, test_path
-
-    os.remove(prog_path)
-    os.remove(test_path)
+    prog_path = tmp_path_factory.getbasetemp() / "prog.py"
+    test_path = tmp_path_factory.getbasetemp() / "test.in"
+    prog_path.write_bytes(b"a, b = eval(input())\nprint(max(a, b))")
+    test_path.write_bytes(b"123, 345")
+    return prog_path, test_path
 
 
 class TestCheckRuntime:
