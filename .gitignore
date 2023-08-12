@@ -5,6 +5,7 @@ venv/
 logs/
 t_*.py
 
+tags
 test.db
 data.db
 hworker/_version.py
