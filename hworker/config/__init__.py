@@ -2,91 +2,68 @@
 
 from copy import copy
 from typing import Final
-from functools import cache
 from tomllib import load
 from pathlib import Path
-import os
 import datetime
 
 from pytimeparse import parse
 from mergedeep import merge
 from tomli_w import dump
 
-_final_config_name: Final = "final_hworker.toml"
-_user_config_name: Final = "hworker.toml"
-_default_config_name: Final = "default_hworker.toml"
+final_name_suffix: Final = "_final"
+user_name = "hworker"
+default_name: Final = "default_hworker"
+extension: Final = ".toml"
+profile: list = []
 
 
-def read_default_config(config_name: str = _default_config_name) -> dict:
+def read_from_path(path: Path) -> dict:
     """Read given config
 
-    :param config_name: config name to read
+    :param path: config file to read
     :return: config info dict
     """
-    content = {}
-    for path in __path__:
-        if (cfg_path := Path(path) / config_name).is_file():
-            with cfg_path.open(mode="rb") as cfg:
-                content |= load(cfg)
-    return content
+    if not path.is_file():
+        return {}
+    with path.open(mode="rb") as cfg:
+        return load(cfg)
 
 
-def read_config(config_name: str | Path) -> dict:
-    """
-
-    :param config_name:
-    :return:
-    """
-    content = {}
-    if os.path.isfile(config_name):
-        with open(config_name, "rb") as cfg:
-            content |= load(cfg)
-
-    return content
-
-
-def create_config(config_name: str, content: dict = None) -> None:
-    """Creates config file
-
-    :param content: config content dict
-    :param config_name: config file name
-    """
-    if content is None:
-        content = read_config(Path(__path__[0]) / _default_config_name)
-    with open(config_name, "wb") as cfg:
+def create_config(name: Path, content: dict) -> None:
+    with name.open(mode="wb") as cfg:
         dump(content, cfg)
 
 
-def make_final_config(
-    default_config: str = _default_config_name,
-    user_config: str = _user_config_name,
-    final_config: str = _final_config_name,
-) -> str:
-    """Merge default and user configs to final and create user config if it doesn't exist
+def process_configs(user_config: str, *extras: str) -> Path:
+    """Search, read, merge and process all config files, creating finalized config
 
-    :param default_config:
-    :param user_config:
-    :param final_config:
-    :return:
+    :param user_config: user config file prefix
+    :param extras: additional config file prefix
+    :return: finalized config file
     """
-    if not os.path.isfile(user_config):
-        create_config(user_config, {})
-    dflt, usr = read_default_config(default_config), read_config(user_config)
-    final_content = dict(merge(dflt, usr))
-    fill_final_config(final_content)
-    clear_underscores(final_content)
-    create_config(final_config, final_content)
-    return final_config
+    userpath = Path(user_config)
+    userdir = userpath.parent
+    username = userpath.name.removesuffix(extension)
+    content = {}
+    for folder in [*__path__, str(userdir)]:
+        for name in [default_name, *extras, username]:
+            merge(content, read_from_path(Path(folder) / f"{name}{extension}"))
+    fill_final_config(content)
+    clear_underscores(content)
+    finalpath = userdir / f"{username}{final_name_suffix}{extension}"
+    create_config(finalpath, content)
+    profile[:] = [content, *extras, username]
+    return finalpath
 
 
-@cache
-def get_final_config() -> dict:
+def config() -> dict:
     """Get final config info
 
     :return: config info dict
     """
-    final_config = make_final_config(_default_config_name, _user_config_name, _final_config_name)
-    return read_config(final_config)
+    if not profile:
+        process_configs(user_name)
+    return profile[0]
 
 
 def fill_final_config(final_content: dict) -> None:
@@ -129,7 +106,7 @@ def get_git_directory() -> str:
 
     :return: user-repo dict
     """
-    return get_final_config()["git"]["directory"]
+    return config()["git"]["directory"]
 
 
 def get_file_root_path() -> str:
@@ -137,7 +114,7 @@ def get_file_root_path() -> str:
 
     :return: user-repo dict
     """
-    return get_final_config()["file"]["root_path"]
+    return config()["file"]["root_path"]
 
 
 def get_repos() -> list[str]:
@@ -145,7 +122,7 @@ def get_repos() -> list[str]:
 
     :return: all repos list
     """
-    return list(get_final_config()["git"]["users"].values())
+    return list(config()["git"]["users"].values())
 
 
 # TODO: add multiback get uids  and get uids for every back
@@ -154,7 +131,7 @@ def get_git_uids() -> list[str]:
 
     :return: all user ids list
     """
-    return list(get_final_config()["git"]["users"].keys())
+    return list(config()["git"]["users"].keys())
 
 
 def get_uids() -> list[str]:
@@ -164,7 +141,7 @@ def get_uids() -> list[str]:
     """
     uids = []
     for module in get_deliver_modules():
-        uids += get_final_config().get(module, {}).get("users", [])
+        uids += config().get(module, {}).get("users", [])
 
     return uids
 
@@ -174,7 +151,7 @@ def get_tasks_list() -> list[str]:
 
     :return: all tasks list
     """
-    return get_final_config()["tasks"].keys()
+    return config()["tasks"].keys()
 
 
 def uid_to_repo(uid: str) -> str | None:
@@ -183,7 +160,7 @@ def uid_to_repo(uid: str) -> str | None:
     :param uid: user id
     :return: repo URL
     """
-    return get_final_config()["git"]["users"].get(uid, None)
+    return config()["git"]["users"].get(uid, None)
 
 
 def repo_to_uid(repo: str) -> str | None:
@@ -192,7 +169,7 @@ def repo_to_uid(repo: str) -> str | None:
     :param repo: repo URL
     :return: user id
     """
-    reverse = {repo: student_id for student_id, repo in get_final_config()["git"]["users"].items()}
+    reverse = {repo: student_id for student_id, repo in config()["git"]["users"].items()}
     return reverse.get(repo, None)
 
 
@@ -202,7 +179,7 @@ def uid_to_email(uid: str) -> str | None:
     :param uid: user id
     :return: email address
     """
-    return get_final_config()["imap"]["users"].get(uid, None)
+    return config()["imap"]["users"].get(uid, None)
 
 
 def email_to_uid(email: str) -> str | None:
@@ -211,7 +188,7 @@ def email_to_uid(email: str) -> str | None:
     :param email: email address
     :return: user id
     """
-    reverse = {email: uid for uid, email in get_final_config()["imap"]["users"].items()}
+    reverse = {email: uid for uid, email in config()["imap"]["users"].items()}
     return reverse.get(email, None)
 
 
@@ -221,7 +198,7 @@ def taskid_to_deliverid(task_id: str) -> str | None:
     :param task_id: task name in config
     :return: task name for specific deliver backend
     """
-    return get_final_config()["tasks"].get(task_id, {}).get("deliver_ID", None)
+    return config()["tasks"].get(task_id, {}).get("deliver_ID", None)
 
 
 def deliverid_to_taskid(deliver_id: str) -> str | None:
@@ -230,7 +207,7 @@ def deliverid_to_taskid(deliver_id: str) -> str | None:
     :param deliver_id: task name in config
     :return: task name for specific deliver backend
     """
-    reverse = {t_dict["deliver_ID"]: t_id for t_id, t_dict in get_final_config()["tasks"].items()}
+    reverse = {t_dict["deliver_ID"]: t_id for t_id, t_dict in config()["tasks"].items()}
     return reverse.get(deliver_id, None)
 
 
@@ -239,7 +216,7 @@ def get_logger_info() -> dict[str, str]:
 
     :return: file-console logger info dict
     """
-    return get_final_config()["logging"]
+    return config()["logging"]
 
 
 def get_publish_info() -> dict[str, str]:
@@ -247,7 +224,7 @@ def get_publish_info() -> dict[str, str]:
 
     :return: publish info dict
     """
-    return get_final_config()["publish"]
+    return config()["publish"]
 
 
 def get_deliver_modules() -> list:
@@ -255,7 +232,7 @@ def get_deliver_modules() -> list:
 
     :return: list of modules
     """
-    return get_final_config()["modules"]["deliver"]
+    return config()["modules"]["deliver"]
 
 
 def get_imap_info() -> dict[str, str]:
@@ -263,7 +240,7 @@ def get_imap_info() -> dict[str, str]:
 
     :return: imap info dict
     """
-    return get_final_config()["imap"]
+    return config()["imap"]
 
 
 def get_max_test_size() -> int:
@@ -271,7 +248,7 @@ def get_max_test_size() -> int:
 
     :return: maximum test rows size
     """
-    return int(get_final_config()["tasks"]["_default"]["max_size"])
+    return int(config()["tasks"]["_default"]["max_size"])
 
 
 def get_default_time_limit() -> int:
@@ -279,7 +256,7 @@ def get_default_time_limit() -> int:
 
     :return: task default time limit
     """
-    return int(get_final_config()["tasks"]["_default"]["time_limit"])
+    return int(config()["tasks"]["_default"]["time_limit"])
 
 
 def get_default_resource_limit() -> int:
@@ -287,7 +264,7 @@ def get_default_resource_limit() -> int:
 
     :return: task default resource limit
     """
-    return int(get_final_config()["tasks"]["_default"]["resource_limit"])
+    return int(config()["tasks"]["_default"]["resource_limit"])
 
 
 def get_task_info(task_name: str) -> dict:
@@ -296,7 +273,7 @@ def get_task_info(task_name: str) -> dict:
     :param task_name: task name from config
     :return: task info dict
     """
-    return get_final_config()["tasks"].get(task_name, {})
+    return config()["tasks"].get(task_name, {})
 
 
 def get_check_directory() -> str:
@@ -304,7 +281,7 @@ def get_check_directory() -> str:
 
     :return: check dir
     """
-    return get_final_config()["check"]["directory"]
+    return config()["check"]["directory"]
 
 
 def get_prog_name() -> str:
@@ -312,7 +289,7 @@ def get_prog_name() -> str:
 
     :return: program name
     """
-    return get_final_config()["formalization"]["prog_name"]
+    return config()["formalization"]["prog_name"]
 
 
 def get_urls_name() -> str:
@@ -320,7 +297,7 @@ def get_urls_name() -> str:
 
     :return: urls name
     """
-    return get_final_config()["formalization"]["remotes_name"]
+    return config()["formalization"]["remotes_name"]
 
 
 def get_checks_dir() -> str:
@@ -328,7 +305,7 @@ def get_checks_dir() -> str:
 
     :return: tests dir name
     """
-    return get_final_config()["formalization"]["checks_dir"]
+    return config()["formalization"]["checks_dir"]
 
 
 def get_checks_suffix() -> str:
@@ -336,4 +313,4 @@ def get_checks_suffix() -> str:
 
     :return: tets suffix
     """
-    return get_final_config()["formalization"]["checks_suffix"]
+    return config()["formalization"]["checks_suffix"]

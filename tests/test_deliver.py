@@ -1,7 +1,5 @@
 """Tests for deliver.git"""
 
-from hworker.deliver.git import get_homework_content
-
 import os
 import shutil
 
@@ -37,6 +35,8 @@ class TestDeliverGit:
 
     def test_get_homework_content(self, example_git_repo):
         """"""
+        from hworker.deliver.git import get_homework_content
+
         assert get_homework_content(example_git_repo) == {
             "test_repo": {
                 "prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
