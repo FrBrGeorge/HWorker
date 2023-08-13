@@ -8,8 +8,9 @@ import cmd
 import shlex
 import sys
 import io
+from pprint import pprint
 from pathlib import Path
-from .. import deliver, config, control  # NoQA: F401
+from .. import deliver, config, control, depot  # NoQA: F401
 from ..log import get_logger
 
 try:
@@ -32,6 +33,16 @@ class HWorker(cmd.Cmd):
     intro = "HomeWorker shell. Type ? for help.\n"
     prompt = "hw> "
 
+    def filtertext(self, seq, part, fmt="{}"):
+        """Universal completion matcher"""
+        match part:
+            case str(_):
+                flt = lambda txt: txt.startswith(part)  # Noqa E731
+            case _:  # Must be callable
+                flt = part
+        res = [fmt.format(el) for el in filter(flt, seq)]
+        return res
+
     @staticmethod
     def shplit(string):
         """Try to shlex.split(string) or print an error"""
@@ -45,16 +56,20 @@ class HWorker(cmd.Cmd):
         "Download all homeworks"
         deliver.download_all()
 
-    def do_list(self, arg):
-        "List some data TODO"
+    def do_config(self, arg):
+        "Print (some) information from config file"
         args = self.shplit(arg)
         match args:
             case ["users", *_]:
                 print("\n".join(config.get_uids()))
+            case ["tasks", *_]:
+                print("\n".join(config.get_tasks_list()))
+            case []:
+                pprint(config.config())
 
-    def complete_list(self, text, line, begidx, endidx):
-        objnames = ("users",)
-        return [obj for obj in objnames if obj.startswith(text)]
+    def complete_config(self, text, line, begidx, endidx):
+        objnames = ("users", "tasks")
+        return self.filtertext(objnames, text)
 
     def do_shell(self, arg):
         "Execute python code"
@@ -63,9 +78,9 @@ class HWorker(cmd.Cmd):
     def complete_shell(self, text, line, begidx, endidx):
         objname, _, prefix = text.rpartition(".")
         if objname:
-            return [f"{objname}.{w}" for w in dir(eval(objname)) if w.startswith(prefix)]
+            return self.filtertext(dir(eval(objname)), prefix, f"{objname}.{{}}")
         else:
-            return [w for w in globals() if w.startswith(prefix)]
+            return self.filtertext(globals(), prefix)
 
     def do_EOF(self, arg):
         """Press Ctrl+D to exit"""
