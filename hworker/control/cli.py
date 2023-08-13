@@ -33,7 +33,8 @@ class HWorker(cmd.Cmd):
     intro = "HomeWorker shell. Type ? for help.\n"
     prompt = "hw> "
 
-    def filtertext(self, seq, part, fmt="{}"):
+    @staticmethod
+    def filtertext(seq, part, fmt="{}"):
         """Universal completion matcher"""
         match part:
             case str(_):
@@ -69,6 +70,17 @@ class HWorker(cmd.Cmd):
 
     def complete_config(self, text, line, begidx, endidx):
         objnames = ("users", "tasks")
+        return self.filtertext(objnames, text)
+
+    def do_show(self, arg):
+        args = self.shplit(arg)
+        match args:
+            case [] | ["homework"]:
+                for hw in depot.search(depot.objects.Homework):
+                    print(hw)
+
+    def complete_show(self, text, line, begidx, endidx):
+        objnames = ("homework",)
         return self.filtertext(objnames, text)
 
     def do_shell(self, arg):
