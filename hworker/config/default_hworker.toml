@@ -17,11 +17,11 @@ directory = "/tmp/hworker_git"
 # user_ID = "repo"
 
 [imap]
-# host = "host"
+host = ""
 port = 993
-# folder = "folder"
-# username = "username"
-# password = "password"
+folder = "folder"
+username = "username"
+password = "password"
 letter_limit = -1
 
 [imap.users]

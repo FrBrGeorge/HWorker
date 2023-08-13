@@ -43,14 +43,16 @@ def parse_tar_file(filename: str, content: bytes):
 
 
 def download_all():
-    box = get_mailbox()
+    if not (box := get_mailbox()):
+        get_logger(__name__).warn("Empty imap.host — not using IMAP backend")
+        return
 
     # TODO maybe should only get new latter, not all. Fow know this works really fast, just skip it.
     # print(box.uids("ALL"))
 
     donwload_mails = 0
 
-    get_logger(__name__).info(f"Started")
+    get_logger(__name__).info("Started")
 
     for mail in box.fetch("ALL", limit=get_imap_info()["letter_limit"]):
         # TODO should take from config

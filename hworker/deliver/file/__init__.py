@@ -13,6 +13,9 @@ _default_datetime = datetime.datetime.fromisoformat("2009-05-17 20:09:00")
 
 def download_all():
     root = get_file_root_path()
+    if not os.path.isdir(root):
+        get_logger(__name__).warn(f"No {root=} directory — not using FILE bachkend")
+        return
 
     for username in os.listdir(root):
         for task_name in os.listdir(user_path := root + os.sep + username):
