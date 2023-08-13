@@ -58,22 +58,22 @@ def init_backends(
     @param uniform: do we need to aggregate the results
     """
     module = inspect.getmodule(inspect.stack()[1][0])
-    for m in dir(module):
-        if m.startswith("_"):
+    for _m in dir(module):
+        if _m.startswith("_"):
             continue
-        proto = getattr(module, m)
+        proto = getattr(module, _m)
         if not callable(proto):
             continue
         assign = tuple(set(functools.WRAPPER_ASSIGNMENTS) - {"__module__"})
 
-        def wrapper(*args, **kwds):
+        def wrapper(*args, _m=_m, **kwds):
             backlist = [
                 importlib.import_module(f"{backpath}.{modname}", module.__name__)
                 for modname in (backends() if callable(backends) else backends)
             ]
             if uniform:
-                return aggregate([getattr(back, m)(*args, **kwds) for back in backlist])
+                return aggregate([getattr(back, _m)(*args, **kwds) for back in backlist])
             else:
-                return [getattr(back, m)(*args, **kwds) for back in backlist]
+                return [getattr(back, _m)(*args, **kwds) for back in backlist]
 
-        module.__dict__[m] = functools.update_wrapper(wrapper, proto, assign)
+        module.__dict__[_m] = functools.update_wrapper(wrapper, proto, assign)
