@@ -29,9 +29,11 @@ def user_config(request, tmp_path):
 class TestConfig:
     """"""
 
-    @pytest.mark.parametrize("user_config", [{"imap": {"host": "host", "folder": "folder"}}], indirect=True)
+    _p_test_imap_info = {"host": "host", "folder": "folder", "username": "username", "password": "password"}
+
+    @pytest.mark.parametrize("user_config", [{"imap": _p_test_imap_info}], indirect=True)
     def test_imap_info(self, user_config):
-        assert get_imap_info() == {"letter_limit": -1, "port": 993, "users": {}, "host": "host", "folder": "folder"}
+        assert get_imap_info() == {"letter_limit": -1, "port": 993, "users": {}} | self._p_test_imap_info
 
     def test_get_names(self):
         assert (get_prog_name(), get_urls_name(), get_checks_suffix(), get_checks_dir()) == (
