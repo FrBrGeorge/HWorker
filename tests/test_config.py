@@ -14,7 +14,7 @@ from hworker.config import (
     get_checks_suffix,
     get_checks_dir,
     get_prog_name,
-    get_urls_name,
+    get_remotes_name,
     get_task_info,
 )
 
@@ -36,10 +36,10 @@ class TestConfig:
         assert get_imap_info() == {"letter_limit": -1, "port": 993, "users": {}} | self._p_test_imap_info
 
     def test_get_names(self):
-        assert (get_prog_name(), get_urls_name(), get_checks_suffix(), get_checks_dir()) == (
+        assert (get_prog_name(), get_remotes_name(), get_checks_suffix(), get_checks_dir()) == (
             "prog.py",
             "remotes",
-            "in/out",
+            ["in", "out"],
             "checks",
         )
 
