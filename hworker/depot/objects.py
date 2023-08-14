@@ -221,7 +221,7 @@ class Formula(StoreObject):
     _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
     _is_versioned: bool = False
 
-    def __init__(self, content: str = None, **kwargs):
+    def __init__(self, content: str = None, name: str = None, **kwargs):
         kwargs["USER_ID"] = ""
         kwargs["TASK_ID"] = ""
         super().__init__(**kwargs)
@@ -232,11 +232,12 @@ class Formula(StoreObject):
 class FinalScore(StoreObject):
     """Final user verdict"""
 
+    name: str
     rating: str
     _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
     _is_versioned: bool = False
 
-    def __init__(self, rating: str = None, **kwargs):
+    def __init__(self, rating: str = None, name: str = None, **kwargs):
         kwargs["TASK_ID"] = ""
         super().__init__(**kwargs)
         self.name = "Final mark"

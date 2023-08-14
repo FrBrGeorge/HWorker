@@ -55,7 +55,7 @@ def _create_object(
     return_fields: list[str] = None,
 ) -> objects.StoreObject:
     if isinstance(to_parse, Base):
-        fields = [item.name for item in inspect(Homework).columns]
+        fields = [item.name for item in inspect(type(to_parse)).columns]
     else:
         fields = list(to_parse._fields)
 
