@@ -292,10 +292,10 @@ def get_prog_name() -> str:
     return config()["formalization"]["prog_name"]
 
 
-def get_urls_name() -> str:
+def get_remotes_name() -> str:
     """Get remote tests file name
 
-    :return: urls name
+    :return: remotes name
     """
     return config()["formalization"]["remotes_name"]
 
@@ -313,4 +313,4 @@ def get_checks_suffix() -> str:
 
     :return: tets suffix
     """
-    return config()["formalization"]["checks_suffix"]
+    return config()["formalization"]["checks_suffix"].split("/")
