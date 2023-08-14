@@ -10,7 +10,8 @@ from git import Repo
 @pytest.fixture()
 def example_git_repo():
     repo_path = os.path.join(os.path.join(os.path.abspath(os.sep), "tmp", "test_repo"))
-    os.mkdir(repo_path)
+    if not os.path.exists(repo_path):
+        os.mkdir(repo_path)
     repo = Repo.init(repo_path)
     with open(os.path.join(repo_path, "prog.py"), "wb") as p:
         p.write(b"a, b = eval(input())\n" b"print(max(a, b))")

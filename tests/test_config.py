@@ -9,7 +9,6 @@ from hworker.config import (
     repo_to_uid,
     uid_to_repo,
     uid_to_email,
-    _user_config_name,
     email_to_uid,
     get_imap_info,
     get_checks_suffix,
@@ -60,6 +59,9 @@ class TestConfig:
     )
     def test_task_info(self, user_config):
         assert get_task_info("task_ID") == {
+            "test_size": 100,
+            "resource_limit": 3145728,
+            "time_limit": 2,
             "deliver_ID": "20240101/01",
             "hard_deadline": datetime(2024, 1, 14, 0, 0),
             "hard_deadline_delta": "open_date+13d",

@@ -243,12 +243,15 @@ def get_imap_info() -> dict[str, str]:
     return config()["imap"]
 
 
-def get_max_test_size() -> int:
+def get_default_test_size() -> int:
     """Get maximum test rows size
 
     :return: maximum test rows size
     """
-    return int(config()["tasks"]["_default"]["max_size"])
+    userpath = Path(default_name)
+    userdir = userpath.parent
+    folder = [*__path__, str(userdir)][0]
+    return read_from_path(Path(folder) / f"{default_name}{extension}")["tasks"]["_default"]["test_size"]
 
 
 def get_default_time_limit() -> int:
@@ -256,7 +259,10 @@ def get_default_time_limit() -> int:
 
     :return: task default time limit
     """
-    return int(config()["tasks"]["_default"]["time_limit"])
+    userpath = Path(default_name)
+    userdir = userpath.parent
+    folder = [*__path__, str(userdir)][0]
+    return read_from_path(Path(folder) / f"{default_name}{extension}")["tasks"]["_default"]["time_limit"]
 
 
 def get_default_resource_limit() -> int:
@@ -264,7 +270,10 @@ def get_default_resource_limit() -> int:
 
     :return: task default resource limit
     """
-    return int(config()["tasks"]["_default"]["resource_limit"])
+    userpath = Path(default_name)
+    userdir = userpath.parent
+    folder = [*__path__, str(userdir)][0]
+    return read_from_path(Path(folder) / f"{default_name}{extension}")["tasks"]["_default"]["resource_limit"]
 
 
 def get_task_info(task_name: str) -> dict:
