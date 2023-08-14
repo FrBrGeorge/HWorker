@@ -10,6 +10,7 @@ import io
 import os
 import platform
 import time
+import subprocess
 from datetime import date
 from math import isclose
 from itertools import zip_longest
@@ -18,9 +19,13 @@ from random import randint
 from difflib import diff_bytes, unified_diff
 from os.path import getsize, basename
 from tempfile import NamedTemporaryFile
-import resource
-import subprocess
 from subprocess import CompletedProcess, TimeoutExpired
+
+if platform.system() != "Windows":
+    try:
+        import resource
+    except ImportError:
+        resource = None
 
 
 def python_set_limits(time_limit: int = None, resource_limit: int = None) -> None:
@@ -62,7 +67,7 @@ def python_runner(prog_path: str, input_path: str) -> tuple[bytes | None, bytes,
         try:
             result = subprocess.Popen(
                 [sys.executable, prog_path],
-                preexec_fn=python_set_limits(),
+                preexec_fn=python_set_limits() if platform != "Windows" else None,
                 stdin=prog_input,
                 stdout=prog_output,
                 stderr=subprocess.PIPE,
