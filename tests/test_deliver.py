@@ -17,7 +17,7 @@ def example_git_repo():
         p.write(b"a, b = eval(input())\n" b"print(max(a, b))")
     with open(os.path.join(repo_path, "URLS"), "wb") as urls:
         urls.write(b"https://github.com/Test/test/tree/main/20220913/1/tests")
-    test_path = os.path.join(repo_path, "tests")
+    test_path = os.path.join(repo_path, "checks")
     os.mkdir(test_path)
     with open(os.path.join(test_path, "1.in"), "wb") as test_in:
         test_in.write(b"123, 345")
@@ -42,6 +42,6 @@ class TestDeliverGit:
             "test_repo": {
                 "prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
                 "URLS": b"https://github.com/Test/test/tree/main/20220913/1/tests",
-                "tests": {"1.in": b"123, 345", "1.out": b"345"},
+                "checks": {"1.in": b"123, 345", "1.out": b"345"},
             }
         }
