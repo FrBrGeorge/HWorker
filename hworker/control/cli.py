@@ -2,15 +2,17 @@
 """
 Commandline interface
 """
+import argparse
 import atexit
 import cmd
 import shlex
 import sys
 import io
+from pprint import pprint
 from pathlib import Path
-from .. import deliver, config, control     # NoQA: F401
+from .. import deliver, config, control, depot  # NoQA: F401
 from ..log import get_logger
-from ..config import get_uids
+
 try:
     import readline
 except ModuleNotFoundError:
@@ -32,6 +34,17 @@ class HWorker(cmd.Cmd):
     prompt = "hw> "
 
     @staticmethod
+    def filtertext(seq, part, fmt="{}"):
+        """Universal completion matcher"""
+        match part:
+            case str(_):
+                flt = lambda txt: txt.startswith(part)  # Noqa E731
+            case _:  # Must be callable
+                flt = part
+        res = [fmt.format(el) for el in filter(flt, seq)]
+        return res
+
+    @staticmethod
     def shplit(string):
         """Try to shlex.split(string) or print an error"""
         try:
@@ -44,18 +57,42 @@ class HWorker(cmd.Cmd):
         "Download all homeworks"
         deliver.download_all()
 
-    def do_list(self, arg):
-        "List some data TODO"
+    def do_config(self, arg):
+        "Print (some) information from config file"
         args = self.shplit(arg)
         match args:
-            case ["users", *tail]:
-                print("\n".join(get_uids()))
+            case ["users", *_]:
+                print("\n".join(config.get_uids()))
+            case ["tasks", *_]:
+                print("\n".join(config.get_tasks_list()))
+            case []:
+                pprint(config.config())
 
+    def complete_config(self, text, line, begidx, endidx):
+        objnames = ("users", "tasks")
+        return self.filtertext(objnames, text)
 
-    def complete_list(self, text, line, begidx, endidx):
-        objnames = "users",
-        return [obj for obj in objnames if obj.startswith(text)]
+    def do_show(self, arg):
+        args = self.shplit(arg)
+        match args:
+            case [] | ["homework"]:
+                for hw in depot.search(depot.objects.Homework):
+                    print(hw)
 
+    def complete_show(self, text, line, begidx, endidx):
+        objnames = ("homework",)
+        return self.filtertext(objnames, text)
+
+    def do_shell(self, arg):
+        "Execute python code"
+        print(eval(arg))
+
+    def complete_shell(self, text, line, begidx, endidx):
+        objname, _, prefix = text.rpartition(".")
+        if objname:
+            return self.filtertext(dir(eval(objname)), prefix, f"{objname}.{{}}")
+        else:
+            return self.filtertext(globals(), prefix)
 
     def do_EOF(self, arg):
         """Press Ctrl+D to exit"""
@@ -70,16 +107,21 @@ class HWorker(cmd.Cmd):
 
 
 def shell():
-    # TODO optparse
-    if len(sys.argv) > 1 and sys.argv[1] == "-c":
-        with io.StringIO("\n".join(sys.argv[2:]) + "\n") as stdin:
+    parser = argparse.ArgumentParser(description="Homework checker")
+    parser.add_argument("-c", "--command", action="append", help="Run a command")
+    parser.add_argument("config", nargs="*", help="Configuration file to parse")
+    args = parser.parse_args()
+    if args.config:
+        config.process_configs(*args.config)
+    if args.command:
+        with io.StringIO("\n".join(args.command) + "\n") as stdin:
             runner = HWorker(stdin=stdin)
             runner.use_rawinput = False
             runner.prompt = ""
-            res = runner.cmdloop(intro="")
+            return runner.cmdloop(intro="")
     else:
         if not (hist := Path(HISTFILE)).is_file():
-            hist.write_bytes(b'')
+            hist.write_bytes(b"")
         readline.read_history_file(HISTFILE)
         atexit.register(lambda: readline.write_history_file(HISTFILE))
         for errors in range(100):
