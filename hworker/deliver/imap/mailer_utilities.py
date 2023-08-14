@@ -8,8 +8,6 @@ from ...config import get_imap_info
 
 def get_mailbox():
     """Get mailbox."""
-    if not get_imap_info()["host"]:
-        return None
     con_mailbox = MailBox(get_imap_info()["host"], get_imap_info()["port"])
     con_mailbox.login(get_imap_info()["username"], get_imap_info()["password"])
     try:

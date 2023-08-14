@@ -17,7 +17,7 @@ directory = "/tmp/hworker_git"
 # user_ID = "repo"
 
 [imap]
-host = ""
+host = "host"
 port = 993
 folder = "folder"
 username = "username"
