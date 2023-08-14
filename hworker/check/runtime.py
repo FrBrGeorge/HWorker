@@ -130,7 +130,7 @@ def check(checker: Check, solution: Solution, check_num: int = 0) -> None:
     """
     get_logger(__name__).info(f"Checking solution {solution.ID} with {checker.ID} checker")
     if checker.category == CheckCategoryEnum.runtime:
-        result = check_wo_save(checker, solution, check_num)
+        result = check_wo_store(checker, solution, check_num)
         store(result)
     else:
         get_logger(__name__).warning(f"The {checker.ID} object given to check is not a checker")
