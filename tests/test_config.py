@@ -2,10 +2,9 @@
 
 import pytest
 from datetime import datetime
+from .user_config import user_config
 
 from hworker.config import (
-    create_config,
-    process_configs,
     repo_to_uid,
     uid_to_repo,
     uid_to_email,
@@ -18,13 +17,6 @@ from hworker.config import (
     get_task_info,
 )
 import hworker.config
-
-
-@pytest.fixture(scope="function")
-def user_config(request, tmp_path):
-    config = tmp_path / "testconfig.toml"
-    create_config(config, request.param)
-    process_configs(str(config))
 
 
 class TestConfig:
