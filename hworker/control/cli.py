@@ -10,8 +10,9 @@ import sys
 import io
 from pprint import pprint
 from pathlib import Path
-from .. import deliver, config, control, depot  # NoQA: F401
+from .. import deliver, config, control, depot, make  # NoQA: F401
 from ..log import get_logger
+from ..depot.objects import Criteria as Rule
 
 try:
     import readline
@@ -32,16 +33,16 @@ class HWorker(cmd.Cmd):
     # TODO version
     intro = "HomeWorker shell. Type ? for help.\n"
     prompt = "hw> "
+    DELIMETERS = set(' \t\n`~!@#$%^&*()-=+[{]}\\|;:",<>/?')
 
-    @staticmethod
-    def filtertext(seq, part, fmt="{}"):
+    def filtertext(self, seq, part, fmt="{}", shift=0):
         """Universal completion matcher"""
         match part:
             case str(_):
                 flt = lambda txt: txt.startswith(part)  # Noqa E731
             case _:  # Must be callable
                 flt = part
-        res = [fmt.format(el) for el in filter(flt, seq)]
+        res = [fmt.format(el[shift:]) for el in filter(flt, seq)]
         return res
 
     @staticmethod
@@ -73,15 +74,39 @@ class HWorker(cmd.Cmd):
         return self.filtertext(objnames, text)
 
     def do_show(self, arg):
+        """Show objects or individual object"""
         args = self.shplit(arg)
         match args:
             case [] | ["homework"]:
                 for hw in depot.search(depot.objects.Homework):
                     print(hw)
+            case ["homework", ID]:
+                hw = depot.search(depot.objects.Homework, Rule("ID", "==", ID), first=True, actual=True)
+                print(hw)
+                if hw:
+                    for fname in hw.content:
+                        print(f"\t{fname}")
+
+    def qsplit(self, line, text, endidx):
+        try:  # All quotes are closed
+            res = shlex.split(line[:endidx]) + ([""] if line[endidx - 1] == " " else [])
+        except ValueError:  # Unclosed quote
+            res = shlex.split(line[:endidx] + "'")
+            # print(f"\n@{res}")
+        except Exception as E:
+            log(E, "error")
+        return res, len(res[-1]) - len(text)
 
     def complete_show(self, text, line, begidx, endidx):
         objnames = ("homework",)
-        return self.filtertext(objnames, text)
+        (_, *args, word), delta = self.qsplit(line, text, endidx)
+        # print("\n→", args, text, delta)
+        match args:
+            case []:
+                return self.filtertext(objnames, word, shift=delta)
+            case ["homework"]:
+                ids = [hw.ID for hw in depot.search(depot.objects.Homework, actual=True)]
+                return self.filtertext(ids, word, shift=delta)
 
     def do_shell(self, arg):
         "Execute python code"
