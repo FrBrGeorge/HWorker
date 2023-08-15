@@ -1,7 +1,7 @@
 """Downloads solutions from repos"""
 
 import os
-from functools import reduce
+from pathlib import Path
 
 import git
 
@@ -65,18 +65,6 @@ def update_all() -> None:
             pull(repo)
 
 
-def get_file_content(path: str) -> bytes:
-    """
-
-    :param path:
-    :return:
-    """
-    with open(path, "rb") as file:
-        content = file.read()
-
-    return content
-
-
 def get_homework_content(root: str) -> dict:
     """Extracts tests, solution and URLS from homework and pack into dict
 
@@ -85,16 +73,11 @@ def get_homework_content(root: str) -> dict:
     """
     get_logger(__name__).info(f"Getting {root} content")
 
-    # Modified https://code.activestate.com/recipes/577879-create-a-nested-dictionary-from-oswalk/
-    content = {}
-    root = root.rstrip(os.sep)
-    start = root.rfind(os.sep) + 1
-    for path, dirs, files in os.walk(root):
-        if all(map(lambda s: not s.startswith("."), path.split(os.sep))):
-            folders = path[start:].split(os.sep)
-            subdir = {file: get_file_content(os.path.join(path, file)) for file in files}
-            parent = reduce(dict.get, folders[:-1], content)
-            parent[folders[-1]] = subdir
+    content = {
+        str(path): path.read_bytes()
+        for path in Path(root).rglob("*")
+        if path.is_file() and all(map(lambda s: not s.startswith("."), str(path).split(os.sep)))
+    }
     return content
 
 
@@ -124,7 +107,6 @@ def download_all() -> None:
                 for commit in commits:
                     repo.git.checkout(commit[0])
                     content = get_homework_content(task_path)
-                    # get_logger(__name__).info(content)
                     store(
                         Homework(
                             content=content,
