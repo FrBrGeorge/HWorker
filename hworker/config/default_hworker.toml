@@ -63,7 +63,8 @@ directory = "/tmp/hworker_check"
 prog_name = "prog.py"
 remotes_name = "remotes"
 checks_dir = "checks"
-checks_suffix = "in/out"
+runtime_suffix = ["in", "out"]
+validate_suffix = "py"
 
 [publish]
 course_name = "Kapibarology"

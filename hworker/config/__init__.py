@@ -284,9 +284,17 @@ def get_checks_dir() -> str:
     return config()["formalization"]["checks_dir"]
 
 
-def get_checks_suffix() -> str:
-    """Get tests suffix
+def get_runtime_suffix() -> list:
+    """Get runtime suffix
 
-    :return: tets suffix
+    :return: runtime suffix
     """
-    return config()["formalization"]["checks_suffix"].split("/")
+    return config()["formalization"]["runtime_suffix"]
+
+
+def get_validate_suffix() -> str:
+    """Get validate suffix
+
+    :return: validate suffix
+    """
+    return config()["formalization"]["validate_suffix"]
