@@ -101,3 +101,51 @@ class TestDepotFunctionsWithCriteria:
             Criteria("timestamp", "<=", datetime.datetime(2023, 6, 30).timestamp()),
         )
         assert len(list(search(Homework))) == 3
+
+
+@pytest.fixture
+def homeworks_with_versions():
+    for user_id in ["Vania", "Petya", "Vasili"]:
+        for task_id in ["01", "02", "03"]:
+            for ts in range(10, 31, 10):
+                store(
+                    Homework(
+                        ID=f"t{user_id}{task_id}",
+                        USER_ID=user_id,
+                        TASK_ID=task_id,
+                        timestamp=ts,
+                        content={},
+                        is_broken=False,
+                    )
+                )
+    yield
+    delete(Homework)
+
+
+class TestSearchOptionals:
+    def test_get_all(self, homeworks_with_versions):
+        assert len(list(search(Homework))) == 27
+
+    def test_get_actual(self, homeworks_with_versions):
+        assert len(list(search(Homework, actual=True))) == 9
+        assert all(item.timestamp == 30 for item in search(Homework, actual=True))
+
+    def test_return_field(self, homeworks_with_versions):
+        fields = ["ID", "timestamp"]
+        assert all(
+            [
+                all([value is None or name in fields for name, value in item])
+                for item in search(Homework, return_fields=fields)
+            ]
+        )
+
+    def test_actual_and_return_fields(self, homeworks_with_versions):
+        fields = ["ID", "timestamp"]
+        assert all(
+            [
+                all([value is None or name in fields for name, value in item])
+                for item in search(Homework, return_fields=fields)
+            ]
+        )
+        assert len(list(search(Homework, actual=True))) == 9
+        assert all(item.timestamp == 30 for item in search(Homework, actual=True))

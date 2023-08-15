@@ -13,6 +13,7 @@ from ... import depot
 from ...depot.objects import Homework
 
 _default_datetime = datetime.datetime.fromisoformat("2009-05-17 20:09:00")
+_depot_prefix = "i"
 
 
 def parse_tar_file(filename: str, content: bytes):
@@ -53,7 +54,6 @@ def download_all():
     get_logger(__name__).info(f"Started")
 
     for mail in box.fetch("ALL", limit=get_imap_info()["letter_limit"]):
-        # TODO should take from config
         mail_name = mail.from_
         timestamps = []
         contents = {}
@@ -90,7 +90,7 @@ def download_all():
             else:
                 depot.store(
                     Homework(
-                        ID="i" + mail.uid,
+                        ID=f"{_depot_prefix}{mail.uid}",
                         USER_ID=USER_ID,
                         TASK_ID=TASK_ID,
                         timestamp=max(timestamps),

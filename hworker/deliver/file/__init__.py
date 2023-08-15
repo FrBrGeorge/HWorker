@@ -9,6 +9,7 @@ from ... import depot
 from ...depot.objects import Homework
 
 _default_datetime = datetime.datetime.fromisoformat("2009-05-17 20:09:00")
+_depot_prefix = "f"
 
 
 def download_all():
@@ -30,7 +31,7 @@ def download_all():
             if len(contents) != 0:
                 depot.store(
                     Homework(
-                        ID="f" + task_path,
+                        ID=f"{_depot_prefix}{task_path}",
                         USER_ID=USER_ID,
                         TASK_ID=TASK_ID,
                         timestamp=max(timestamps),

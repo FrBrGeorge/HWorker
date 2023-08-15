@@ -20,6 +20,9 @@ dynamic = ["version", "dependencies"]
 [tool.setuptools_scm]
 write_to = "hworker/_version.py"
 
+#[tool.setuptools.dynamic]
+#dependencies = {file = ["README.rst", "USAGE.rst"]}
+
 [tool.setuptools]
 packages = ["hworker"]
 

@@ -43,6 +43,10 @@ class StoreObject:
         """Returns generator that yields only public fields"""
         return (kv[idx] for kv in getmembers_static(self) if kv[0] in self._public_fields)
 
+    def is_versioned(self):
+        """Returns _is_versioned fields"""
+        return self._is_versioned
+
     def __iter__(self):
         """Returns generator that yields ALL fields"""
         return (kv for kv in getmembers_static(self) if is_field(*kv))
@@ -92,7 +96,7 @@ class CheckCategoryEnum(enum.Enum):
 class Check(StoreObject):
     content: dict[str, bytes]  # filename : file_content
     category: CheckCategoryEnum
-    _is_versioned: bool = True
+    _is_versioned: bool = False
     _public_fields: set[str] = StoreObject._public_fields | {"category"}
 
     def __init__(self, content: dict[str, bytes] = None, category: CheckCategoryEnum = None, **kwargs):
@@ -217,7 +221,7 @@ class Formula(StoreObject):
     _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
     _is_versioned: bool = False
 
-    def __init__(self, content: str = None, **kwargs):
+    def __init__(self, content: str = None, name: str = None, **kwargs):
         kwargs["USER_ID"] = ""
         kwargs["TASK_ID"] = ""
         super().__init__(**kwargs)
@@ -228,11 +232,12 @@ class Formula(StoreObject):
 class FinalScore(StoreObject):
     """Final user verdict"""
 
+    name: str
     rating: str
     _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
     _is_versioned: bool = False
 
-    def __init__(self, rating: str = None, **kwargs):
+    def __init__(self, rating: str = None, name: str = None, **kwargs):
         kwargs["TASK_ID"] = ""
         super().__init__(**kwargs)
         self.name = "Final mark"
