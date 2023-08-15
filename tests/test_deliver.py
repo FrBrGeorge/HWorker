@@ -39,9 +39,8 @@ class TestDeliverGit:
         from hworker.deliver.git import get_homework_content
 
         assert get_homework_content(example_git_repo) == {
-            "test_repo": {
-                "prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
-                "URLS": b"https://github.com/Test/test/tree/main/20220913/1/tests",
-                "checks": {"1.in": b"123, 345", "1.out": b"345"},
-            }
+            "/tmp/test_repo/prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
+            "/tmp/test_repo/URLS": b"https://github.com/Test/test/tree/main/20220913/1/tests",
+            "/tmp/test_repo/checks/1.in": b"123, 345",
+            "/tmp/test_repo/checks/1.out": b"345",
         }

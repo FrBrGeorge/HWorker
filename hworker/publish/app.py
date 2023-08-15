@@ -1,3 +1,4 @@
+import logging
 from collections import defaultdict
 
 from flask import Flask, request, render_template, redirect
@@ -10,7 +11,7 @@ app = Flask(__name__)
 app.config.update(get_publish_info())
 
 
-@app.post("/info/")
+@app.post("/info")
 def info():
     username, taskname = map(lambda x: request.form.get(x), ["username", "taskname"])
     if username is None or taskname is None:
@@ -32,14 +33,12 @@ def info():
                 depot.objects.Criteria("TASK_ID", "==", taskname),
             )
         ]
-        if len(find_objects) == 0:
-            find_objects.append(cur_object())
+        # if len(find_objects) == 0:
+        #     find_objects.append(cur_object())
 
-        data = defaultdict(list)
-        for item in find_objects:
-            for key, value in item:
-                data[key].append(value)
-        tables[cur_object.__name__] = create_table(data)
+        data = [[value for key, value in item] for item in find_objects]
+
+        tables[cur_object.__name__] = create_table(data, [key for key, value in cur_object()])
 
     return render_template("info.html", username=username, taskname=taskname, tables=tables)
 
@@ -50,40 +49,56 @@ def index():
     data_per_user: dict[str, list] = defaultdict(list)
 
     final_score_names = [*map(lambda x: x.name, depot.search(depot.objects.Formula))]
-    user_score_names = [*map(lambda x: x.name, depot.search(depot.objects.UserQualify))]
-    task_score_names = [*map(lambda x: x.name, depot.search(depot.objects.TaskQualify))]
+    user_score_names = [*map(lambda x: x.name, depot.search(depot.objects.UserQualifier))]
+    task_score_names = {
+        task_id: [
+            *map(
+                lambda x: x.name,
+                depot.search(depot.objects.TaskQualifier, depot.objects.Criteria("TASK_ID", "==", task_id)),
+            )
+        ]
+        for task_id in config.get_tasks_list()
+    }
+    # task_score_names = [*map(lambda x: x.name, depot.search(depot.objects.TaskQualifier))]
 
     for user_id in users:
-        for names, search_object in zip(
+        for big_names, search_object in zip(
             [final_score_names, user_score_names, task_score_names],
             [depot.objects.FinalScore, depot.objects.UserScore, depot.objects.TaskScore],
         ):
-            for name in names:
-                score = depot.search(
-                    search_object,
-                    depot.objects.Criteria("USER_ID", "==", user_id),
-                    depot.objects.Criteria("name", "==", name),
-                    first=True,
-                )
-                data_per_user[user_id].append(score.rating)
+            if type(big_names) == list:
+                for name in big_names:
+                    score = depot.search(
+                        search_object,
+                        depot.objects.Criteria("USER_ID", "==", user_id),
+                        depot.objects.Criteria("name", "==", name),
+                        first=True,
+                    )
+                    data_per_user[user_id].append(None if score is None else score.rating)
+            else:
+                for task_id, names in big_names.items():
+                    for name in names:
+                        score = depot.search(
+                            search_object,
+                            depot.objects.Criteria("TASK_ID", "==", task_id),
+                            depot.objects.Criteria("USER_ID", "==", user_id),
+                            depot.objects.Criteria("name", "==", name),
+                            first=True,
+                        )
+                        data_per_user[user_id].append(None if score is None else score.rating)
 
-    data = defaultdict(list)
-    data["Names"] = users
-    for cur_index in range(sum(map(len, [final_score_names, user_score_names, task_score_names]))):
-        cur_name = sum([final_score_names, user_score_names, task_score_names], [])[cur_index]
-        for user_id in users:
-            data[cur_name].append(data_per_user[user_id][cur_index])
+    header = list()
+    header.append("Users")
+    header.append(final_score_names[0])
+    type_pretty_names = ["User Qualifiers", "Task Qualifiers"]
+    for type_index, big_names in enumerate([user_score_names, task_score_names]):
+        header.append({type_pretty_names[type_index]: big_names})
 
-    # data = {
-    #     "Name": ["Vania", "Petya", "Vasiliy"],
-    #     "Final score": ["33", "44", "55"],
-    #     "Score1": list(range(5, 8)),
-    #     "Score2": list(range(3, 6)),
-    #     "Score3": list(range(1, 4)),
-    #     "Score4": list(range(7, 10)),
-    #     "Score5": list(range(8, 11)),
-    # }
+    rows = [[key] + value for key, value in data_per_user.items()]
 
     return render_template(
-        "index.html", table=create_table(data), skip_prefix=len(final_score_names) + len(user_score_names)
+        "index.html",
+        table=create_table(rows, header),
+        skip_prefix=len(final_score_names) + len(user_score_names) + 1,
+        homework_names=",".join(config.get_tasks_list()),
     )

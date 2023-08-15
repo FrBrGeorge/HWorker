@@ -1,7 +1,7 @@
 """Isolated runtime tests and check results"""
 
 from ..log import get_logger
-from ..config import get_default_test_size, get_check_directory, get_default_time_limit, get_default_resource_limit
+from ..config import get_check_directory, get_task_info
 from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
 from ..depot.database.functions import store
 
@@ -20,6 +20,7 @@ from difflib import diff_bytes, unified_diff
 from os.path import getsize, basename
 from tempfile import NamedTemporaryFile
 from subprocess import CompletedProcess, TimeoutExpired
+from functools import partial
 
 if platform.system() != "Windows":
     try:
@@ -28,17 +29,13 @@ if platform.system() != "Windows":
         resource = None
 
 
-def python_set_limits(time_limit: int = None, resource_limit: int = None) -> None:
+def python_set_limits(time_limit: int, resource_limit: int) -> None:
     """Set limits for python program run
 
     :param time_limit: time limit in seconds, will be taken from config if not specified
     :param resource_limit: resource limit in bytes, will be taken from config if not specified
     """
     get_logger(__name__).info("Set limits for python runner")
-    if time_limit is None:
-        time_limit = get_default_time_limit()
-    if resource_limit is None:
-        resource_limit = get_default_resource_limit()
 
     resource.setrlimit(resource.RLIMIT_CPU, (time_limit, time_limit))
     # TODO: Causes Memory Error
@@ -51,11 +48,15 @@ def python_set_limits(time_limit: int = None, resource_limit: int = None) -> Non
     #     resource.setrlimit(resource.RLIMIT_FSIZE, (2048, 2048))
 
 
-def python_runner(prog_path: str, input_path: str) -> tuple[bytes | None, bytes, int]:
+def python_runner(
+    prog_path: str, input_path: str, time_limit: int, resource_limit: int
+) -> tuple[bytes | None, bytes, int]:
     """Runs python program with given input and returns output info
 
     :param prog_path: python program path
     :param input_path: program input in io format
+    :param time_limit:
+    :param resource_limit:
     :return: tuple of program output, stderr and exit code
     """
     get_logger(__name__).info(f"{prog_path} run")
@@ -67,7 +68,7 @@ def python_runner(prog_path: str, input_path: str) -> tuple[bytes | None, bytes,
         try:
             result = subprocess.Popen(
                 [sys.executable, prog_path],
-                preexec_fn=python_set_limits() if platform != "Windows" else None,
+                preexec_fn=partial(python_set_limits, time_limit, resource_limit) if platform != "Windows" else None,
                 stdin=prog_input,
                 stdout=prog_output,
                 stderr=subprocess.PIPE,
@@ -108,9 +109,12 @@ def check_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> Ch
         i.write(prog_input)
 
     runner = choose_runner(checker)
-    actual_output, stderr, exit_code = runner(prog_path, input_path)
+    task_info = get_task_info(solution.TASK_ID)
+    print(task_info)
+    time_limit, resource_limit = task_info["time_limit"], task_info["resource_limit"]
+    actual_output, stderr, exit_code = runner(prog_path, input_path, time_limit, resource_limit)
     diff, score = choose_diff_score(actual_output, initial_output, checker.category)
-    content = score(diff(actual_output, initial_output))
+    content = score(diff(actual_output, initial_output, task_info["test_size"]))
     return CheckResult(
         ID=checker.ID + solution.ID,
         USER_ID=solution.USER_ID,
@@ -147,7 +151,7 @@ def choose_runner(checker: Check):
     return python_runner
 
 
-def bytes_diff(actual: bytes, initial: bytes) -> Iterator[bytes] | None:
+def bytes_diff(actual: bytes, initial: bytes, test_size: int) -> Iterator[bytes] | None:
     """Compares two test file without insignificant whitespaces
 
     :param actual: Output from program
@@ -159,7 +163,7 @@ def bytes_diff(actual: bytes, initial: bytes) -> Iterator[bytes] | None:
     if act_lines == init_lines:
         return None
     act_size, init_size = getsize(actual), getsize(initial)
-    if act_size > get_default_test_size() or init_size > get_default_test_size():
+    if act_size > test_size or init_size > test_size:
         init_lines, act_lines = [f"Size differs: {init_size}\n"], ["Size differs: <output>\n"]
     return diff_bytes(unified_diff, init_lines, act_lines, basename(initial), b"<output>")
 

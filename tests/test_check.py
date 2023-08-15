@@ -1,11 +1,13 @@
 """Tests for check.runtime"""
 
+from .user_config import user_config
 from hworker.check.runtime import python_runner, check_wo_store
 from hworker.check.validate import validate_wo_store
 from hworker.depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
 
 import time
 from datetime import date
+from datetime import datetime
 
 import pytest
 
@@ -25,9 +27,14 @@ class TestCheckRuntime:
 
     def test_python_runner(self, tmp_prog):
         """"""
-        assert python_runner(*tmp_prog) == (b"345\n", b"", 0)
+        assert python_runner(*tmp_prog, time_limit=2, resource_limit=3145728) == (b"345\n", b"", 0)
 
-    def test_checker(self):
+    @pytest.mark.parametrize(
+        "user_config",
+        [{"tasks": {"task_ID": {"deliver_ID": "20240101/01", "open_date": datetime(year=2024, month=1, day=1)}}}],
+        indirect=True,
+    )
+    def test_checker(self, user_config):
         """"""
         # TODO: Change to parametrize
         checker = Check(
@@ -40,7 +47,7 @@ class TestCheckRuntime:
             ],
             ID="solution_ID",
             USER_ID="user_ID",
-            TASK_ID="task_Id",
+            TASK_ID="task_ID",
         )
         result = check_wo_store(checker, solution)
 
