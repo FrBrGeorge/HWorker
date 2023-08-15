@@ -56,8 +56,6 @@
                 "paging": false,
                 "searching": false,
                 "info": false,
-                // scrollX: true,
-                // scrollY: true,
             });
         });
     </script>
@@ -69,22 +67,28 @@
     </form>
     <input hidden id="skip_prefix" type="number" value="{% if skip_prefix is defined %}{{ skip_prefix }}{% else %}1{% endif %}"/>
     <input hidden id="skip_suffix" type="number" value="{% if skip_suffix is defined %}{{ skip_suffix }}{% else %}0{% endif %}"/>
+    <input hidden id="homework_names" value="{% if homework_names is defined %}{{ homework_names }}{% else %}{% endif %}"/>
     <script>
         $(function () {
-            $("tbody > tr > th").on("click", function (e) {
+            $("tbody > tr > td").on("click", function (e) {
+                const homework_names = $("#homework_names").val().split(",");
+                const skip_prefix = $("#skip_prefix").val();
+                const skip_suffix = $("#skip_suffix").val();
+
                 let username = $(e.currentTarget).parent().children()[0].innerText.replace("&nbsp;", " ")
                 let col_index = $(e.currentTarget).index($(e.currentTarget).innerText);
                 let total_cols = $(e.currentTarget).parent().children().length;
-                const skip_prefix = $("#skip_prefix").val();
-                const skip_suffix = $("#skip_suffix").val();
+
+                const one_task_columns = Math.floor((total_cols - skip_prefix - skip_suffix) / homework_names.length)
+
                 // console.log(total_cols);
                 // console.log(col_index);
-                if (col_index > skip_prefix && col_index < total_cols - skip_suffix) {
+                if (col_index > skip_prefix - 1 && col_index < total_cols - skip_suffix) {
+                    let hw_name_index = Math.floor((col_index - skip_prefix) / one_task_columns)
+
                     $("#form_username").val(username);
-                    $("#form_taskname").val($("thead > tr > th")[col_index].innerText);
+                    $("#form_taskname").val(homework_names[hw_name_index]);
                     $("#data_form").trigger("submit");
-                    // console.log($("thead > tr > th")[col_index].innerText);
-                    // console.log(username);
                 }
             });
         });

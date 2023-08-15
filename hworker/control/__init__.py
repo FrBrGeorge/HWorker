@@ -19,30 +19,40 @@ def generate_scores():
     users = config.get_uids()
     tasks = config.get_tasks_list()
     depot.store(objects.Formula(ID=f"", timestamp=123, content=""))
-    depot.store(objects.UserQualify(ID=f"", timestamp=123, name="User total", content=""))
+    names_for_qual = ["Attendance", "Score"]
+    for name in names_for_qual:
+        depot.store(objects.UserQualifier(ID=f"{name}", timestamp=123, name=name, content=""))
 
-    for task_id in tasks:
-        depot.store(objects.TaskQualify(ID=f"{task_id}", TASK_ID=task_id, timestamp=123, name=task_id, content=""))
+        for task_id in tasks:
+            depot.store(
+                objects.TaskQualifier(ID=f"{task_id}/{name}", TASK_ID=task_id, timestamp=123, name=name, content="")
+            )
 
     for user_id in users:
-        user_total = 0
+        score_total = 0
+        attend_total = 0
         for task_id in tasks:
-            cur_task = random.randint(1, 10)
-            depot.store(
-                objects.TaskScore(
-                    ID=f"{user_id}{task_id}",
-                    USER_ID=user_id,
-                    TASK_ID=task_id,
-                    name=task_id,
-                    timestamp=123,
-                    rating=cur_task,
+            score = random.randint(1, 10)
+            attend = random.randint(0, 1)
+            for name_index, name in enumerate(names_for_qual):
+                depot.store(
+                    objects.TaskScore(
+                        ID=f"{user_id}{task_id}{name}",
+                        USER_ID=user_id,
+                        TASK_ID=task_id,
+                        name=name,
+                        timestamp=123,
+                        rating=attend if name_index == 0 else score,
+                    )
                 )
+            score_total += score
+            attend_total += attend
+
+        for rating, name in zip([attend_total, score_total], names_for_qual):
+            depot.store(
+                objects.UserScore(ID=f"{user_id}{name}", USER_ID=user_id, name=name, timestamp=123, rating=rating)
             )
-            user_total += cur_task
-        depot.store(
-            objects.UserScore(ID=f"{user_id}", USER_ID=user_id, name="User total", timestamp=123, rating=user_total)
-        )
-        depot.store(objects.FinalScore(ID=f"{user_id}", USER_ID=user_id, timestamp=123, rating=f"--{user_total}--"))
+        depot.store(objects.FinalScore(ID=f"{user_id}", USER_ID=user_id, timestamp=123, rating=f"--{score_total}--"))
 
 
 def generate_homeworks_with_versions():

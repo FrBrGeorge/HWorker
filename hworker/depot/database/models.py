@@ -99,8 +99,8 @@ class CheckResult(Base):
         self.stderr = stderr
 
 
-class TaskQualify(Base):
-    __tablename__ = "task_qualify"
+class TaskQualifier(Base):
+    __tablename__ = "task_qualifier"
 
     name: Mapped[str] = mapped_column(String)
     content: Mapped[str] = mapped_column(String)
@@ -125,8 +125,8 @@ class TaskScore(Base):
         self.rating = rating
 
 
-class UserQualify(Base):
-    __tablename__ = "user_qualify"
+class UserQualifier(Base):
+    __tablename__ = "user_qualifier"
 
     name: Mapped[str] = mapped_column(String)
     content: Mapped[str] = mapped_column(String)

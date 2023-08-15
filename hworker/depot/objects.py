@@ -153,7 +153,7 @@ class CheckResult(StoreObject):
         self.stderr = stderr
 
 
-class TaskQualify(StoreObject):
+class TaskQualifier(StoreObject):
     """Calculates a TaskScore from all CheckResult's for certain TASK_ID, USER_ID pair"""
 
     name: str
@@ -182,7 +182,7 @@ class TaskScore(StoreObject):
         self.rating = rating
 
 
-class UserQualify(StoreObject):
+class UserQualifier(StoreObject):
     """Calculates a userScore from all TaskScores's for certain USER_ID"""
 
     name: str

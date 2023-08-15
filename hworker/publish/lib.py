@@ -5,13 +5,61 @@ def encode_to_str(to_encode: any) -> str:
     return str(to_encode).replace(" ", "\xa0")
 
 
-def create_table(data: dict[str, list]) -> str:
+def _create_header(header: list, soup: BeautifulSoup):
+    def get_depth(x):
+        if issubclass(type(x), list):
+            return max([get_depth(item) for item in x])
+        elif issubclass(type(x), dict):
+            return 1 + max([get_depth(item) for item in x.values()])
+        else:
+            return 0
+
+    def create_ths(cur_data, index):
+        if type(cur_data) == list:
+            for item in cur_data:
+                create_ths(item, index)
+
+            return len(cur_data)
+        elif type(cur_data) == dict:
+            th_created = 0
+            for key in cur_data:
+                cur_th_count = create_ths(cur_data[key], index + 1)
+                th_created += cur_th_count
+
+                th_cur = soup.new_tag("th", attrs={"rowspan": "1", "colspan": cur_th_count})
+                th_cur.string = encode_to_str(key)
+                trs[index].append(th_cur)
+
+            return th_created
+        else:
+            # leaf element
+            th_cur = soup.new_tag("th", attrs={"rowspan": max_depth - index, "colspan": "1"})
+            th_cur.string = encode_to_str(cur_data)
+            trs[index].append(th_cur)
+            return 1
+
+    max_depth = get_depth(header) + 1
+
+    thead = soup.new_tag("thead")
+
+    trs = [soup.new_tag("tr") for i in range(max_depth)]
+    for item in trs:
+        thead.append(item)
+
+    create_ths(header, 0)
+
+    return thead
+
+
+def create_table(rows: list, header: list) -> str:
     """
-    :param data: All data, where keys in ordered correctly and value in list of data
+    :param rows: Just rows with data
+    :param header: Complex object, that can contain dicts, list and basic elements with str()
     :rtype: object Return html string
     """
-    lens = [len(value) for key, value in data.items()]
-    if not lens or any([cur_len != lens[0] for cur_len in lens]):
+
+    lens = [len(value) for value in rows]
+    if not lens and any([cur_len != lens[0] for cur_len in lens]):
         raise ValueError("Invalid data got on input")
 
     soup = BeautifulSoup()
@@ -20,23 +68,15 @@ def create_table(data: dict[str, list]) -> str:
         table := soup.new_tag("table", attrs={"class": "table table-hover table-striped table-bordered align-middle"})
     )
 
-    table.append(thead := soup.new_tag("thead"))
+    table.append(_create_header(header, soup))
     table.append(tbody := soup.new_tag("tbody"))
 
-    thead.append(head_tr := soup.new_tag("tr"))
-    # thead content
-
-    for head_name in data.keys():
-        th = soup.new_tag("th", attrs={"scope": "col"})
-        th.string = encode_to_str(head_name)
-        head_tr.append(th)
-
-    for index in range(lens[0]):
+    for row in rows:
         tbody.append(body_tr := soup.new_tag("tr"))
 
-        for elem in data.values():
-            th = soup.new_tag("th")
-            th.string = "Nope" if elem[index] is None else encode_to_str(elem[index])
+        for elem in row:
+            th = soup.new_tag("td")
+            th.string = "Nope" if elem is None else encode_to_str(elem)
             body_tr.append(th)
         # for homework_name in homeworks_names_and_files.keys():
         #     cur_task = submitted_tasks.get(homework_name, None)

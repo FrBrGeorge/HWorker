@@ -16,9 +16,9 @@ _object_to_model_class: dict[Type[objects.StoreObject] : Type[Base]] = {
     objects.Check: Check,
     objects.Solution: Solution,
     objects.CheckResult: CheckResult,
-    objects.TaskQualify: TaskQualify,
+    objects.TaskQualifier: TaskQualifier,
     objects.TaskScore: TaskScore,
-    objects.UserQualify: UserQualify,
+    objects.UserQualifier: UserQualifier,
     objects.UserScore: UserScore,
     objects.Formula: Formula,
     objects.FinalScore: FinalScore,
@@ -134,7 +134,7 @@ def search(
     :param actual: return only latest version of object (grouping them by id)
     :return: iterator for found objects
     """
-    get_logger(__name__).debug(f"Tried to search {str(obj_type)[:100]}")
+    get_logger(__name__).debug(f"Tried to search {obj_type.__name__}")
 
     model_type = type(_translate_object_to_model(obj_type))
     with Session() as session:
