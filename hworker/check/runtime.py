@@ -1,7 +1,7 @@
 """Isolated runtime tests and check results"""
 
 from ..log import get_logger
-from ..config import get_max_test_size, get_check_directory, get_default_time_limit, get_default_resource_limit
+from ..config import get_default_test_size, get_check_directory, get_default_time_limit, get_default_resource_limit
 from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
 from ..depot.database.functions import store
 
@@ -10,6 +10,7 @@ import io
 import os
 import platform
 import time
+import subprocess
 from datetime import date
 from math import isclose
 from itertools import zip_longest
@@ -18,9 +19,13 @@ from random import randint
 from difflib import diff_bytes, unified_diff
 from os.path import getsize, basename
 from tempfile import NamedTemporaryFile
-import resource
-import subprocess
 from subprocess import CompletedProcess, TimeoutExpired
+
+if platform.system() != "Windows":
+    try:
+        import resource
+    except ImportError:
+        resource = None
 
 
 def python_set_limits(time_limit: int = None, resource_limit: int = None) -> None:
@@ -40,10 +45,10 @@ def python_set_limits(time_limit: int = None, resource_limit: int = None) -> Non
     # resource.setrlimit(resource.RLIMIT_NPROC, (0, 0))
     resource.setrlimit(resource.RLIMIT_STACK, (resource_limit, resource_limit))
     resource.setrlimit(resource.RLIMIT_NOFILE, (30, 30))
-
-    if platform.system() == "Linux" or platform.system() == "Linux2":
-        resource.setrlimit(resource.RLIMIT_AS, (1024 * 1024 * 15, 1024 * 1024 * 15))
-        resource.setrlimit(resource.RLIMIT_FSIZE, (2048, 2048))
+    # TODO: Also Memory Error
+    # if platform.system() == "Linux" or platform.system() == "Linux2":
+    #     resource.setrlimit(resource.RLIMIT_AS, (1024 * 1024 * 15, 1024 * 1024 * 15))
+    #     resource.setrlimit(resource.RLIMIT_FSIZE, (2048, 2048))
 
 
 def python_runner(prog_path: str, input_path: str) -> tuple[bytes | None, bytes, int]:
@@ -62,7 +67,7 @@ def python_runner(prog_path: str, input_path: str) -> tuple[bytes | None, bytes,
         try:
             result = subprocess.Popen(
                 [sys.executable, prog_path],
-                # preexec_fn=python_set_limits(),
+                preexec_fn=python_set_limits() if platform != "Windows" else None,
                 stdin=prog_input,
                 stdout=prog_output,
                 stderr=subprocess.PIPE,
@@ -154,7 +159,7 @@ def bytes_diff(actual: bytes, initial: bytes) -> Iterator[bytes] | None:
     if act_lines == init_lines:
         return None
     act_size, init_size = getsize(actual), getsize(initial)
-    if act_size > get_max_test_size() or init_size > get_max_test_size():
+    if act_size > get_default_test_size() or init_size > get_default_test_size():
         init_lines, act_lines = [f"Size differs: {init_size}\n"], ["Size differs: <output>\n"]
     return diff_bytes(unified_diff, init_lines, act_lines, basename(initial), b"<output>")
 

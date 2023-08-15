@@ -17,6 +17,7 @@ from hworker.config import (
     get_remotes_name,
     get_task_info,
 )
+import hworker.config
 
 
 @pytest.fixture(scope="function")
@@ -58,6 +59,9 @@ class TestConfig:
     )
     def test_task_info(self, user_config):
         assert get_task_info("task_ID") == {
+            "test_size": 100,
+            "resource_limit": 3145728,
+            "time_limit": 2,
             "deliver_ID": "20240101/01",
             "hard_deadline": datetime(2024, 1, 14, 0, 0),
             "hard_deadline_delta": "open_date+13d",
