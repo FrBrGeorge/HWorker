@@ -134,16 +134,20 @@ def get_git_uids() -> list[str]:
     return list(config()["git"]["users"].keys())
 
 
+def get_users() -> dict[str:str]:
+    """Get all UID: Deliver_ID pairs"""
+    users = {}
+    for module in get_deliver_modules():
+        users |= config().get(module, {}).get("users", {})
+    return users
+
+
 def get_uids() -> list[str]:
     """Get all uids
 
     :return: all uids list
     """
-    uids = []
-    for module in get_deliver_modules():
-        uids += config().get(module, {}).get("users", [])
-
-    return uids
+    return list(get_users().keys())
 
 
 def get_tasks_list() -> list[str]:
