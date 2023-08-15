@@ -8,6 +8,7 @@ import cmd
 import shlex
 import sys
 import io
+import re
 from pprint import pprint
 from pathlib import Path
 from .. import deliver, config, control, depot, make  # NoQA: F401
@@ -35,14 +36,27 @@ class HWorker(cmd.Cmd):
     prompt = "hw> "
     DELIMETERS = set(' \t\n`~!@#$%^&*()-=+[{]}\\|;:",<>/?')
 
-    def filtertext(self, seq, part, fmt="{}", shift=0):
+    def qsplit(self, line, text, begidx, endidx):
+        try:  # All quotes are closed
+            res = shlex.split(line[:endidx]) + ([""] if line[endidx - 1] == " " else [])
+        except ValueError:  # Unclosed quote
+            res = shlex.split(line[:endidx] + "'")
+        except Exception as E:
+            log(E, "error")
+        delta = len(res[-1]) - len(text)
+        return res, delta, line[begidx - delta - 1]
+
+    def filtertext(self, seq, part, fmt="{}", shift=0, quote="'"):
         """Universal completion matcher"""
         match part:
             case str(_):
                 flt = lambda txt: txt.startswith(part)  # Noqa E731
             case _:  # Must be callable
                 flt = part
-        res = [fmt.format(el[shift:]) for el in filter(flt, seq)]
+        res = [
+            fmt.format(el[shift:]) if quote == "'" or not el[shift:] else shlex.quote(fmt.format(el[shift:]))
+            for el in filter(flt, seq)
+        ]
         return res
 
     @staticmethod
@@ -62,16 +76,29 @@ class HWorker(cmd.Cmd):
         "Print (some) information from config file"
         args = self.shplit(arg)
         match args:
-            case ["users", *_]:
+            case ["users"] | ["user"]:
                 print("\n".join(config.get_uids()))
-            case ["tasks", *_]:
+            case ["user", uidp]:
+                print(
+                    "\n".join(
+                        f"{uid}: {deluid}"
+                        for uid, deluid in config.get_users().items()
+                        if re.search(uidp, uid) or re.search(uidp, deluid)
+                    )
+                )
+            case ["tasks"] | ["task"]:
                 print("\n".join(config.get_tasks_list()))
             case []:
                 pprint(config.config())
 
     def complete_config(self, text, line, begidx, endidx):
-        objnames = ("users", "tasks")
-        return self.filtertext(objnames, text)
+        objnames = ("user", "task", "users", "tasks")
+        (_, *args, word), delta, quote = self.qsplit(line, text, begidx, endidx)
+        match args:
+            case []:
+                return self.filtertext(objnames, word, shift=delta)
+            case ["user"]:
+                return self.filtertext(config.get_uids(), word, shift=delta, quote=quote)
 
     def do_show(self, arg):
         """Show objects or individual object"""
@@ -87,26 +114,16 @@ class HWorker(cmd.Cmd):
                     for fname in hw.content:
                         print(f"\t{fname}")
 
-    def qsplit(self, line, text, endidx):
-        try:  # All quotes are closed
-            res = shlex.split(line[:endidx]) + ([""] if line[endidx - 1] == " " else [])
-        except ValueError:  # Unclosed quote
-            res = shlex.split(line[:endidx] + "'")
-            # print(f"\n@{res}")
-        except Exception as E:
-            log(E, "error")
-        return res, len(res[-1]) - len(text)
-
     def complete_show(self, text, line, begidx, endidx):
         objnames = ("homework",)
-        (_, *args, word), delta = self.qsplit(line, text, endidx)
+        (_, *args, word), delta, quote = self.qsplit(line, text, begidx, endidx)
         # print("\n→", args, text, delta)
         match args:
             case []:
                 return self.filtertext(objnames, word, shift=delta)
             case ["homework"]:
                 ids = [hw.ID for hw in depot.search(depot.objects.Homework, actual=True)]
-                return self.filtertext(ids, word, shift=delta)
+                return self.filtertext(ids, word, shift=delta, quote=quote)
 
     def do_shell(self, arg):
         "Execute python code"
