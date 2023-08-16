@@ -1,10 +1,10 @@
+from ..depot import store, search
 from ..depot.objects import Homework, Check, Solution, CheckCategoryEnum
 from ..config import (
     get_runtime_suffix,
     get_validate_suffix,
     get_check_name,
     get_remote_name,
-    get_prog_name,
     get_task_info,
 )
 
@@ -69,3 +69,24 @@ def get_solution(hw: Homework) -> Solution:
         USER_ID=hw.USER_ID,
         timestamp=hw.timestamp,
     )
+
+
+def parse_store_homework(hw: Homework) -> None:
+    """Parse homework to Solution and Checks and store them with depot
+
+    :param hw: homework object
+    :return: -
+    """
+    for check in get_checks(hw):
+        store(check)
+    store(get_solution(hw))
+
+
+def parse_store_all_homeworks() -> None:
+    """Parse all actual homeworks to Solution and Checks and store them with depot
+
+    :return: -
+    """
+    hws = search(Homework, actual=True)
+    for hw in hws:
+        parse_store_homework(hw)
