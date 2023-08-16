@@ -196,6 +196,25 @@ def email_to_uid(email: str) -> str | None:
     return reverse.get(email, None)
 
 
+def uid_to_dirname(uid: str) -> str | None:
+    """Converts user id to email
+
+    :param uid: user id
+    :return: dirname
+    """
+    return config()["file"]["users"].get(uid, None)
+
+
+def dirname_to_uid(dirname: str) -> str | None:
+    """Converts email address to user id
+
+    :param dirname: directory name
+    :return: user id
+    """
+    reverse = {email: uid for uid, email in config()["file"]["users"].items()}
+    return reverse.get(dirname, None)
+
+
 def taskid_to_deliverid(task_id: str) -> str | None:
     """Converts task id to deliver id
 

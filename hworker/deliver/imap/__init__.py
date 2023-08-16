@@ -17,7 +17,7 @@ _depot_prefix = "i"
 
 
 def parse_tar_file(filename: str, content: bytes):
-    timestamps = [_default_datetime.timestamp()]
+    timestamps = []
     contents = {}
     is_broken = False
 
@@ -25,9 +25,6 @@ def parse_tar_file(filename: str, content: bytes):
         with tempfile.NamedTemporaryFile("wb", delete=False) as tmp_file:
             tmp_file.write(content)
             tmp_file.flush()
-
-        timestamps = [_default_datetime.timestamp()]
-        contents = {}
 
         with tarfile.open(tmp_file.name) as tar:
             for member in tar.getmembers():
@@ -40,7 +37,7 @@ def parse_tar_file(filename: str, content: bytes):
     except Exception as e:
         is_broken = True
         get_logger(__name__).debug(f"Exception during archive parsing\n {''.join(traceback.format_exception(e))}")
-    return max(timestamps), contents, is_broken
+    return max(timestamps, default=_default_datetime.timestamp()), contents, is_broken
 
 
 def download_all():
@@ -49,7 +46,7 @@ def download_all():
     # TODO maybe should only get new latter, not all. Fow know this works really fast, just skip it.
     # print(box.uids("ALL"))
 
-    donwload_mails = 0
+    download_mails = 0
 
     get_logger(__name__).info(f"Started")
 
@@ -86,7 +83,7 @@ def download_all():
 
         if TASK_ID is not None:
             if USER_ID is None:
-                get_logger(__name__).warn(f"Detected task {TASK_ID} for not registered email {mail_name:<30}")
+                get_logger(__name__).warn(f"Detected task {TASK_ID:<15} for not registered email {mail_name:<30}")
             else:
                 depot.store(
                     Homework(
@@ -98,6 +95,6 @@ def download_all():
                         is_broken=is_broken_all,
                     )
                 )
-                donwload_mails += 1
+                download_mails += 1
 
-    get_logger(__name__).info(f"Download a total of {donwload_mails} homeworks")
+    get_logger(__name__).info(f"Download a total of {download_mails} homeworks")
