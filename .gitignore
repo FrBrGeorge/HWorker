@@ -14,6 +14,9 @@ final_hworker.toml
 *_final.toml
 .history
 
+/tests/timestamp_validator.py
+
+
 Pipfile.lock
 
 

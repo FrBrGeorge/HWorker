@@ -68,7 +68,7 @@ def python_runner(
         try:
             result = subprocess.Popen(
                 [sys.executable, prog_path],
-                preexec_fn=partial(python_set_limits, time_limit, resource_limit) if platform != "Windows" else None,
+                preexec_fn=partial(python_set_limits, time_limit, resource_limit) if platform.system() != "Windows" else None,
                 stdin=prog_input,
                 stdout=prog_output,
                 stderr=subprocess.PIPE,
