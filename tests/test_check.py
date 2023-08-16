@@ -73,7 +73,7 @@ class TestCheckValidate:
         """"""
         validator = Check(
             content={
-                "timestamp_validator": b"def timestamp_validator(solution) -> float:\n"
+                "timestamp_validator.py": b"def timestamp_validator(solution) -> float:\n"
                 b"    return 1.0 if solution.timestamp else 0.0"
             },
             category=CheckCategoryEnum.validate,
@@ -108,7 +108,7 @@ class TestCheckValidate:
     def test_regexp(self):
         validator = Check(
             content={
-                "timestamp_validator": b"def regexp_validator(solution) -> float:\n"
+                "regexp_validator.py": b"def regexp_validator(solution) -> float:\n"
                 b"    return 1.0 if b'import itertools' in "
                 b"list(solution.content.values())[0] else 0.0"
             },
