@@ -53,13 +53,11 @@ def get_solution(hw: Homework) -> Solution:
     :param hw: homework object
     :return: solution object
     """
-    content, remote_checks, prog = {}, [], get_prog_name()
-    # TODO: Solution content for imap?
+    content, remote_checks = {}, []
     for path, path_content in hw.content.items():
-        if path.endswith(prog):
-            content = {prog: path_content}
-        if path.endswith(get_remote_name()):
-            remote_checks = path_content.decode("utf-8").split()
+        if not path.startswith(get_check_name()):
+            content[path] = path_content
+    remote_checks = hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8").split()
     own_checks = [check.ID for check in get_checks(hw)]
     config_checks = get_task_info(hw.TASK_ID).get("checks", [])
 
