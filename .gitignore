@@ -17,6 +17,14 @@ final_hworker.toml
 /tests/timestamp_validator.py
 
 
+tests/timestamp_validator.py
+
+#scores
+task_qualifier.py
+user_qualifier.py
+formula.py
+
+
 Pipfile.lock
 
 

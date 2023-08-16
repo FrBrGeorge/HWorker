@@ -7,6 +7,7 @@ import pytest
 _test_database_filename = "test.db"
 os.environ["HWORKER_DATABASE_FILENAME"] = _test_database_filename
 
+
 from hworker.depot import store, delete, search
 from hworker.depot.objects import Homework, Criteria, is_field
 

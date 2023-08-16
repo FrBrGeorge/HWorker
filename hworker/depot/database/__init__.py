@@ -1,6 +1,8 @@
 """Database module initialisation."""
 from .models import Base
-from .common import engine, Session
+from .common import get_engine
 from .functions import store, search, delete
 
-models.Base.metadata.create_all(engine)
+
+def init_db():
+    models.Base.metadata.create_all(get_engine())
