@@ -11,9 +11,9 @@ from hworker.config import (
     email_to_uid,
     get_imap_info,
     get_runtime_suffix,
-    get_checks_dir,
+    get_check_name,
     get_prog_name,
-    get_remotes_name,
+    get_remote_name,
     get_task_info,
 )
 import hworker.config
@@ -29,11 +29,11 @@ class TestConfig:
         assert get_imap_info() == {"letter_limit": -1, "port": 993, "users": {}} | self._p_test_imap_info
 
     def test_get_names(self):
-        assert (get_prog_name(), get_remotes_name(), get_runtime_suffix(), get_checks_dir()) == (
+        assert (get_prog_name(), get_remote_name(), get_runtime_suffix(), get_check_name()) == (
             "prog.py",
-            "remotes",
+            "remote",
             ["in", "out"],
-            "checks",
+            "check",
         )
 
     @pytest.mark.parametrize("user_config", [{"imap": {"users": {"user_ID": "mail address"}}}], indirect=True)

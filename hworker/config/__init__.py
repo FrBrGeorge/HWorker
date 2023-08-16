@@ -272,20 +272,20 @@ def get_prog_name() -> str:
     return config()["formalization"]["prog_name"]
 
 
-def get_remotes_name() -> str:
+def get_remote_name() -> str:
     """Get remote tests file name
 
     :return: remotes name
     """
-    return config()["formalization"]["remotes_name"]
+    return config()["formalization"]["remote_name"]
 
 
-def get_checks_dir() -> str:
+def get_check_name() -> str:
     """Get tests dir name
 
     :return: tests dir name
     """
-    return config()["formalization"]["checks_dir"]
+    return config()["formalization"]["check_name"]
 
 
 def get_runtime_suffix() -> list:

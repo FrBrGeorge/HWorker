@@ -61,8 +61,8 @@ directory = "/tmp/hworker_check"
 
 [formalization]
 prog_name = "prog.py"
-remotes_name = "remotes"
-checks_dir = "checks"
+remote_name = "remote"
+check_name = "check"
 runtime_suffix = ["in", "out"]
 validate_suffix = "py"
 

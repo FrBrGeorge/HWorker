@@ -77,10 +77,10 @@ class TestMake:
         [
             {
                 "/tmp/test_repo/prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
-                "/tmp/test_repo/remotes": b"User1:Task1\nUser2:Task1\nUser3:Task1",
-                "/tmp/test_repo/checks/1.in": b"123, 345",
-                "/tmp/test_repo/checks/1.out": b"345",
-                "/tmp/test_repo/checks/validate.py": b"def timestamp_validator(solution) -> float:\n"
+                "/tmp/test_repo/remote": b"User1:Task1\nUser2:Task1\nUser3:Task1",
+                "/tmp/test_repo/check/1.in": b"123, 345",
+                "/tmp/test_repo/check/1.out": b"345",
+                "/tmp/test_repo/check/validate.py": b"def timestamp_validator(solution) -> float:\n"
                 b"    return 1.0 if solution.timestamp else 0.0",
             }
         ],

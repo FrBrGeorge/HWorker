@@ -1,7 +1,7 @@
 import os
 
 from ..depot.objects import Homework, Check, Solution, CheckCategoryEnum
-from ..config import get_runtime_suffix, get_validate_suffix, get_remotes_name, get_prog_name, get_task_info
+from ..config import get_runtime_suffix, get_validate_suffix, get_remote_name, get_prog_name, get_task_info
 
 
 def get_checks(hw: Homework) -> list[Check]:
@@ -56,7 +56,7 @@ def get_solution(hw: Homework) -> Solution:
     for path, path_content in hw.content.items():
         if path.endswith(prog):
             content = {prog: path_content}
-        if path.endswith(get_remotes_name()):
+        if path.endswith(get_remote_name()):
             remote_checks = path_content.decode("utf-8").split()
     own_checks = [check.ID for check in get_checks(hw)]
     config_checks = get_task_info(hw.TASK_ID).get("checks", [])
