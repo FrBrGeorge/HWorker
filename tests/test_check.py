@@ -6,8 +6,7 @@ from hworker.check.validate import validate_wo_store
 from hworker.depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
 
 import time
-from datetime import date
-from datetime import datetime
+from datetime import date, datetime
 
 import pytest
 
@@ -17,7 +16,7 @@ def tmp_prog(tmp_path_factory):
     """"""
     prog_path = tmp_path_factory.getbasetemp() / "prog.py"
     test_path = tmp_path_factory.getbasetemp() / "test.in"
-    prog_path.write_bytes(b"a, b = eval(input())\nprint(max(a, b))")
+    prog_path.write_bytes(b"a, b = eval(input())\nprint(max(a, b), end='')")
     test_path.write_bytes(b"123, 345")
     return prog_path, test_path
 
@@ -27,7 +26,7 @@ class TestCheckRuntime:
 
     def test_python_runner(self, tmp_prog):
         """"""
-        assert python_runner(*tmp_prog, time_limit=2, resource_limit=3145728) == (b"345\n", b"", 0)
+        assert python_runner(*tmp_prog, time_limit=2, resource_limit=3145728) == (b"345", b"", 0)
 
     @pytest.mark.parametrize(
         "user_config",
@@ -38,10 +37,10 @@ class TestCheckRuntime:
         """"""
         # TODO: Change to parametrize
         checker = Check(
-            content={"1.in": b"123, 345", "1.out": b"345\n"}, category=CheckCategoryEnum.runtime, ID="checker_ID"
+            content={"1.in": b"123, 345", "1.out": b"345"}, category=CheckCategoryEnum.runtime, ID="checker_ID"
         )
         solution = Solution(
-            content={"prog.py": b"a, b = eval(input())\n" b"print(max(a, b))"},
+            content={"prog.py": b"a, b = eval(input())\n" b"print(max(a, b), end='')"},
             checks=[
                 checker.ID,
             ],
@@ -59,7 +58,7 @@ class TestCheckRuntime:
             rating=1.0,
             category=checker.category,
             stderr=b"",
-            stdout=b"345\n",
+            stdout=b"345",
             check_ID=checker.ID,
             solution_ID=solution.ID,
             verdict=VerdictEnum.passed,
