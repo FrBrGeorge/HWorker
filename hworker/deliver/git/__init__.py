@@ -57,7 +57,7 @@ def pull(repo: str) -> None:
 def update_all() -> None:
     """Pull every repo from config list (or clone if not downloaded)"""
     repos = get_repos()
-    get_logger(__name__).info(f"Updating all repos")
+    get_logger(__name__).info("Updating all repos")
     for repo in repos:
         if not os.path.exists(local_path(repo_to_uid(repo))):
             clone(repo)
@@ -72,10 +72,11 @@ def get_homework_content(root: str) -> dict:
     :return: dict with "prog", "tests" and "urls" keys
     """
     get_logger(__name__).info(f"Getting {root} content")
+    Root = Path(root)
     content = {
-        str(path).removeprefix(root + os.sep): path.read_bytes()
-        for path in Path(root).rglob("*")
-        if path.is_file() and all(map(lambda s: not s.startswith("."), str(path).split(os.sep)))
+        str(path.relative_to(Root)): path.read_bytes()
+        for path in Root.rglob("*")
+        if path.is_file() and f"{os.sep}." not in str(path.relative_to(Root.parent))
     }
     return content
 
@@ -96,7 +97,7 @@ def get_commits(repo: git.Repo, path: str) -> list[tuple[str, str]]:
 # TODO: task_id from config
 def download_all() -> None:
     """Update all solutions and store every version in depot"""
-    get_logger(__name__).info(f"Downloading (or updating) all repos and store them")
+    get_logger(__name__).info("Downloading (or updating) all repos and store them")
     update_all()
     for student_id in get_git_uids():
         repo = git.Repo(local_path(student_id))
