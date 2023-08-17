@@ -2,7 +2,7 @@
 """
 """
 
-import hworker.control  # NoQA: F401
+# import hworker.control  # NoQA: F401
 
 
 class TestControl:
