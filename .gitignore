@@ -1,24 +1,37 @@
-#cur project files
-.idea/
-venv/
-*.cfg
-logs/
-t_*.py
+tests/timestamp_validator.py
 
-tags
-test.db
+
+### Workflow files
 data.db
-hworker/_version.py
+logs/
+
+# Configs
 hworker.toml
-final_hworker.toml
 *_final.toml
+
+# Scores
+task_qualifier.py
+user_qualifier.py
+formula.py
+
+# CLI
 .history
 
-/tests/timestamp_validator.py
+### Development
 
+# Ctags
+tags
 
+# Pycharm files
+.idea/
+
+# Local scripts
+t_*.py
+
+# Generated files
 Pipfile.lock
-
+hworker/_version.py
+test.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -5,7 +5,7 @@ from typing import Iterable, Union, Type, Optional
 
 import sqlalchemy.exc
 
-from .common import Session
+from .common import get_Session
 from .models import *
 
 import hworker.depot.objects as objects
@@ -94,7 +94,7 @@ def store(obj: objects.StoreObject) -> None:
         )
 
     try:
-        with Session.begin() as session:
+        with get_Session().begin() as session:
             model_obj: Base = _translate_object_to_model(obj)
 
             if obj._is_versioned:
@@ -137,7 +137,7 @@ def search(
     get_logger(__name__).debug(f"Tried to search {obj_type.__name__}")
 
     model_type = type(_translate_object_to_model(obj_type))
-    with Session() as session:
+    with get_Session()() as session:
         search_result = session.query(model_type).order_by(model_type.timestamp.desc())
 
         if len(criteria) != 0:
@@ -164,7 +164,7 @@ def delete(obj_type: Type[objects.StoreObject], *criteria: objects.Criteria) -> 
     get_logger(__name__).debug(f"Tried to delete {str(obj_type)[:100]}")
 
     model_type = type(_translate_object_to_model(obj_type))
-    with Session.begin() as session:
+    with get_Session().begin() as session:
         search_result = session.query(model_type)
         if len(criteria) != 0:
             search_result = search_result.filter(*list(map(functools.partial(_parse_criteria, model_type), criteria)))
