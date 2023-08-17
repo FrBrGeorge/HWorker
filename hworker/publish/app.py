@@ -89,7 +89,8 @@ def index():
 
     header = list()
     header.append("Users")
-    header.append(final_score_names[0])
+    if len(final_score_names) != 0:
+        header.append(final_score_names[0])
     type_pretty_names = ["User Qualifiers", "Task Qualifiers"]
     for type_index, big_names in enumerate([user_score_names, task_score_names]):
         header.append({type_pretty_names[type_index]: big_names})
