@@ -14,7 +14,7 @@ class Base(DeclarativeBase):
     ID: Mapped[str] = mapped_column(String, primary_key=True, nullable=False)
     USER_ID: Mapped[str] = mapped_column(String, nullable=False)
     TASK_ID: Mapped[str] = mapped_column(String, nullable=False)
-    timestamp: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
+    timestamp: Mapped[float] = mapped_column(Float, primary_key=True, nullable=False)
 
     # noinspection PyTypeChecker
     def __init__(self, ID: str = None, USER_ID: str = None, TASK_ID: str = None, timestamp: int = None, **kwargs):

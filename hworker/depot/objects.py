@@ -20,11 +20,11 @@ class StoreObject:
     ID: str  # Unique ID
     USER_ID: str  # User name
     TASK_ID: str  # Task name
-    timestamp: int  # Timestamp
+    timestamp: float  # Timestamp
     _is_versioned: bool
     _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
 
-    def __init__(self, ID: str = None, USER_ID: str = None, TASK_ID: str = None, timestamp: int = None, **kwargs):
+    def __init__(self, ID: str = None, USER_ID: str = None, TASK_ID: str = None, timestamp: float = None, **kwargs):
         super().__init__(**kwargs)
         self.ID = ID
         self.USER_ID = USER_ID
@@ -154,15 +154,17 @@ class CheckResult(StoreObject):
 
 
 class TaskQualifier(StoreObject):
-    """Calculates a TaskScore from all CheckResult's for certain TASK_ID, USER_ID pair"""
+    """Calculates a TaskScore from all CheckResult's grouped by certain TASK_ID, USER_ID pair"""
 
     name: str
+    # TODO to be deleted
     content: str
-    _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
+    _public_fields: set[str] = {"ID", "timestamp"}
     _is_versioned: bool = False
 
     def __init__(self, name: str = None, content: str = None, **kwargs):
         kwargs["USER_ID"] = ""
+        kwargs["TASK_ID"] = ""
         super().__init__(**kwargs)
         self.name = name
         self.content = content
@@ -186,8 +188,9 @@ class UserQualifier(StoreObject):
     """Calculates a userScore from all TaskScores's for certain USER_ID"""
 
     name: str
+    # TODO to be deleted
     content: str
-    _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
+    _public_fields: set[str] = {"ID", "timestamp"}
     _is_versioned: bool = False
 
     def __init__(self, name: str = None, content: str = None, **kwargs):
@@ -217,11 +220,12 @@ class Formula(StoreObject):
     """Overall formulae over all UserScore's for certain USER_ID"""
 
     name: str
+    # TODO to be deleted
     content: str
-    _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
+    _public_fields: set[str] = {"ID", "timestamp"}
     _is_versioned: bool = False
 
-    def __init__(self, content: str = None, name: str = None, **kwargs):
+    def __init__(self, name: str = None, content: str = None, **kwargs):
         kwargs["USER_ID"] = ""
         kwargs["TASK_ID"] = ""
         super().__init__(**kwargs)
@@ -237,7 +241,7 @@ class FinalScore(StoreObject):
     _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
     _is_versioned: bool = False
 
-    def __init__(self, rating: str = None, name: str = None, **kwargs):
+    def __init__(self, name: str = None, rating: str = None, **kwargs):
         kwargs["TASK_ID"] = ""
         super().__init__(**kwargs)
         self.name = "Final mark"

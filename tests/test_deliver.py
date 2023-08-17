@@ -16,6 +16,8 @@ def example_git_repo():
         os.mkdir(repo_path)
 
         repo = Repo.init(repo_path)
+        repo.config_writer().set_value("user", "name", "myusername").release()
+        repo.config_writer().set_value("user", "email", "myemail").release()
         with open(os.path.join(repo_path, "prog.py"), "wb") as p:
             p.write(b"a, b = eval(input())\n" b"print(max(a, b))")
         test_path = os.path.join(repo_path, "check")
