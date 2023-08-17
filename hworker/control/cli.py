@@ -136,6 +136,25 @@ class HWorker(cmd.Cmd):
         else:
             return self.filtertext(globals(), prefix)
 
+    def do_publish(self, arg):
+        """Start publisher"""
+        # TODO check if is anythin to publish
+        control.start_publish()
+
+    def do_echo(self, arg):
+        """Print a line"""
+        print(arg)
+
+    def do_fake(self, arg):
+        args = self.shplit(arg)
+        match args:
+            case ["score"]:
+                control.generate_scores()
+
+    def complete_fake(self, text, line, begidx, endidx):
+        objnames = ("score",)
+        return self.filtertext(objnames, text)
+
     def do_EOF(self, arg):
         """Press Ctrl+D to exit"""
         if self.use_rawinput:
