@@ -1,10 +1,6 @@
 import random
 
-import hworker.deliver as deliver
-import hworker.publish as publish
-import hworker.config as config
-import hworker.depot as depot
-import hworker.depot.objects as objects
+from .. import check, config, deliver, depot, log, make, publish, score
 
 
 def download_all():
@@ -18,14 +14,16 @@ def start_publish():
 def generate_scores():
     users = config.get_uids()
     tasks = config.get_tasks_list()
-    depot.store(objects.Formula(ID=f"", timestamp=123, content=""))
+    depot.store(depot.objects.Formula(ID=f"", timestamp=123, content=""))
     names_for_qual = ["Attendance", "Score"]
     for name in names_for_qual:
-        depot.store(objects.UserQualifier(ID=f"{name}", timestamp=123, name=name, content=""))
+        depot.store(depot.objects.UserQualifier(ID=f"{name}", timestamp=123, name=name, content=""))
 
         for task_id in tasks:
             depot.store(
-                objects.TaskQualifier(ID=f"{task_id}/{name}", TASK_ID=task_id, timestamp=123, name=name, content="")
+                depot.objects.TaskQualifier(
+                    ID=f"{task_id}/{name}", TASK_ID=task_id, timestamp=123, name=name, content=""
+                )
             )
 
     for user_id in users:
@@ -36,8 +34,8 @@ def generate_scores():
             attend = random.randint(0, 1)
             for name_index, name in enumerate(names_for_qual):
                 depot.store(
-                    objects.TaskScore(
-                        ID=f"{user_id}{task_id}{name}",
+                    depot.objects.TaskScore(
+                        ID=f"{user_id}/{task_id}/{name}",
                         USER_ID=user_id,
                         TASK_ID=task_id,
                         name=name,
@@ -50,9 +48,11 @@ def generate_scores():
 
         for rating, name in zip([attend_total, score_total], names_for_qual):
             depot.store(
-                objects.UserScore(ID=f"{user_id}{name}", USER_ID=user_id, name=name, timestamp=123, rating=rating)
+                depot.objects.UserScore(ID=f"{user_id}/{name}", USER_ID=user_id, name=name, timestamp=123, rating=rating)
             )
-        depot.store(objects.FinalScore(ID=f"{user_id}", USER_ID=user_id, timestamp=123, rating=f"--{score_total}--"))
+        depot.store(
+            depot.objects.FinalScore(ID=f"{user_id}", USER_ID=user_id, timestamp=123, rating=f"--{score_total}--")
+        )
 
 
 def generate_homeworks_with_versions():
@@ -69,3 +69,9 @@ def generate_homeworks_with_versions():
                         is_broken=False,
                     )
                 )
+
+
+def do_score():
+    score.create_files()
+    score.read_and_import()
+    score.perform_qualifiers()

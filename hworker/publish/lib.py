@@ -8,9 +8,9 @@ def encode_to_str(to_encode: any) -> str:
 def _create_header(header: list, soup: BeautifulSoup):
     def get_depth(x):
         if issubclass(type(x), list):
-            return max([get_depth(item) for item in x])
+            return max([get_depth(item) for item in x], default=0)
         elif issubclass(type(x), dict):
-            return 1 + max([get_depth(item) for item in x.values()])
+            return 1 + max([get_depth(item) for item in x.values()], default=0)
         else:
             return 0
 
