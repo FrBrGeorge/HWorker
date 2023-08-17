@@ -1,9 +1,11 @@
 """Tasks meta-information checks and check results"""
-import os
+import sys
+from pathlib import Path
 
 from ..depot import store
 from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
 from ..log import get_logger
+from ..config import get_check_directory
 
 import time
 from datetime import date
@@ -19,16 +21,18 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
     :return:
     """
     # TODO: add check nums for parallel work
-    # TODO: change check parsing
+    if get_check_directory() not in sys.path:
+        sys.path.append(get_check_directory())
     validators = {}
     for name, b in validator.content.items():
-        with open(f"{name}.py", "wb") as n:
-            n.write(b)
-        module = import_module(name)
-        os.remove(f"{name}.py")
+        module_path = Path(get_check_directory()) / name
+        with open(module_path, "wb") as m:
+            m.write(b)
+        module = import_module(name.rpartition(".")[0])
+        module_path.unlink(missing_ok=True)
         for f in dir(module):
             if not f.startswith("_"):
-                validators[f"{name}.{f}"] = getattr(module, name)
+                validators[f"{name}.{f}"] = getattr(module, f)
 
     for name, v in validators.items():
         stderr, result = b"", 0.0

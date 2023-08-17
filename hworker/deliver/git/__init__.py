@@ -72,9 +72,8 @@ def get_homework_content(root: str) -> dict:
     :return: dict with "prog", "tests" and "urls" keys
     """
     get_logger(__name__).info(f"Getting {root} content")
-
     content = {
-        str(path): path.read_bytes()
+        str(path).removeprefix(root + os.sep): path.read_bytes()
         for path in Path(root).rglob("*")
         if path.is_file() and all(map(lambda s: not s.startswith("."), str(path).split(os.sep)))
     }

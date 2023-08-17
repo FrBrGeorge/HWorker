@@ -24,11 +24,11 @@ class TestMake:
         "homework",
         [
             {
-                "/tmp/test_repo/prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
-                "/tmp/test_repo/URLS": b"https://github.com/Test/test/tree/main/20220913/1/tests",
-                "/tmp/test_repo/checks/1.in": b"123, 345",
-                "/tmp/test_repo/checks/1.out": b"345",
-                "/tmp/test_repo/checks/validate.py": b"def timestamp_validator(solution) -> float:\n"
+                "prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
+                "check/remote": b"User1:Task1\nUser2:Task1\nUser3:Task1",
+                "check/1.in": b"123, 345",
+                "check/1.out": b"345",
+                "check/validate.py": b"def timestamp_validator(solution) -> float:\n"
                 b"    return 1.0 if solution.timestamp else 0.0",
             }
         ],
@@ -37,7 +37,7 @@ class TestMake:
     def test_get_checks(self, homework):
         assert get_checks(homework) == [
             Check(
-                ID="user_ID:task_ID/1.in",
+                ID="user_ID:task_ID/1",
                 TASK_ID="task_ID",
                 USER_ID="user_ID",
                 category=CheckCategoryEnum.runtime,
@@ -45,7 +45,7 @@ class TestMake:
                 timestamp=datetime(year=2024, month=1, day=1),
             ),
             Check(
-                ID="user_ID:task_ID/validate.py",
+                ID="user_ID:task_ID/validate",
                 TASK_ID="task_ID",
                 USER_ID="user_ID",
                 category=CheckCategoryEnum.validate,
@@ -76,11 +76,11 @@ class TestMake:
         "homework",
         [
             {
-                "/tmp/test_repo/prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
-                "/tmp/test_repo/remotes": b"User1:Task1\nUser2:Task1\nUser3:Task1",
-                "/tmp/test_repo/checks/1.in": b"123, 345",
-                "/tmp/test_repo/checks/1.out": b"345",
-                "/tmp/test_repo/checks/validate.py": b"def timestamp_validator(solution) -> float:\n"
+                "prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
+                "check/remote": b"User1:Task1\nUser2:Task1\nUser3:Task1",
+                "check/1.in": b"123, 345",
+                "check/1.out": b"345",
+                "check/validate.py": b"def timestamp_validator(solution) -> float:\n"
                 b"    return 1.0 if solution.timestamp else 0.0",
             }
         ],
@@ -92,8 +92,8 @@ class TestMake:
             TASK_ID="task_ID",
             USER_ID="user_ID",
             checks=[
-                "user_ID:task_ID/1.in",
-                "user_ID:task_ID/validate.py",
+                "user_ID:task_ID/1",
+                "user_ID:task_ID/validate",
                 "User1:Task1",
                 "User2:Task1",
                 "User3:Task1",
