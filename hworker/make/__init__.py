@@ -1,3 +1,6 @@
+"""Parsing depot objects and basic execution functionality"""
+
+from ..check import check
 from ..depot import store, search
 from ..depot.objects import Homework, Check, Solution, CheckCategoryEnum
 from ..config import (
@@ -90,3 +93,19 @@ def parse_store_all_homeworks() -> None:
     hws = search(Homework, actual=True)
     for hw in hws:
         parse_store_homework(hw)
+
+
+def check_solution(solution: Solution) -> None:
+    """
+
+    :param solution:
+    :return:
+    """
+
+
+def check_all_solutions() -> None:
+    """
+
+    :return:
+    """
+    pass

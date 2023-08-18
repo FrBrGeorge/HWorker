@@ -68,7 +68,9 @@ def python_runner(
         try:
             result = subprocess.Popen(
                 [sys.executable, prog_path],
-                preexec_fn=partial(python_set_limits, time_limit, resource_limit) if platform.system() != "Windows" else None,
+                preexec_fn=partial(python_set_limits, time_limit, resource_limit)
+                if platform.system() != "Windows"
+                else None,
                 stdin=prog_input,
                 stdout=prog_output,
                 stderr=subprocess.PIPE,
@@ -110,7 +112,6 @@ def check_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> Ch
 
     runner = choose_runner(checker)
     task_info = get_task_info(solution.TASK_ID)
-    print(task_info)
     time_limit, resource_limit = task_info["time_limit"], task_info["resource_limit"]
     actual_output, stderr, exit_code = runner(prog_path, input_path, time_limit, resource_limit)
     diff, score = choose_diff_score(actual_output, initial_output, checker.category)
@@ -130,7 +131,7 @@ def check_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> Ch
     )
 
 
-def check(checker: Check, solution: Solution, check_num: int = 0) -> None:
+def runtime(checker: Check, solution: Solution, check_num: int = 0) -> None:
     """Run checker on a given solution and save result object
 
     :param checker: check object

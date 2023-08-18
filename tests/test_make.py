@@ -5,7 +5,7 @@ import pytest
 from datetime import datetime
 
 from hworker.make import get_checks, get_solution, parse_store_homework, parse_store_all_homeworks
-from hworker.depot.objects import Homework, Check, CheckCategoryEnum, Solution, Criteria
+from hworker.depot.objects import Homework, Check, CheckCategoryEnum, Solution
 from hworker.depot import search, delete, store
 from hworker.config import create_config, process_configs
 
