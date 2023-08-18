@@ -33,7 +33,7 @@ def download_all():
             for file in Path(task_path := user_path + os.sep + task_name).rglob("**/*"):
                 if file.is_file():
                     with open(file, "rb") as file_in:
-                        contents[str(file.relative_to(get_file_root_path()))] = file_in.read()
+                        contents[file.relative_to(task_path).as_posix()] = file_in.read()
                     timestamps.append(os.path.getmtime(file))
 
             if len(contents) != 0:

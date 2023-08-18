@@ -164,6 +164,7 @@ class TaskQualifier(StoreObject):
 
     def __init__(self, name: str = None, content: str = None, **kwargs):
         kwargs["USER_ID"] = ""
+        kwargs["TASK_ID"] = ""
         super().__init__(**kwargs)
         self.name = name
         self.content = content
