@@ -9,9 +9,8 @@ import sys
 import io
 import os
 import platform
-import time
 import subprocess
-from datetime import date
+from datetime import datetime
 from math import isclose
 from itertools import zip_longest
 from typing import Iterator
@@ -120,7 +119,7 @@ def check_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> Ch
         ID=checker.ID + solution.ID,
         USER_ID=solution.USER_ID,
         TASK_ID=solution.TASK_ID,
-        timestamp=date.fromtimestamp(time.time()),
+        timestamp=datetime.now().timestamp(),
         rating=content,
         category=checker.category,
         stderr=stderr,
