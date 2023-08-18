@@ -105,8 +105,11 @@ class TestMake:
             runtime_check,
             validate_check,
         ]
+        delete(Solution)
+        delete(Check)
 
     def test_parse_store_all_homeworks(self, example_config, example_homework):
+        store(example_homework)
         parse_store_all_homeworks()
 
         assert list(search(Solution)) == [
@@ -116,3 +119,5 @@ class TestMake:
             runtime_check,
             validate_check,
         ]
+        delete(Solution)
+        delete(Check)
