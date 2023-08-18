@@ -82,7 +82,7 @@ class TestCheckValidate:
 
         solution = Solution(
             content={"prog.py": b"a, b = eval(input())\n" b"print(max(a, b))"},
-            timestamp=date.fromtimestamp(time.time()),
+            timestamp=datetime.now().timestamp(),
             checks=[
                 validator.ID,
             ],
@@ -96,7 +96,7 @@ class TestCheckValidate:
             ID=validator.ID + solution.ID,
             USER_ID=solution.USER_ID,
             TASK_ID=solution.TASK_ID,
-            timestamp=date.fromtimestamp(time.time()),
+            timestamp=result.timestamp,
             rating=1.0,
             category=validator.category,
             stderr=b"",
@@ -118,7 +118,7 @@ class TestCheckValidate:
 
         solution = Solution(
             content={"prog.py": b"import itertools\n" b"a, b = eval(input())\n" b"print(max(a, b))"},
-            timestamp=date.fromtimestamp(time.time()),
+            timestamp=datetime.now().timestamp(),
             checks=[
                 validator.ID,
             ],
@@ -132,7 +132,7 @@ class TestCheckValidate:
             ID=validator.ID + solution.ID,
             USER_ID=solution.USER_ID,
             TASK_ID=solution.TASK_ID,
-            timestamp=date.fromtimestamp(time.time()),
+            timestamp=result.timestamp,
             rating=1.0,
             category=validator.category,
             stderr=b"",
