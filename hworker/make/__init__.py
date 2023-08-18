@@ -2,7 +2,7 @@
 
 from ..check import check
 from ..depot import store, search
-from ..depot.objects import Homework, Check, Solution, CheckCategoryEnum
+from ..depot.objects import Homework, Check, Solution, CheckCategoryEnum, Criteria
 from ..config import (
     get_runtime_suffix,
     get_validate_suffix,
@@ -96,16 +96,21 @@ def parse_store_all_homeworks() -> None:
 
 
 def check_solution(solution: Solution) -> None:
-    """
+    """Run all given solution checks and store results in depot
 
-    :param solution:
-    :return:
+    :param solution: solution to run checks
+    :return: -
     """
+    for check_name in solution.checks:
+        checker = search(Check, Criteria("ID", "==", check_name), actual=True, first=True)[0]
+        check(checker, solution)
 
 
 def check_all_solutions() -> None:
-    """
+    """Run all solution checks for every actual solution and store results in depot
 
-    :return:
+    :return: -
     """
-    pass
+    solutions = search(Solution, actual=True)
+    for solution in solutions:
+        check_solution(solution)
