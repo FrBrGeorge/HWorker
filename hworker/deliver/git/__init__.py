@@ -74,7 +74,7 @@ def get_homework_content(root: str) -> dict:
     get_logger(__name__).info(f"Getting {root} content")
     Root = Path(root)
     content = {
-        str(path.relative_to(Root)): path.read_bytes()
+        path.relative_to(Root).as_posix(): path.read_bytes()
         for path in Root.rglob("*")
         if path.is_file() and f"{os.sep}." not in str(path.relative_to(Root.parent))
     }
