@@ -2,10 +2,10 @@
 import sys
 from pathlib import Path
 
-from ..depot import store
-from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
+from ..depot import store, search
+from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum, Criteria
 from ..log import get_logger
-from ..config import get_check_directory
+from ..config import get_check_directory, get_validator_name, get_version_validator_name
 
 import time
 from datetime import date
@@ -23,23 +23,31 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
     # TODO: add check nums for parallel work
     if get_check_directory() not in sys.path:
         sys.path.append(get_check_directory())
-    validators = {}
-    for name, b in validator.content.items():
-        module_path = Path(get_check_directory()) / name
-        with open(module_path, "wb") as m:
-            m.write(b)
-        module = import_module(name.rpartition(".")[0])
-        module_path.unlink(missing_ok=True)
-        for f in dir(module):
-            if not f.startswith("_"):
-                validators[f"{name}.{f}"] = getattr(module, f)
 
-    for name, v in validators.items():
-        stderr, result = b"", 0.0
-        try:
-            result = v(solution)
-        except Exception as error:
-            stderr = str(error).encode()
+    name, b = list(validator.content.items())[0]
+    module_path = Path(get_check_directory()) / name
+    with open(module_path, "wb") as m:
+        m.write(b)
+    module = import_module(name.rpartition(".")[0])
+
+    validator_type = None
+    if get_validator_name() in dir(module):
+        validator_type = get_validator_name()
+    elif get_version_validator_name() in dir(module):
+        validator_type = get_version_validator_name()
+
+    if validator_type:
+        stderr, result, v = b"", 0.0, getattr(module, validator_type)
+        if validator_type == get_validator_name():
+            try:
+                if validator_type == get_validator_name():
+                    result = v(solution)
+                else:
+                    result = v(search(Solution, Criteria("ID", "==", solution.ID)))
+            except Exception as error:
+                stderr = str(error).encode()
+            finally:
+                module_path.unlink(missing_ok=True)
 
         return CheckResult(
             ID=validator.ID + solution.ID,

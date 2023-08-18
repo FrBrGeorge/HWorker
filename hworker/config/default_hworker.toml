@@ -65,6 +65,8 @@ remote_name = "remote"
 check_name = "check"
 runtime_suffix = ["in", "out"]
 validate_suffix = "py"
+validator_name = "validator"
+version_validator_name = "version_validator"
 
 [publish]
 host = "0.0.0.0"

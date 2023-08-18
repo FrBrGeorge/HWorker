@@ -321,3 +321,19 @@ def get_validate_suffix() -> str:
     :return: validate suffix
     """
     return config()["formalization"]["validate_suffix"]
+
+
+def get_validator_name() -> str:
+    """Get validator (that works with last solution version) name
+
+    :return: validator name
+    """
+    return config()["formalization"]["validator_name"]
+
+
+def get_version_validator_name() -> str:
+    """Get validator (that works with all solution versions) name
+
+    :return: version validator name
+    """
+    return config()["formalization"]["version_validator_name"]
