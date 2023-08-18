@@ -83,3 +83,9 @@ def store_check_results():
     deliver.download_all()
     make.parse_store_all_homeworks()
     make.check_all_solutions()
+
+
+def big_red_button():
+    store_check_results()
+    do_score()
+    start_publish()
