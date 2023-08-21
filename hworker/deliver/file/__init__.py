@@ -15,6 +15,8 @@ _depot_prefix = "f"
 def download_all():
     root = get_file_root_path()
 
+    get_logger(__name__).info("Downloading files...")
+
     for username in os.listdir(root):
         if dirname_to_uid(username) is None:
             get_logger(__name__).error(f"Found unspecified username {username:<15}")
@@ -47,4 +49,4 @@ def download_all():
                         is_broken=False,
                     )
                 )
-                get_logger(__name__).info(f"Added task {TASK_ID:<15} for user {USER_ID:<15}")
+                get_logger(__name__).debug(f"Added task {TASK_ID:<15} for user {USER_ID:<15}")

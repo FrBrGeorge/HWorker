@@ -242,6 +242,14 @@ def get_logger_info() -> dict[str, str]:
     return config()["logging"]
 
 
+def get_score_info() -> dict[str, str]:
+    """Get score info dict
+
+    :return: score info dict
+    """
+    return config()["score"]
+
+
 def get_publish_info() -> dict[str, str]:
     """Get publish info dict
 
