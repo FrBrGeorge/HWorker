@@ -1,5 +1,5 @@
 """Tasks meta-information checks and check results"""
-import sys
+
 from pathlib import Path
 
 from ..depot import store, search
@@ -70,7 +70,7 @@ def validate(validator: Check, solution: Solution, check_num: int = 0) -> None:
     :param check_num:
     :return:
     """
-    get_logger(__name__).info(f"Checking solution {solution.ID} with {validator.ID} validator")
+    get_logger(__name__).debug(f"Checking solution {solution.ID} with {validator.ID} validator")
     if validator.category == CheckCategoryEnum.validate:
         result = validate_wo_store(validator, solution, check_num)
         store(result)
