@@ -1,17 +1,29 @@
 import random
 
-from .. import check, config, deliver, depot, log, make, publish, score
+from .. import config, deliver, depot, make, publish, score
 
 
 def download_all():
+    """Download all solutions from several backends
+
+    :return: -
+    """
     deliver.download_all()
 
 
 def start_publish():
+    """Runs publish server
+
+    :return: -
+    """
     publish.run_server()
 
 
 def generate_scores():
+    """Example store generation
+
+    :return: -
+    """
     users = config.get_uids()
     tasks = config.get_tasks_list()
     depot.store(depot.objects.Formula(ID=f"", timestamp=123, content=""))
@@ -58,6 +70,10 @@ def generate_scores():
 
 
 def generate_homeworks_with_versions():
+    """Example homeworks generation
+
+    :return: -
+    """
     for user_id in ["Vania", "Petya", "Vasili"]:
         for task_id in ["01", "02", "03"]:
             for ts in range(10, 31, 10):
@@ -74,18 +90,30 @@ def generate_homeworks_with_versions():
 
 
 def do_score():
+    """ Perform qualifiers and get score results
+
+    :return: -
+    """
     score.create_files()
     score.read_and_import()
     score.perform_qualifiers()
 
 
 def store_check_results():
+    """Get check results from homeworks
+
+    :return: -
+    """
     deliver.download_all()
     make.parse_store_all_homeworks()
     make.check_all_solutions()
 
 
 def big_red_button():
+    """Starts a full working system cycle
+
+    :return: -
+    """
     store_check_results()
     do_score()
     start_publish()
