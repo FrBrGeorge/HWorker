@@ -1,4 +1,3 @@
-tests/timestamp_validator.py
 
 
 ### Workflow files
@@ -6,8 +5,7 @@ data.db
 logs/
 
 # Configs
-hworker.toml
-*_final.toml
+hworker*.toml
 
 # Scores
 task_qualifier.py

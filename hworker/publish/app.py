@@ -51,12 +51,7 @@ def index():
     final_score_names = [*map(lambda x: x.name, depot.search(depot.objects.Formula))]
     user_score_names = [*map(lambda x: x.name, depot.search(depot.objects.UserQualifier))]
     task_score_names = {
-        task_id: [
-            *map(
-                lambda x: x.name,
-                depot.search(depot.objects.TaskQualifier, depot.objects.Criteria("TASK_ID", "==", task_id)),
-            )
-        ]
+        task_id: [*map(lambda x: x.name, depot.search(depot.objects.TaskQualifier))]
         for task_id in config.get_tasks_list()
     }
     # task_score_names = [*map(lambda x: x.name, depot.search(depot.objects.TaskQualifier))]
