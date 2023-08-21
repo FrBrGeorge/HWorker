@@ -4,8 +4,15 @@ import os
 import pytest
 from datetime import datetime
 
-from hworker.make import get_checks, get_solution, parse_store_homework, parse_store_all_homeworks
-from hworker.depot.objects import Homework, Check, CheckCategoryEnum, Solution, Criteria
+from hworker.make import (
+    get_checks,
+    get_solution,
+    parse_store_homework,
+    parse_store_all_homeworks,
+    check_solution,
+    check_all_solutions,
+)
+from hworker.depot.objects import Homework, Check, CheckCategoryEnum, Solution
 from hworker.depot import search, delete, store
 from hworker.config import create_config, process_configs
 
@@ -105,8 +112,11 @@ class TestMake:
             runtime_check,
             validate_check,
         ]
+        delete(Solution)
+        delete(Check)
 
     def test_parse_store_all_homeworks(self, example_config, example_homework):
+        store(example_homework)
         parse_store_all_homeworks()
 
         assert list(search(Solution)) == [
@@ -116,3 +126,5 @@ class TestMake:
             runtime_check,
             validate_check,
         ]
+        delete(Solution)
+        delete(Check)

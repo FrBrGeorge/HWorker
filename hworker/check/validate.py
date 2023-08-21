@@ -8,7 +8,7 @@ from ..log import get_logger
 from ..config import get_check_directory, get_validator_name, get_version_validator_name
 
 import time
-from datetime import date
+from datetime import datetime
 from importlib import import_module
 
 
@@ -53,7 +53,7 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
             ID=validator.ID + solution.ID,
             USER_ID=solution.USER_ID,
             TASK_ID=solution.TASK_ID,
-            timestamp=date.fromtimestamp(time.time()),
+            timestamp=datetime.now().timestamp(),
             rating=result,
             category=validator.category,
             stderr=stderr,

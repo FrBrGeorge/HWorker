@@ -48,7 +48,9 @@ def generate_scores():
 
         for rating, name in zip([attend_total, score_total], names_for_qual):
             depot.store(
-                depot.objects.UserScore(ID=f"{user_id}/{name}", USER_ID=user_id, name=name, timestamp=123, rating=rating)
+                depot.objects.UserScore(
+                    ID=f"{user_id}/{name}", USER_ID=user_id, name=name, timestamp=123, rating=rating
+                )
             )
         depot.store(
             depot.objects.FinalScore(ID=f"{user_id}", USER_ID=user_id, timestamp=123, rating=f"--{score_total}--")
@@ -75,3 +77,15 @@ def do_score():
     score.create_files()
     score.read_and_import()
     score.perform_qualifiers()
+
+
+def store_check_results():
+    deliver.download_all()
+    make.parse_store_all_homeworks()
+    make.check_all_solutions()
+
+
+def big_red_button():
+    store_check_results()
+    do_score()
+    start_publish()
