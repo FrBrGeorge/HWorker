@@ -248,6 +248,21 @@ class FinalScore(StoreObject):
         self.rating = rating
 
 
+class UpdateTime(StoreObject):
+    """Latest update time for module"""
+
+    name: str
+    _public_fields: set[str] = {"ID", "timestamp"}
+    _is_versioned: bool = False
+
+    def __init__(self, name: str = None, **kwargs):
+        kwargs["ID"] = f"{name}"
+        kwargs["USER_ID"] = ""
+        kwargs["TASK_ID"] = ""
+        super().__init__(**kwargs)
+        self.name = name
+
+
 class Plagiary(StoreObject):
     content: list[str]  # ID's ?? or list[Homework] or list[Solution]
 
