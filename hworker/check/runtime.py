@@ -34,7 +34,7 @@ def python_set_limits(time_limit: int, resource_limit: int) -> None:
     :param time_limit: time limit in seconds, will be taken from config if not specified
     :param resource_limit: resource limit in bytes, will be taken from config if not specified
     """
-    get_logger(__name__).info("Set limits for python runner")
+    get_logger(__name__).debug("Set limits for python runner")
 
     resource.setrlimit(resource.RLIMIT_CPU, (time_limit, time_limit))
     # TODO: Causes Memory Error
@@ -58,7 +58,7 @@ def python_runner(
     :param resource_limit:
     :return: tuple of program output, stderr and exit code
     """
-    get_logger(__name__).info(f"{prog_path} run")
+    get_logger(__name__).debug(f"{prog_path} run")
     if not os.path.exists(get_check_directory()):
         os.makedirs(get_check_directory())
     with open(input_path, encoding="utf-8") as prog_input, NamedTemporaryFile(
@@ -137,7 +137,7 @@ def runtime(checker: Check, solution: Solution, check_num: int = 0) -> None:
     :param solution:
     :param check_num: number of check for parallel work
     """
-    get_logger(__name__).info(f"Checking solution {solution.ID} with {checker.ID} checker")
+    get_logger(__name__).debug(f"Checking solution {solution.ID} with {checker.ID} checker")
     if checker.category == CheckCategoryEnum.runtime:
         result = check_wo_store(checker, solution, check_num)
         store(result)

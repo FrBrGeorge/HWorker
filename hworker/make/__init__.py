@@ -19,7 +19,7 @@ def get_checks(hw: Homework) -> list[Check]:
     :param hw: homework object
     :return: checks list
     """
-    get_logger(__name__).info(f"Started check parsing for {hw.ID} homework")
+    get_logger(__name__).debug(f"Started check parsing for {hw.ID} homework")
     checks, seen = [], set()
     for check_path, check_content in hw.content.items():
         if check_path.startswith(get_check_name()):
@@ -49,7 +49,7 @@ def get_checks(hw: Homework) -> list[Check]:
                 seen.add(name)
                 checks.append(check)
 
-    get_logger(__name__).info(f"Extracted {[check.ID for check in checks]} checks from {hw.ID} homework")
+    get_logger(__name__).debug(f"Extracted {[check.ID for check in checks]} checks from {hw.ID} homework")
     return checks
 
 
@@ -59,7 +59,7 @@ def get_solution(hw: Homework) -> Solution:
     :param hw: homework object
     :return: solution object
     """
-    get_logger(__name__).info(f"Started solution parsing for {hw.ID} homework")
+    get_logger(__name__).debug(f"Started solution parsing for {hw.ID} homework")
     content, remote_checks = {}, []
     for path, path_content in hw.content.items():
         if not path.startswith(get_check_name()):
@@ -69,7 +69,7 @@ def get_solution(hw: Homework) -> Solution:
     config_checks = get_task_info(hw.TASK_ID).get("checks", [])
     solution_id = f"{hw.USER_ID}:{hw.TASK_ID}"
 
-    get_logger(__name__).info(f"Extracted {solution_id} solution from {hw.ID} homework")
+    get_logger(__name__).debug(f"Extracted {solution_id} solution from {hw.ID} homework")
     return Solution(
         content=content,
         checks=own_checks + remote_checks + config_checks,
@@ -96,6 +96,7 @@ def parse_store_all_homeworks() -> None:
 
     :return: -
     """
+    get_logger(__name__).info("Parse and store all homeworks")
     hws = search(Homework, actual=True)
     for hw in hws:
         parse_store_homework(hw)
@@ -107,6 +108,7 @@ def check_solution(solution: Solution) -> None:
     :param solution: solution to run checks
     :return: -
     """
+    get_logger(__name__).debug(f"Run all checks of {solution.ID} solution")
     for check_name in solution.checks:
         checker = search(Check, Criteria("ID", "==", check_name), actual=True, first=True)
         check(checker, solution)
@@ -117,6 +119,7 @@ def check_all_solutions() -> None:
 
     :return: -
     """
+    get_logger(__name__).info("Run all checks on all solutions")
     solutions = search(Solution, actual=True)
     for solution in solutions:
         check_solution(solution)

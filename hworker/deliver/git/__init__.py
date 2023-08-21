@@ -27,7 +27,7 @@ def clone(repo: str) -> None:
     :param repo: student repo path
     :return: -
     """
-    get_logger(__name__).info(f"Cloning {repo} repo")
+    get_logger(__name__).debug(f"Cloning {repo} repo")
     if not os.path.exists(local_path(repo_to_uid(repo))):
         os.makedirs(local_path(repo_to_uid(repo)))
 
@@ -43,7 +43,7 @@ def pull(repo: str) -> None:
     :param repo: student repo path
     :return: -
     """
-    get_logger(__name__).info(f"Pulling {repo} repo")
+    get_logger(__name__).debug(f"Pulling {repo} repo")
     try:
         repo = git.Repo(local_path(repo_to_uid(repo)))
         repo.git.pull("origin", "main")
@@ -71,7 +71,7 @@ def get_homework_content(root: str) -> dict:
     :param root: local path to homework
     :return: dict with "prog", "tests" and "urls" keys
     """
-    get_logger(__name__).info(f"Getting {root} content")
+    get_logger(__name__).debug(f"Getting {root} content")
     Root = Path(root)
     content = {
         path.relative_to(Root).as_posix(): path.read_bytes()
@@ -88,9 +88,8 @@ def get_commits(repo: git.Repo, path: str) -> list[tuple[str, str]]:
     :param path: homework local path
     :return: list of (commit hash, timestamp) pairs
     """
-    get_logger(__name__).info(f"Getting {path} commits")
+    get_logger(__name__).debug(f"Getting {path} commits")
     commits = [tuple(_.split()) for _ in repo.git.log("--format=%H %ct", "--date=default", "--", path).split("\n")]
-    # get_logger(__name__).info(commits)
     return commits
 
 

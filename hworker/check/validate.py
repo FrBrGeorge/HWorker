@@ -1,5 +1,5 @@
 """Tasks meta-information checks and check results"""
-import sys
+
 from pathlib import Path
 
 from ..depot import store, search
@@ -7,9 +7,8 @@ from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, Ver
 from ..log import get_logger
 from ..config import get_check_directory, get_validator_name, get_version_validator_name
 
-import time
+from importlib.util import module_from_spec, spec_from_file_location
 from datetime import datetime
-from importlib import import_module
 
 
 def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) -> CheckResult:
@@ -21,14 +20,14 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
     :return:
     """
     # TODO: add check nums for parallel work
-    if get_check_directory() not in sys.path:
-        sys.path.append(get_check_directory())
-
     name, b = list(validator.content.items())[0]
     module_path = Path(get_check_directory()) / name
     with open(module_path, "wb") as m:
         m.write(b)
-    module = import_module(name.rpartition(".")[0])
+
+    spec = spec_from_file_location(name.rpartition(".")[0], module_path)
+    module = module_from_spec(spec)
+    spec.loader.exec_module(module)
 
     validator_type = None
     if get_validator_name() in dir(module):
@@ -71,7 +70,7 @@ def validate(validator: Check, solution: Solution, check_num: int = 0) -> None:
     :param check_num:
     :return:
     """
-    get_logger(__name__).info(f"Checking solution {solution.ID} with {validator.ID} validator")
+    get_logger(__name__).debug(f"Checking solution {solution.ID} with {validator.ID} validator")
     if validator.category == CheckCategoryEnum.validate:
         result = validate_wo_store(validator, solution, check_num)
         store(result)
