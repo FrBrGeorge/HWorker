@@ -1,5 +1,5 @@
 import datetime
-import importlib
+import importlib.util
 import inspect
 import os
 import traceback
@@ -16,20 +16,30 @@ _module_objects = [
     depot.objects.UserQualifier,
     depot.objects.Formula,
 ]
-_filename_template = "{0}.py"
+
+
+@cache
+def _get_score_directory():
+    return config.get_score_info()["score_directory"]
+
+
+def _get_path_from_name(name: str):
+    return Path(_get_score_directory(), f"{name}.py")
 
 
 def create_files():
     for name in _module_names:
-        filename = f"{name}.py"
-        if not Path(filename).exists():
-            with open(filename, "x") as fp:
+        path = _get_path_from_name(name)
+        if not path.exists():
+            with open(path, "x") as fp:
+                print(1)
                 pass
 
 
 @cache
 def _get_functions_from_module(name: str):
-    module = importlib.import_module(f"{name}")
+    spec = importlib.util.spec_from_file_location(f"{name}", Path(_get_score_directory(), f"{name}.py"))
+    module = importlib.util.module_from_spec(spec)
 
     found_funcs = dict()
     for key, value in inspect.getmembers(module):
@@ -40,10 +50,11 @@ def _get_functions_from_module(name: str):
 
 
 def read_and_import():
+    get_logger(__name__).info("Importing user functions...")
     for index, name in enumerate(_module_names):
         found_funcs = _get_functions_from_module(name)
 
-        file_timestamp = os.path.getmtime(_filename_template.format(name))
+        file_timestamp = os.path.getmtime(_get_path_from_name(name))
         for f_name in found_funcs:
             depot.store(
                 _module_objects[index](
@@ -55,7 +66,7 @@ def read_and_import():
             )
 
 
-def execute_user_func(func, inputs):
+def _execute_user_func(func, inputs):
     try:
         rating = func(inputs)
     except Exception as e:
@@ -67,6 +78,7 @@ def execute_user_func(func, inputs):
 
 
 def perform_qualifiers():
+    get_logger(__name__).info("Performing all imported qualifiers...")
     _current_timestamp = datetime.datetime.now().timestamp()
     for USER_ID in config.get_uids():
         for TASK_ID in config.get_tasks_list():
@@ -78,7 +90,7 @@ def perform_qualifiers():
                 )
             )
             for f_name, func in _get_functions_from_module("task_qualifier").items():
-                rating = execute_user_func(func, inputs)
+                rating = _execute_user_func(func, inputs)
                 if rating is not None:
                     depot.store(
                         depot.objects.TaskScore(
@@ -93,7 +105,7 @@ def perform_qualifiers():
 
         inputs = list(depot.search(depot.objects.TaskScore, depot.objects.Criteria("USER_ID", "==", USER_ID)))
         for f_name, func in _get_functions_from_module("user_qualifier").items():
-            rating = execute_user_func(func, inputs)
+            rating = _execute_user_func(func, inputs)
             if rating is not None:
                 depot.store(
                     depot.objects.UserScore(
@@ -107,7 +119,7 @@ def perform_qualifiers():
 
         inputs = list(depot.search(depot.objects.UserScore, depot.objects.Criteria("USER_ID", "==", USER_ID)))
         for f_name, func in _get_functions_from_module("formula").items():
-            rating = execute_user_func(func, inputs)
+            rating = _execute_user_func(func, inputs)
             if rating is not None:
                 depot.store(
                     depot.objects.FinalScore(
