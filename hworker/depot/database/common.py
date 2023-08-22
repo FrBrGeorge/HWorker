@@ -1,18 +1,28 @@
 import os
 from functools import cache
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import sessionmaker
 
+from .models import Base
+
 __all__ = ["get_engine", "get_Session"]
+
+__database_filename = "data.db"
+
+
+def _create_database_tables(engine: Engine):
+    Base.metadata.create_all(engine)
 
 
 @cache
 def get_engine():
-    __database_filename = os.environ.get("HWORKER_DATABASE_FILENAME", "data.db")
     database_path = "sqlite:///" + os.path.abspath(f"./{__database_filename}")
-    return create_engine(database_path, pool_size=10, max_overflow=40)
-    # return create_engine(database_path, pool_size=1, max_overflow=0)
+    engine = create_engine(database_path, pool_size=10, max_overflow=40)
+
+    _create_database_tables(engine)
+
+    return engine
 
 
 @cache
