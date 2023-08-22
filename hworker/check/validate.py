@@ -62,6 +62,7 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
             timestamp=datetime.now().timestamp(),
             rating=result,
             category=validator.category,
+            stdout=b"",
             stderr=stderr,
             check_ID=validator.ID,
             solution_ID=solution.ID,

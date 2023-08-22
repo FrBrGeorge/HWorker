@@ -96,7 +96,7 @@ def parse_store_all_homeworks() -> None:
 
     :return: -
     """
-    get_logger(__name__).info("Parse and store all homeworks")
+    get_logger(__name__).info("Parse and store all homeworks...")
     hws = search(Homework, actual=True)
     for hw in hws:
         parse_store_homework(hw)
@@ -110,6 +110,8 @@ def check_solution(solution: Solution) -> None:
     """
     get_logger(__name__).debug(f"Run all checks of {solution.ID} solution")
     for check_name in solution.checks:
+        # Current check parameterize ban spaces in USER_ID
+        check_name = check_name.split()[0]
         checker = search(Check, Criteria("ID", "==", check_name), actual=True, first=True)
         check(checker, solution)
 
@@ -119,7 +121,7 @@ def check_all_solutions() -> None:
 
     :return: -
     """
-    get_logger(__name__).info("Run all checks on all solutions")
+    get_logger(__name__).info("Run all checks on all solutions...")
     solutions = search(Solution, actual=True)
     for solution in solutions:
         check_solution(solution)
