@@ -174,3 +174,15 @@ class FinalScore(Base):
         super().__init__(**kwargs)
         self.name = name
         self.rating = rating
+
+
+class UpdateTime(Base):
+    __tablename__ = "update_time"
+
+    name: Mapped[str] = mapped_column(String)
+
+    # noinspection PyTypeChecker
+    def __init__(self, name: str = None, update_datetime: datetime.datetime = None, **kwargs):
+        super().__init__(**kwargs)
+        self.name = name
+        self.update_datetime = update_datetime
