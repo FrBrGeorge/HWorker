@@ -20,6 +20,12 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
     :return:
     """
     # TODO: add check nums for parallel work
+    validator_args = []
+    for validator_info in solution.checks:
+        name, *args = validator_info.split()
+        if name == validator.ID:
+            validator_args = args
+
     name, b = list(validator.content.items())[0]
     module_path = Path(get_check_directory()) / name
     with open(module_path, "wb") as m:
@@ -40,9 +46,10 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
         if validator_type == get_validator_name():
             try:
                 if validator_type == get_validator_name():
-                    result = v(solution)
+                    result = v(solution, *validator_args)
                 else:
-                    result = v(search(Solution, Criteria("ID", "==", solution.ID)))
+                    result = v(search(Solution,
+                                      Criteria("ID", "==", solution.ID)), *validator_args)
             except Exception as error:
                 stderr = str(error).encode()
             finally:
