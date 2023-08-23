@@ -16,8 +16,8 @@ license = { text = "GPL-3.0 license" }
 dynamic = ["version", "dependencies"]
 
 [tool.setuptools.packages.find]
-where = ["hworker"]
-exclude = ["hworker.tests*"]
+where = ["."]
+exclude = ["tests*"]
 
 [tool.setuptools-pipfile]
 path = "Pipfile"

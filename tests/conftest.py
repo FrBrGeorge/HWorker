@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 """"""
-import os
-
 import pytest
 import hworker.config
 
