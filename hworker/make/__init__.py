@@ -66,7 +66,7 @@ def get_solution(hw: Homework) -> Solution:
             content[path] = path_content
     remote_checks = hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8").split()
     own_checks = [check.ID for check in get_checks(hw)]
-    config_checks = get_task_info(hw.TASK_ID).get("checks", [])
+    config_checks = list(get_task_info(hw.TASK_ID).get("checks", {}).keys())
     solution_id = f"{hw.USER_ID}:{hw.TASK_ID}"
 
     get_logger(__name__).debug(f"Extracted {solution_id} solution from {hw.ID} homework")

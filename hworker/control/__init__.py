@@ -117,3 +117,6 @@ def big_red_button():
     store_check_results()
     do_score()
     start_publish()
+
+store_check_results()
+print(list(depot.search(depot.objects.CheckResult)))

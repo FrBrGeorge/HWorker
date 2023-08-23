@@ -49,7 +49,7 @@ def example_config(tmp_path):
             "tasks": {
                 "task_ID": {
                     "deliver_ID": "20240101/01",
-                    "checks": ["User4:Task1"],
+                    "checks": {"User4:Task1": ""},
                     "open_date": datetime(year=2024, month=1, day=1),
                 }
             }
