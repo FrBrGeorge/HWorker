@@ -23,7 +23,7 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
     validator_args = []
     for name in solution.checks:
         if name == validator.ID:
-            validator_args = get_task_info(validator.TASK_ID).get(validator.ID, "").split()
+            validator_args = get_task_info(validator.TASK_ID).get(validator.ID, [])
 
     name, b = list(validator.content.items())[0]
     module_path = Path(get_check_directory()) / name
