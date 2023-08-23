@@ -2,13 +2,14 @@ name: Release and wheel upload
 run-name: ${{ github.actor }} creating a release
 
 on:
-  workflow_run:
-    workflows: [ "Pull tests" ]
-    types:
-      - completed
+  push:
+    tags:
+      - "*.*"
+      - "*.*.*"
 
 jobs:
-
+  tests:
+    uses: ./.github/workflows/tests.yaml
   build:
     runs-on: ubuntu-latest
     permissions:
@@ -27,7 +28,7 @@ jobs:
       - name: Upload wheels to action
         uses: actions/upload-artifact@v3
         with:
-#          name: ${{ matrix.python-version }} wheel
+          #          name: ${{ matrix.python-version }} wheel
           path: dist/*.whl
       - name: Create release
         uses: ncipollo/release-action@v1.12.0

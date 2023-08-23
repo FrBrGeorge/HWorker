@@ -1,7 +1,8 @@
-name: Pull tests
-run-name: ${{ github.actor }} runs tests on pull
+name: Tests
+run-name: ${{ github.actor }} runs tests
 
-on: [ push, pull_request ]
+on:
+  workflow_call:
 
 jobs:
   tests:
