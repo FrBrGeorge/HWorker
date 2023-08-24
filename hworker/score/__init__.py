@@ -32,8 +32,7 @@ def create_files():
         path = _get_path_from_name(name)
         if not path.exists():
             with open(path, "x") as fp:
-                print(1)
-                pass
+                get_logger(__name__).warn(f"Empty {name} file")
 
 
 @cache

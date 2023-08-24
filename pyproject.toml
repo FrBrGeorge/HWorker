@@ -5,29 +5,27 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "hworker"
 authors = [
-    { name = "George V. Kouryachy", email = "george@altlinux.org" },
-    { name = "Veniamin Arefev", email = "veniamin.arefev@mail.ru" },
-    { name = "Nikita Barabanov", email = "barabanov.ns@gmail.com" },
+    { name = "George V. Kouryachy", email = "george@altlinux.org"     },
+    { name = "Veniamin Arefev",     email = "veniamin.arefev@mail.ru" },
+    { name = "Nikita Barabanov",    email = "barabanov.ns@gmail.com"  },
 ]
 description = "My package description"
-readme = "README.rst"
+readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "GPL-3.0 license" }
 dynamic = ["version", "dependencies"]
 
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["tests*"]
+
 [tool.setuptools-pipfile]
+path = "Pipfile"
 
 [tool.setuptools_scm]
 write_to = "hworker/_version.py"
 
-#[tool.setuptools.dynamic]
-#dependencies = {file = ["README.rst", "USAGE.rst"]}
-
-[tool.setuptools]
-packages = ["hworker"]
-
 [project.scripts]
-test_control = "hworker.control:test"
 hworker = "hworker.control.cli:shell"
 
 [tool.pytest.ini_options]
