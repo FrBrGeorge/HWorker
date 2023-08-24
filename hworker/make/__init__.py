@@ -1,5 +1,6 @@
 """Parsing depot objects and basic execution functionality"""
 
+from tomllib import loads
 from ..log import get_logger
 from ..check import check
 from ..depot import store, search
@@ -64,15 +65,17 @@ def get_solution(hw: Homework) -> Solution:
     for path, path_content in hw.content.items():
         if not path.startswith(get_check_name()):
             content[path] = path_content
-    remote_checks = hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8").split()
-    own_checks = [check.ID for check in get_checks(hw)]
-    config_checks = get_task_info(hw.TASK_ID).get("checks", [])
+    print(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8"))
+    remote_checks = loads(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8")).get("remote",
+                                                                                                              {})
+    own_checks = {check.ID: [] for check in get_checks(hw)}
+    config_checks = get_task_info(hw.TASK_ID).get("checks", {})
     solution_id = f"{hw.USER_ID}:{hw.TASK_ID}"
 
     get_logger(__name__).debug(f"Extracted {solution_id} solution from {hw.ID} homework")
     return Solution(
         content=content,
-        checks=own_checks + remote_checks + config_checks,
+        checks=dict(own_checks, **remote_checks, **config_checks),
         ID=solution_id,
         TASK_ID=hw.TASK_ID,
         USER_ID=hw.USER_ID,
@@ -110,8 +113,6 @@ def check_solution(solution: Solution) -> None:
     """
     get_logger(__name__).debug(f"Run all checks of {solution.ID} solution")
     for check_name in solution.checks:
-        # Current check parameterize ban spaces in USER_ID
-        check_name = check_name.split()[0]
         checker = search(Check, Criteria("ID", "==", check_name), actual=True, first=True)
         check(checker, solution)
 

@@ -26,7 +26,7 @@ def example_homework():
     return Homework(
         content={
             "prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
-            "check/remote": b"User1:Task1\nUser2:Task1\nUser3:Task1",
+            "check/remote": b"remote = {'User1:Task1' = [], 'User2:Task1' = [], 'User3:Task1' = []}",
             "check/1.in": b"123, 345",
             "check/1.out": b"345",
             "check/validate.py": b"def timestamp_validator(solution) -> float:\n"
@@ -49,7 +49,7 @@ def example_config(tmp_path):
             "tasks": {
                 "task_ID": {
                     "deliver_ID": "20240101/01",
-                    "checks": ["User4:Task1"],
+                    "checks": {"User4:Task1": []},
                     "open_date": datetime(year=2024, month=1, day=1),
                 }
             }
@@ -62,14 +62,14 @@ example_solution = Solution(
     ID="user_ID:task_ID",
     TASK_ID="task_ID",
     USER_ID="user_ID",
-    checks=[
-        "user_ID:task_ID/1",
-        "user_ID:task_ID/validate",
-        "User1:Task1",
-        "User2:Task1",
-        "User3:Task1",
-        "User4:Task1",
-    ],
+    checks={
+        "user_ID:task_ID/1": [],
+        "user_ID:task_ID/validate": [],
+        "User1:Task1": [],
+        "User2:Task1": [],
+        "User3:Task1": [],
+        "User4:Task1": [],
+    },
     content={"prog.py": b"a, b = eval(input())\nprint(max(a, b))"},
     timestamp=int(datetime(year=2024, month=1, day=1).timestamp()),
 )
