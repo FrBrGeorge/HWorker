@@ -113,8 +113,6 @@ def check_solution(solution: Solution) -> None:
     """
     get_logger(__name__).debug(f"Run all checks of {solution.ID} solution")
     for check_name in solution.checks:
-        # Current check parameterize ban spaces in USER_ID
-        check_name = check_name.split()[0]
         checker = search(Check, Criteria("ID", "==", check_name), actual=True, first=True)
         check(checker, solution)
 
