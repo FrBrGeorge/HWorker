@@ -65,7 +65,7 @@ def get_solution(hw: Homework) -> Solution:
     for path, path_content in hw.content.items():
         if not path.startswith(get_check_name()):
             content[path] = path_content
-    print(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8"))
+    # print(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8"))
     remote_checks = loads(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8")).get("remote",
                                                                                                               {})
     own_checks = {check.ID: [] for check in get_checks(hw)}
