@@ -41,6 +41,8 @@ def parse_tar_file(filename: str, content: bytes):
 
 
 def download_all():
+    depot.store(depot.objects.UpdateTime(name="Imap deliver", timestamp=datetime.datetime.now().timestamp()))
+
     box = get_mailbox()
 
     # TODO maybe should only get new latter, not all. Fow know this works really fast, just skip it.

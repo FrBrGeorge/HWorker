@@ -80,6 +80,8 @@ def _execute_user_func(func, inputs):
 
 
 def perform_qualifiers():
+    depot.store(depot.objects.UpdateTime(name="Score", timestamp=datetime.datetime.now().timestamp()))
+
     get_logger(__name__).info("Performing all imported qualifiers...")
     _current_timestamp = datetime.datetime.now().timestamp()
     for USER_ID in config.get_uids():

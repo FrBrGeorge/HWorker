@@ -13,6 +13,8 @@ _depot_prefix = "f"
 
 
 def download_all():
+    depot.store(depot.objects.UpdateTime(name="File deliver", timestamp=datetime.datetime.now().timestamp()))
+
     root = get_file_root_path()
 
     get_logger(__name__).info("Downloading files...")

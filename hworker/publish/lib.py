@@ -51,7 +51,7 @@ def _create_header(header: list, soup: BeautifulSoup):
     return thead
 
 
-def create_table(rows: list, header: list) -> str:
+def create_table(header: list, rows: list) -> str:
     """
     :param rows: Just rows with data
     :param header: Complex object, that can contain dicts, list and basic elements with str()

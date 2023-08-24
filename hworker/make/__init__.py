@@ -1,6 +1,8 @@
 """Parsing depot objects and basic execution functionality"""
-
+import datetime
 from tomllib import loads
+
+from .. import depot
 from ..log import get_logger
 from ..check import check
 from ..depot import store, search
@@ -122,6 +124,8 @@ def check_all_solutions() -> None:
 
     :return: -
     """
+    depot.store(depot.objects.UpdateTime(name="Check run", timestamp=datetime.datetime.now().timestamp()))
+
     get_logger(__name__).info("Run all checks on all solutions...")
     solutions = search(Solution, actual=True)
     for solution in solutions:
