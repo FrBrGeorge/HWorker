@@ -12,8 +12,10 @@ def global_user_config(tmp_path_factory):
 
 
 @pytest.fixture(scope="session", autouse=True)
-def database_test():
+def database_test(tmp_path_factory):
     import hworker.depot.database.common as common
 
-    common.__database_filename = "test.db"
+    # database_name = tmp_path_factory.getbasetemp() / "test.db"
+    database_name = "test.db"
 
+    common.__database_filename = database_name
