@@ -1,4 +1,5 @@
 import random
+from pathlib import Path
 
 from .. import config, deliver, depot, make, publish, score
 
@@ -90,7 +91,7 @@ def generate_homeworks_with_versions():
 
 
 def do_score():
-    """ Perform qualifiers and get score results
+    """Perform qualifiers and get score results
 
     :return: -
     """
@@ -117,3 +118,9 @@ def big_red_button():
     store_check_results()
     do_score()
     start_publish()
+
+
+def generate_static_html():
+    target_path = Path(config.get_publish_info()["static_folder"])
+    target_path.mkdir(parents=True, exist_ok=True)
+    publish.generate_static_html(target_path)

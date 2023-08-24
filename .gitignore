@@ -15,6 +15,9 @@ hworker*.toml
 # CLI
 .history
 
+# Static publish
+static
+
 ### Development
 
 # Ctags

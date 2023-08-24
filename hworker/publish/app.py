@@ -101,7 +101,9 @@ def info():
 def status():
     data: list[depot.objects.UpdateTime] = list(depot.search(depot.objects.UpdateTime))
 
-    rows = list(map(lambda x: [x.name, datetime.datetime.fromtimestamp(x.timestamp).strftime("%H:%M:%S %d.%m.%Y")], data))
+    rows = list(
+        map(lambda x: [x.name, datetime.datetime.fromtimestamp(x.timestamp).strftime("%H:%M:%S %d.%m.%Y")], data)
+    )
 
     table = create_table(["Event type", "Date and time"], rows)
 
