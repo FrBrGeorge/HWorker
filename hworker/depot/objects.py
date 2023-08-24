@@ -107,10 +107,10 @@ class Check(StoreObject):
 
 class Solution(StoreObject):
     content: dict[str, bytes]  # filepath : file_content
-    checks: list[str]  # list[ID]
+    checks: dict[str]  # list[ID]
     _is_versioned: bool = True
 
-    def __init__(self, content: dict[str, bytes] = None, checks: list[str] = None, **kwargs):
+    def __init__(self, content: dict[str, bytes] = None, checks: dict[str] = None, **kwargs):
         super().__init__(**kwargs)
         self.content = content
         self.checks = checks

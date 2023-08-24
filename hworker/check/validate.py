@@ -5,7 +5,7 @@ from pathlib import Path
 from ..depot import store, search
 from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum, Criteria
 from ..log import get_logger
-from ..config import get_check_directory, get_validator_name, get_version_validator_name
+from ..config import get_check_directory, get_validator_name, get_version_validator_name, get_task_info
 
 from importlib.util import module_from_spec, spec_from_file_location
 from datetime import datetime
@@ -21,10 +21,9 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
     """
     # TODO: add check nums for parallel work
     validator_args = []
-    for validator_info in solution.checks:
-        name, *args = validator_info.split()
+    for name in solution.checks:
         if name == validator.ID:
-            validator_args = args
+            validator_args = get_task_info(validator.TASK_ID).get(validator.ID, [])
 
     name, b = list(validator.content.items())[0]
     module_path = Path(get_check_directory()) / name

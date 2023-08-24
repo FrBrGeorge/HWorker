@@ -67,6 +67,7 @@ runtime_suffix = ["in", "out"]
 validate_suffix = "py"
 validator_name = "validator"
 version_validator_name = "version_validator"
+no_merge = ["checks", ]
 
 [publish]
 host = "0.0.0.0"
