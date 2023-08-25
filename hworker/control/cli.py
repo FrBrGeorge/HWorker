@@ -69,8 +69,15 @@ class HWorker(cmd.Cmd):
             return string.split()
 
     def do_download(self, arg):
-        "Download all homeworks"
+        """Download all homeworks (do not parse if "only" parmeter is given)"""
+        args = self.shplit(arg)
         deliver.download_all()
+        if args != ["only"]:
+            make.make.parse_store_all_homeworks()
+
+    def complete_download(self, text, line, begidx, endidx):
+        objnames = ("only",)
+        return self.filtertext(objnames, text)
 
     def do_config(self, arg):
         "Print (some) information from config file"
@@ -138,8 +145,12 @@ class HWorker(cmd.Cmd):
 
     def do_publish(self, arg):
         """Start publisher"""
-        # TODO check if is anythin to publish
+        # TODO check if is anything to publish
         control.start_publish()
+
+    def do_run(self, arg):
+        """Download, check, core and publish at once"""
+        control.big_red_button()
 
     def do_echo(self, arg):
         """Print a line"""
