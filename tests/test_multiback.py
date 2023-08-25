@@ -4,7 +4,6 @@ Test for multibackend
 """
 import pytest
 import sys
-import os
 import importlib
 
 DOCSTRING = "Sample method"
@@ -16,6 +15,7 @@ PARNAMES = ["-".join(("".join(p[0]), "".join(p[1]))) for p in PARAMS]
 def genmodule(tmp_path, request):
     """Create a test package with one method in each backand"""
     modpath = tmp_path / "multiback_client"
+    sys.path.insert(0, str(tmp_path.absolute()))
     modpath.mkdir()
     (modpath / "__init__.py").write_text(
         f"""
@@ -37,14 +37,14 @@ def method(i):
     return {n} + i
 """
         )
-    yield tmp_path, request.param[0]
+    yield request.param[0]
+    sys.path.remove(str(tmp_path.absolute()))
 
 
 class TestMultiback:
     def test_full(self, genmodule):
-        """Import test package, call aggregated mtthods"""
-        libdir, backends = genmodule
-        sys.path[0] = os.path.join(libdir.absolute())
+        """Import test package, call aggregated methods"""
+        backends = genmodule
         import multiback_client
 
         importlib.reload(multiback_client)  # To prevent caching
