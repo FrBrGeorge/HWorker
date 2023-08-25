@@ -1,10 +1,11 @@
 """Downloads solutions from repos"""
-
+import datetime
 import os
 from pathlib import Path
 
 import git
 
+from ... import depot
 from ...depot.objects import Homework
 from ...depot import store
 from ...config import get_git_directory, get_repos, get_git_uids, repo_to_uid, get_tasks_list
@@ -96,6 +97,7 @@ def get_commits(repo: git.Repo, path: str) -> list[tuple[str, str]]:
 # TODO: task_id from config
 def download_all() -> None:
     """Update all solutions and store every version in depot"""
+    depot.store(depot.objects.UpdateTime(name="Git deliver", timestamp=datetime.datetime.now().timestamp()))
     get_logger(__name__).info("Downloading (or updating) all repos and store them")
     update_all()
     for student_id in get_git_uids():

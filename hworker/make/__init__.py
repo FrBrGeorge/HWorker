@@ -1,6 +1,8 @@
 """Parsing depot objects and basic execution functionality"""
-
+import datetime
 from tomllib import loads
+
+from .. import depot
 from ..log import get_logger
 from ..check import check
 from ..depot import store, search
@@ -65,7 +67,7 @@ def get_solution(hw: Homework) -> Solution:
     for path, path_content in hw.content.items():
         if not path.startswith(get_check_name()):
             content[path] = path_content
-    print(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8"))
+    # print(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8"))
     remote_checks = loads(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8")).get(
         "remote", {}
     )
@@ -124,6 +126,8 @@ def check_all_solutions() -> None:
 
     :return: -
     """
+    depot.store(depot.objects.UpdateTime(name="Check run", timestamp=datetime.datetime.now().timestamp()))
+
     get_logger(__name__).info("Run all checks on all solutions...")
     solutions = search(Solution, actual=True)
     for solution in solutions:
