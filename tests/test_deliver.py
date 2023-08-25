@@ -3,8 +3,8 @@
 import pytest
 from git import Repo
 
-from hworker.deliver.git import get_homework_content
 from hworker import config
+from hworker.deliver.git import get_homework_content
 
 
 @pytest.fixture()

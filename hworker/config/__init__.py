@@ -1,13 +1,13 @@
 """Read and parse config"""
 
-from copy import copy
-from typing import Final
-from tomllib import load
-from pathlib import Path
 import datetime
+from copy import copy
+from pathlib import Path
+from tomllib import load
+from typing import Final
 
-from pytimeparse import parse
 from mergedeep import merge
+from pytimeparse import parse
 from tomli_w import dump
 
 final_name_suffix: Final = "_final"

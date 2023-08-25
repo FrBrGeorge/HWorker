@@ -6,9 +6,9 @@ from pathlib import Path
 import git
 
 from ... import depot
-from ...depot.objects import Homework
-from ...depot import store
 from ...config import get_git_directory, get_repos, get_git_uids, repo_to_uid, get_tasks_list
+from ...depot import store
+from ...depot.objects import Homework
 from ...log import get_logger
 
 

@@ -5,11 +5,10 @@ from typing import Iterable, Union, Type, Optional
 
 import sqlalchemy.exc
 
-from .common import get_Session
-from .models import *
-
 import hworker.depot.objects as objects
 from hworker.log import get_logger
+from .common import get_Session
+from .models import *
 
 _object_to_model_class: dict[Type[objects.StoreObject] : Type[Base]] = {
     objects.Homework: Homework,

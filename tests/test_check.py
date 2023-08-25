@@ -1,14 +1,13 @@
 """Tests for check.runtime"""
 
-from .user_config import user_config
+from datetime import datetime
+
+import pytest
+
 from hworker.check.runtime import python_runner, runtime_wo_store
 from hworker.check.validate import validate_wo_store
 from hworker.depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
-
-import time
-from datetime import date, datetime
-
-import pytest
+from .user_config import user_config
 
 
 @pytest.fixture()

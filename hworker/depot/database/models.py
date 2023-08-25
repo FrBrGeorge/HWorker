@@ -1,7 +1,8 @@
 """All database models."""
+import datetime
+
 from sqlalchemy import *
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-import datetime
 
 from ..objects import CheckCategoryEnum, VerdictEnum
 

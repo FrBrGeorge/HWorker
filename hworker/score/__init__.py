@@ -6,7 +6,6 @@ import traceback
 from functools import cache
 from pathlib import Path
 
-
 from .. import depot, config
 from ..log import get_logger
 

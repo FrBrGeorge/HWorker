@@ -12,11 +12,11 @@ Function init_backends() provided here does following:
 - Wrapper method can optionally aggregate list of retuirned values into one appropriate object.
 """
 
-from typing import Any, Callable
-import itertools
 import functools
 import importlib
 import inspect
+import itertools
+from typing import Any, Callable
 
 
 def aggregate(seq: list) -> Any:
