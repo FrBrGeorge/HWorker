@@ -1,21 +1,19 @@
 """Tests from make functions"""
 
 import os
-import pytest
 from datetime import datetime
 
+import pytest
+
+from hworker.config import create_config, process_configs
+from hworker.depot import search, delete, store
+from hworker.depot.objects import Homework, Check, CheckCategoryEnum, Solution
 from hworker.make import (
     get_checks,
     get_solution,
     parse_store_homework,
     parse_store_all_homeworks,
-    check_solution,
-    check_all_solutions,
 )
-from hworker.depot.objects import Homework, Check, CheckCategoryEnum, Solution
-from hworker.depot import search, delete, store
-from hworker.config import create_config, process_configs
-
 
 _test_database_filename = "test.db"
 os.environ["HWORKER_DATABASE_FILENAME"] = _test_database_filename

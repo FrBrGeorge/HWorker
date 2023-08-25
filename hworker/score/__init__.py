@@ -6,7 +6,6 @@ import traceback
 from functools import cache
 from pathlib import Path
 
-
 from .. import depot, config
 from ..log import get_logger
 
@@ -37,13 +36,16 @@ def create_files():
 
 @cache
 def _get_functions_from_module(name: str):
-    spec = importlib.util.spec_from_file_location(f"{name}", Path(_get_score_directory(), f"{name}.py"))
+    spec = importlib.util.spec_from_file_location(name, Path(_get_score_directory(), f"{name}.py"))
     module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
 
     found_funcs = dict()
     for key, value in inspect.getmembers(module):
         if not key.startswith("_") and inspect.isfunction(value):
             found_funcs[key] = value
+
+    get_logger(__name__).debug(f"For module {name:>20} found {found_funcs}")
 
     return found_funcs
 
@@ -77,6 +79,8 @@ def _execute_user_func(func, inputs):
 
 
 def perform_qualifiers():
+    depot.store(depot.objects.UpdateTime(name="Score", timestamp=datetime.datetime.now().timestamp()))
+
     get_logger(__name__).info("Performing all imported qualifiers...")
     _current_timestamp = datetime.datetime.now().timestamp()
     for USER_ID in config.get_uids():

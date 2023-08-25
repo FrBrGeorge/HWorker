@@ -1,4 +1,5 @@
 import pytest
+
 from hworker.config import create_config, process_configs
 
 

@@ -1,7 +1,8 @@
 """All database models."""
+import datetime
+
 from sqlalchemy import *
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-import datetime
 
 from ..objects import CheckCategoryEnum, VerdictEnum
 
@@ -56,10 +57,10 @@ class Solution(Base):
     __tablename__ = "solution"
 
     content: Mapped[dict] = mapped_column(PickleType)
-    checks: Mapped[list] = mapped_column(PickleType)
+    checks: Mapped[dict] = mapped_column(PickleType)
 
     # noinspection PyTypeChecker
-    def __init__(self, content: dict = None, checks: list = None, **kwargs):
+    def __init__(self, content: dict = None, checks: dict = None, **kwargs):
         super().__init__(**kwargs)
         self.content = content
         self.checks = checks

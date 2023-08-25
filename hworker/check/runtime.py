@@ -1,25 +1,25 @@
 """Isolated runtime tests and check results"""
 
-from ..log import get_logger
-from ..config import get_check_directory, get_task_info
-from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
-from ..depot.database.functions import store
-
-import sys
 import io
 import os
 import platform
 import subprocess
+import sys
 from datetime import datetime
-from math import isclose
-from itertools import zip_longest
-from typing import Iterator
-from random import randint
 from difflib import diff_bytes, unified_diff
-from os.path import getsize, basename
-from tempfile import NamedTemporaryFile
-from subprocess import CompletedProcess, TimeoutExpired
 from functools import partial
+from itertools import zip_longest
+from math import isclose
+from os.path import getsize, basename
+from random import randint
+from subprocess import CompletedProcess, TimeoutExpired
+from tempfile import NamedTemporaryFile
+from typing import Iterator
+
+from ..config import get_check_directory, get_task_info
+from ..depot.database.functions import store
+from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
+from ..log import get_logger
 
 if platform.system() != "Windows":
     try:

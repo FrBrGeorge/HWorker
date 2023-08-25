@@ -8,7 +8,7 @@ from .models import Base
 
 __all__ = ["get_engine", "get_Session"]
 
-__database_filename = "data.db"
+_database_path = "data.db"
 
 
 def _create_database_tables(engine: Engine):
@@ -17,7 +17,7 @@ def _create_database_tables(engine: Engine):
 
 @cache
 def get_engine():
-    database_path = "sqlite:///" + os.path.abspath(f"./{__database_filename}")
+    database_path = f"sqlite:///{os.path.abspath(_database_path)}"
     engine = create_engine(database_path, pool_size=10, max_overflow=40)
 
     _create_database_tables(engine)

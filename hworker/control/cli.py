@@ -5,15 +5,16 @@ Commandline interface
 import argparse
 import atexit
 import cmd
-import shlex
-import sys
 import io
 import re
-from pprint import pprint
+import shlex
+import sys
 from pathlib import Path
+from pprint import pprint
+
 from .. import deliver, config, control, depot, make  # NoQA: F401
-from ..log import get_logger
 from ..depot.objects import Criteria as Rule
+from ..log import get_logger
 
 try:
     import readline

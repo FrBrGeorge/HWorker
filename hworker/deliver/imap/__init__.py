@@ -1,16 +1,16 @@
 """imap backend"""
+import datetime
 import os
 import re
 import tarfile
 import tempfile
-import datetime
 import traceback
 
 from .mailer_utilities import get_mailbox
-from ...config import get_imap_info, email_to_uid, deliverid_to_taskid
-from ...log import get_logger
 from ... import depot
+from ...config import get_imap_info, email_to_uid, deliverid_to_taskid
 from ...depot.objects import Homework
+from ...log import get_logger
 
 _default_datetime = datetime.datetime.fromisoformat("2009-05-17 20:09:00")
 _depot_prefix = "i"
@@ -41,6 +41,8 @@ def parse_tar_file(filename: str, content: bytes):
 
 
 def download_all():
+    depot.store(depot.objects.UpdateTime(name="Imap deliver", timestamp=datetime.datetime.now().timestamp()))
+
     box = get_mailbox()
 
     # TODO maybe should only get new latter, not all. Fow know this works really fast, just skip it.
