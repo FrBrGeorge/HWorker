@@ -6,6 +6,7 @@ logs/
 
 # Configs
 hworker*.toml
+*_final.toml
 
 # Scores
 #task_qualifier.py

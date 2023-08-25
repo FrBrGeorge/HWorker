@@ -68,8 +68,9 @@ def get_solution(hw: Homework) -> Solution:
         if not path.startswith(get_check_name()):
             content[path] = path_content
     # print(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8"))
-    remote_checks = loads(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8")).get("remote",
-                                                                                                              {})
+    remote_checks = loads(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8")).get(
+        "remote", {}
+    )
     own_checks = {check.ID: [] for check in get_checks(hw)}
     config_checks = get_task_info(hw.TASK_ID).get("checks", {})
     solution_id = f"{hw.USER_ID}:{hw.TASK_ID}"
@@ -116,7 +117,8 @@ def check_solution(solution: Solution) -> None:
     get_logger(__name__).debug(f"Run all checks of {solution.ID} solution")
     for check_name in solution.checks:
         checker = search(Check, Criteria("ID", "==", check_name), actual=True, first=True)
-        check(checker, solution)
+        check_result = check(checker, solution)
+        store(check_result)
 
 
 def check_all_solutions() -> None:

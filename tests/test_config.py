@@ -1,9 +1,11 @@
 """"""
 
 import pytest
-from datetime import datetime
-from .user_config import user_config
+from mergedeep import merge
 
+from datetime import datetime
+
+from .user_config import user_config
 from hworker.config import (
     repo_to_uid,
     uid_to_repo,
@@ -15,8 +17,16 @@ from hworker.config import (
     get_prog_name,
     get_remote_name,
     get_task_info,
+    create_config,
+    no_merge_processing,
 )
-import hworker.config
+
+
+@pytest.fixture(scope="function")
+def tmp_config(request, tmp_path):
+    config = tmp_path / "testconfig.toml"
+    create_config(config, request.param)
+    return config.as_posix()
 
 
 class TestConfig:
@@ -61,3 +71,33 @@ class TestConfig:
             "soft_deadline": datetime(2024, 1, 7, 0, 0),
             "soft_deadline_delta": "open_date+6d",
         }
+
+    @pytest.mark.parametrize(
+        "tmp_config",
+        [
+            {
+                "tasks": {
+                    "task_ID": {
+                        "checks": {"The teacher:first/123": [], "The teacher:first/456": []},
+                    }
+                }
+            }
+        ],
+        indirect=True,
+    )
+    def test_no_merge(self, tmp_config):
+        final_content = {
+            "formalization": {
+                "no_merge": [
+                    "checks",
+                ]
+            },
+            "tasks": {"task_ID": {"checks": {"The teacher:first/deadline": [], "The teacher:first/attendance": []}}},
+        }
+        merge(
+            final_content,
+            {"tasks": {"task_ID": {"checks": {"The teacher:first/123": [], "The teacher:first/456": []}}}},
+        )
+        no_merge_processing(final_content, tmp_config, final_content["formalization"]["no_merge"], [])
+
+        assert final_content["tasks"]["task_ID"]["checks"] == {"The teacher:first/123": [], "The teacher:first/456": []}
