@@ -47,8 +47,7 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
                 if validator_type == get_validator_name():
                     result = v(solution, *validator_args)
                 else:
-                    result = v(search(Solution,
-                                      Criteria("ID", "==", solution.ID)), *validator_args)
+                    result = v(search(Solution, Criteria("ID", "==", solution.ID)), *validator_args)
             except Exception as error:
                 stderr = str(error).encode()
             finally:

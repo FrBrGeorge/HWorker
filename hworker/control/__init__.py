@@ -90,7 +90,7 @@ def generate_homeworks_with_versions():
 
 
 def do_score():
-    """ Perform qualifiers and get score results
+    """Perform qualifiers and get score results
 
     :return: -
     """

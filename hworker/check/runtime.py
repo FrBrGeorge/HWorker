@@ -82,7 +82,7 @@ def python_runner(
     return po, result.stderr.read(), exit_code
 
 
-def check_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> CheckResult:
+def runtime_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> CheckResult:
     """Run checker on a given solution and returns result object
 
     :param checker: check object
@@ -139,7 +139,7 @@ def runtime(checker: Check, solution: Solution, check_num: int = 0) -> None:
     """
     get_logger(__name__).debug(f"Checking solution {solution.ID} with {checker.ID} checker")
     if checker.category == CheckCategoryEnum.runtime:
-        result = check_wo_store(checker, solution, check_num)
+        result = runtime_wo_store(checker, solution, check_num)
         store(result)
     else:
         get_logger(__name__).warning(f"The {checker.ID} object given to check is not a checker")

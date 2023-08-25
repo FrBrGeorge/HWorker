@@ -50,7 +50,7 @@ def process_configs(user_config: str, *extras: str) -> Path:
             merge(content, read_from_path(Path(folder) / f"{name}{extension}"))
     fill_final_config(content)
     clear_underscores(content)
-    no_merge_processing(content, user_config, [])
+    no_merge_processing(content, user_config, content.get("formalization", {}).get("no_merge", []), [])
     finalpath = userdir / f"{username}{final_name_suffix}{extension}"
     create_config(finalpath, content)
     profile[:] = [content, *extras, username]
@@ -102,22 +102,31 @@ def clear_underscores(final_content: dict) -> None:
             clear_underscores(v)
 
 
-def no_merge_processing(final_content: dict, user_config: str, keys: list) -> None:
+def no_merge_processing(final_content: dict, user_config: str, no_merge: list, keys: list) -> None:
     """Change merge rules for fields in no_merge list
 
     :param final_content: final content dict
     :param user_config: user config name
+    :param no_merge: list of merge ignore fields
     :param keys: keys to current subdict
     :return: -
     """
     for k, v in copy(final_content).items():
         user_content = read_from_path(Path(user_config))
-        if k in user_content.get("formalization", {}).get("no_merge", {}):
+        if k in no_merge:
             for key in keys:
                 user_content = user_content.get(key, {})
-            final_content[k] = user_content[k]
+            final_content[k] = user_content.get(k, final_content[k])
         elif isinstance(v, dict):
-            no_merge_processing(v, user_config, keys + [k, ])
+            no_merge_processing(
+                v,
+                user_config,
+                no_merge,
+                keys
+                + [
+                    k,
+                ],
+            )
 
 
 def get_git_directory() -> str:

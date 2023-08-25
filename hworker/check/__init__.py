@@ -1,11 +1,11 @@
 """Universal check function"""
 
-from .runtime import runtime
-from .validate import validate
-from ..depot.objects import Check, Solution, CheckCategoryEnum
+from .runtime import runtime_wo_store
+from .validate import validate_wo_store
+from ..depot.objects import Check, Solution, CheckCategoryEnum, CheckResult
 
 
-def check(checker: Check, solution: Solution, check_num: int = 0) -> None:
+def check(checker: Check, solution: Solution, check_num: int = 0) -> CheckResult:
     """Universal check run on given solution
 
     :param checker: check object
@@ -15,6 +15,6 @@ def check(checker: Check, solution: Solution, check_num: int = 0) -> None:
     """
     match checker.category:
         case CheckCategoryEnum.runtime:
-            runtime(checker, solution, check_num)
+            return runtime_wo_store(checker, solution, check_num)
         case CheckCategoryEnum.validate:
-            validate(checker, solution, check_num)
+            return validate_wo_store(checker, solution, check_num)
