@@ -6,7 +6,7 @@ from pathlib import Path
 import git
 
 from ... import depot
-from ...config import get_git_directory, get_repos, get_git_uids, repo_to_uid, get_tasks_list
+from ...config import get_git_directory, get_repos, get_git_uids, repo_to_uid, get_tasks_list, get_task_info
 from ...depot import store
 from ...depot.objects import Homework
 from ...log import get_logger
@@ -103,7 +103,9 @@ def download_all() -> None:
     for student_id in get_git_uids():
         repo = git.Repo(local_path(student_id))
         for task in get_tasks_list():
-            if os.path.isdir((task_path := os.path.join(local_path(student_id), task))):
+            if os.path.isdir(
+                (task_path := os.path.join(local_path(student_id), get_task_info(task).get("deliver_ID", "")))
+            ):
                 commits = get_commits(repo, task_path)
                 for commit in commits:
                     repo.git.checkout(commit[0])
