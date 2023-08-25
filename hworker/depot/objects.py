@@ -1,8 +1,8 @@
 """Interface objects for depot management"""
 import enum
+from collections.abc import Iterator
 from inspect import getmembers_static
 from typing import Any
-from collections.abc import Iterator
 
 
 def is_field(name: str, obj: Any) -> bool:

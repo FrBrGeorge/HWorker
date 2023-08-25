@@ -1,11 +1,10 @@
 """"""
 
+from datetime import datetime
+
 import pytest
 from mergedeep import merge
 
-from datetime import datetime
-
-from .user_config import user_config
 from hworker.config import (
     repo_to_uid,
     uid_to_repo,
@@ -20,6 +19,7 @@ from hworker.config import (
     create_config,
     no_merge_processing,
 )
+from .user_config import user_config
 
 
 @pytest.fixture(scope="function")

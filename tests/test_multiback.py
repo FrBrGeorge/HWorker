@@ -2,9 +2,10 @@
 """
 Test for multibackend
 """
-import pytest
-import sys
 import importlib
+import sys
+
+import pytest
 
 DOCSTRING = "Sample method"
 PARAMS = [[_ := list("ABC"[: i + 1]), _ if k else "_methods"] for i in range(3) for k in range(2)]

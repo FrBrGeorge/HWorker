@@ -3,10 +3,7 @@ import datetime
 from tomllib import loads
 
 from .. import depot
-from ..log import get_logger
 from ..check import check
-from ..depot import store, search
-from ..depot.objects import Homework, Check, Solution, CheckCategoryEnum, Criteria
 from ..config import (
     get_runtime_suffix,
     get_validate_suffix,
@@ -14,6 +11,9 @@ from ..config import (
     get_remote_name,
     get_task_info,
 )
+from ..depot import store, search
+from ..depot.objects import Homework, Check, Solution, CheckCategoryEnum, Criteria
+from ..log import get_logger
 
 
 def get_checks(hw: Homework) -> list[Check]:
