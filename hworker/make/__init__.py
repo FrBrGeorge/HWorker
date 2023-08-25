@@ -1,5 +1,6 @@
 """Parsing depot objects and basic execution functionality"""
 import datetime
+import tomllib
 from tomllib import loads
 
 from .. import depot
@@ -67,10 +68,13 @@ def get_solution(hw: Homework) -> Solution:
     for path, path_content in hw.content.items():
         if not path.startswith(get_check_name()):
             content[path] = path_content
-    # print(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8"))
-    remote_checks = loads(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8")).get(
-        "remote", {}
-    )
+    try:
+        remote_content = loads(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8"))
+    except tomllib.TOMLDecodeError:
+        remote_content = {}
+        get_logger(__name__).warning(f"Incorrect remote content at {hw.ID} homework")
+
+    remote_checks = remote_content.get("remote", {})
     own_checks = {check.ID: [] for check in get_checks(hw)}
     config_checks = get_task_info(hw.TASK_ID).get("checks", {})
     solution_id = f"{hw.USER_ID}:{hw.TASK_ID}"
