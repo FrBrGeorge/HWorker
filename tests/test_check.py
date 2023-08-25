@@ -1,7 +1,7 @@
 """Tests for check.runtime"""
 
 from .user_config import user_config
-from hworker.check.runtime import python_runner, check_wo_store
+from hworker.check.runtime import python_runner, runtime_wo_store
 from hworker.check.validate import validate_wo_store
 from hworker.depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
 
@@ -48,7 +48,7 @@ class TestCheckRuntime:
             USER_ID="user_ID",
             TASK_ID="task_ID",
         )
-        result = check_wo_store(checker, solution)
+        result = runtime_wo_store(checker, solution)
 
         assert result == CheckResult(
             ID=checker.ID + solution.ID,
