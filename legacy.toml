@@ -159,7 +159,7 @@ deliver_ID = "20221129/1"
 open_date = 2022-11-29
 
 [score]
-score_directory = "example_scores"
+score_directory = "hworker/example/scores"
 
 [formalization]
 check_name = "tests"
