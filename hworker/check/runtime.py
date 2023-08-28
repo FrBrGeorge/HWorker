@@ -10,7 +10,7 @@ from difflib import diff_bytes, unified_diff
 from functools import partial
 from itertools import zip_longest
 from math import isclose
-from os.path import getsize, basename
+from os.path import basename
 from random import randint
 from subprocess import CompletedProcess, TimeoutExpired
 from tempfile import NamedTemporaryFile
@@ -162,7 +162,7 @@ def bytes_diff(actual: bytes, initial: bytes, test_size: int) -> Iterator[bytes]
     init_lines = [line.strip() + b"\n" for line in initial.split()]
     if act_lines == init_lines:
         return None
-    act_size, init_size = getsize(actual), getsize(initial)
+    act_size, init_size = len(actual), len(initial)
     if act_size > test_size or init_size > test_size:
         init_lines, act_lines = [f"Size differs: {init_size}\n"], ["Size differs: <output>\n"]
     return diff_bytes(unified_diff, init_lines, act_lines, basename(initial), b"<output>")

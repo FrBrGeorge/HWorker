@@ -1,0 +1,167 @@
+[modules]
+deliver = [
+    "git",
+]
+
+[git.users]
+"Филенко Тимофей 321" = "https://github.com/Filenko/pythonprac"
+"Барабанов Никита 321" = "https://git.cs.msu.ru/s02200328/pythonprac"
+"Тюшев Максим 321" = "https://github.com/mandesero/pythonprac.git"
+"Басалов Ярослав 321" = "https://github.com/Marilius/pythonprac"
+"Новиков Сергей 321" = "https://git.cs.msu.ru/s02200450/pythonprac"
+"Иванов Павел 321" = "https://git.cs.msu.ru/s02200645/pythonprac"
+"Сагалевич Виталий 321" = "https://github.com/satoad/pythonprac"
+"Голубкова Мария 321" = "https://github.com/anti-monium/pythonprac.git"
+"Бритенков Егор 321" = "https://github.com/YegorCrazy/pythonprac.git"
+"Зянчурин Игорь 321" = "https://github.com/Dark-Avery/pythonprac.git"
+"Пуртов Богдан 321" = "https://github.com/bogdann29/pythonprac.git"
+"Ященко Игорь 321" = "https://github.com/IgorYashch/pythonprac.git"
+"Морозова Вероника 321" = "https://gitlab.com/venticinque/pythonprac"
+"Путилов Георгий 321" = "https://git.cs.msu.ru/s02200464/prac-2022.git"
+"Воронец Владимир 319" = "https://gitlab.com/zenoro/pythonprac"
+"Мегина Мария 321" = "https://git.cs.msu.ru/s02200439/pythonprac.git"
+"Хаметов Марк 313" = "https://github.com/Djhekto/pythonprac.git"
+"Волчанинов Алексей 321" = "https://git.cs.msu.ru/s02200541/prak_repo"
+"Съедин Никита 313" = "https://gitlab.com/Syedin_Nikita/pythonprac.git"
+
+[tasks."20220913/1"]
+deliver_ID = "20220913/1"
+open_date = 2022-09-13
+
+[tasks."20220913/2"]
+deliver_ID = "20220913/2"
+open_date = 2022-09-13
+
+[tasks."20220920/1"]
+deliver_ID = "20220920/1"
+open_date = 2022-09-20
+
+[tasks."20220920/2"]
+deliver_ID = "20220920/2"
+open_date = 2022-09-20
+
+[tasks."20220920/3"]
+deliver_ID = "20220920/3"
+open_date = 2022-09-20
+
+[tasks."20220927/1"]
+deliver_ID = "20220927/1"
+open_date = 2022-09-27
+
+[tasks."20220927/2"]
+deliver_ID = "20220927/2"
+open_date = 2022-09-27
+
+[tasks."20220927/3"]
+deliver_ID = "20220927/3"
+open_date = 2022-09-27
+
+[tasks."20221004/1"]
+deliver_ID = "20221004/1"
+open_date = 2022-10-04
+
+[tasks."20221004/2"]
+deliver_ID = "20221004/2"
+open_date = 2022-10-04
+
+[tasks."20221004/3"]
+deliver_ID = "20221004/3"
+open_date = 2022-10-04
+
+[tasks."20221004/4"]
+deliver_ID = "20221004/4"
+open_date = 2022-10-04
+
+[tasks."20221011/1"]
+deliver_ID = "20221011/1"
+open_date = 2022-10-11
+
+[tasks."20221011/2"]
+deliver_ID = "20221011/2"
+open_date = 2022-10-11
+
+[tasks."20221011/3"]
+deliver_ID = "20221011/3"
+open_date = 2022-10-11
+
+[tasks."20221018/1"]
+deliver_ID = "20221018/1"
+open_date = 2022-10-18
+
+[tasks."20221018/2"]
+deliver_ID = "20221018/2"
+open_date = 2022-10-18
+
+[tasks."20221018/3"]
+deliver_ID = "20221018/3"
+open_date = 2022-10-18
+
+[tasks."20221025/1"]
+deliver_ID = "20221025/1"
+open_date = 2022-10-25
+
+[tasks."20221025/2"]
+deliver_ID = "20221025/2"
+open_date = 2022-10-25
+
+[tasks."20221025/3"]
+deliver_ID = "20221025/3"
+open_date = 2022-10-25
+
+[tasks."20221101/1"]
+deliver_ID = "20221101/1"
+open_date = 2022-11-01
+
+[tasks."20221101/2"]
+deliver_ID = "20221101/2"
+open_date = 2022-11-01
+
+[tasks."20221101/3"]
+deliver_ID = "20221101/3"
+open_date = 2022-11-01
+
+[tasks."20221108/1"]
+deliver_ID = "20221108/1"
+open_date = 2022-11-08
+
+[tasks."20221108/2"]
+deliver_ID = "20221108/2"
+open_date = 2022-11-08
+
+[tasks."20221108/3"]
+deliver_ID = "20221108/3"
+open_date = 2022-11-08
+
+[tasks."20221115/1"]
+deliver_ID = "20221115/1"
+open_date = 2022-11-15
+
+[tasks."20221115/2"]
+deliver_ID = "20221115/2"
+open_date = 2022-11-15
+
+[tasks."20221115/3"]
+deliver_ID = "20221115/3"
+open_date = 2022-11-15
+
+[tasks."20221122/1"]
+deliver_ID = "20221122/1"
+open_date = 2022-11-22
+
+[tasks."20221122/2"]
+deliver_ID = "20221122/2"
+open_date = 2022-11-22
+
+[tasks."20221122/3"]
+deliver_ID = "20221122/3"
+open_date = 2022-11-22
+
+[tasks."20221129/1"]
+deliver_ID = "20221129/1"
+open_date = 2022-11-29
+
+[score]
+score_directory = "example_scores"
+
+[formalization]
+check_name = "tests"
