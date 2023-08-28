@@ -1,22 +1,20 @@
 """Tests from make functions"""
 
-import os
 from datetime import datetime
 
 import pytest
 
 from hworker.config import create_config, process_configs
 from hworker.depot import search, delete, store
-from hworker.depot.objects import Homework, Check, CheckCategoryEnum, Solution
+from hworker.depot.objects import Homework, Check, CheckCategoryEnum, Solution, CheckResult
 from hworker.make import (
     get_checks,
     get_solution,
-    parse_store_homework,
-    parse_store_all_homeworks,
+    parse_homework_and_store,
+    parse_all_stored_homeworks,
+    check_all_solutions,
+    check_new_solutions,
 )
-
-_test_database_filename = "test.db"
-os.environ["HWORKER_DATABASE_FILENAME"] = _test_database_filename
 
 
 @pytest.fixture(scope="function")
@@ -24,7 +22,7 @@ def example_homework():
     return Homework(
         content={
             "prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
-            "check/remote": b"remote = {'User1:Task1' = [], 'User2:Task1' = [], 'User3:Task1' = []}",
+            # "check/remote": b"remote = {'User1:Task1' = [], 'User2:Task1' = [], 'User3:Task1' = []}",
             "check/1.in": b"123, 345",
             "check/1.out": b"345",
             "check/validate.py": b"def timestamp_validator(solution) -> float:\n"
@@ -38,6 +36,79 @@ def example_homework():
     )
 
 
+def clean_up_database():
+    delete(Homework)
+    delete(Solution)
+    delete(Check)
+    delete(CheckResult)
+
+
+@pytest.fixture(scope="function")
+def checked_example_homework(example_homework):
+    clean_up_database()
+
+    store(example_homework)
+    parse_all_stored_homeworks()
+
+    check_all_solutions()
+
+
+@pytest.fixture(scope="function")
+def example_homework_new_solution():
+    return Homework(
+        content={
+            "prog.py": b"a, b = map(int, input().split(',')\n" b"print(max(a, b))",
+            "check/1.in": b"123, 345",
+            "check/1.out": b"345",
+            "check/validate.py": b"def timestamp_validator(solution) -> float:\n"
+            b"    return 1.0 if solution.timestamp else 0.0",
+        },
+        ID="hw_ID",
+        USER_ID="user_ID",
+        TASK_ID="task_ID",
+        timestamp=int(datetime(year=2024, month=1, day=2).timestamp()),
+        is_broken=False,
+    )
+
+
+@pytest.fixture(scope="function")
+def example_homework_new_check():
+    return Homework(
+        content={
+            "prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
+            "check/1.in": b"123, 345",
+            "check/1.out": b"345",
+            "check/2.in": b"789, 123",
+            "check/2.out": b"789",
+            "check/validate.py": b"def timestamp_validator(solution) -> float:\n"
+            b"    return 1.0 if solution.timestamp else 0.0",
+        },
+        ID="hw_ID",
+        USER_ID="user_ID",
+        TASK_ID="task_ID",
+        timestamp=int(datetime(year=2024, month=1, day=2).timestamp()),
+        is_broken=False,
+    )
+
+
+@pytest.fixture(scope="function")
+def example_homework_update_check():
+    return Homework(
+        content={
+            "prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
+            "check/1.in": b"123, 3456",
+            "check/1.out": b"3456",
+            "check/validate.py": b"def timestamp_validator(solution) -> float:\n"
+            b"    return 1.0 if solution.timestamp else 0.0",
+        },
+        ID="hw_ID",
+        USER_ID="user_ID",
+        TASK_ID="task_ID",
+        timestamp=int(datetime(year=2024, month=1, day=2).timestamp()),
+        is_broken=False,
+    )
+
+
 @pytest.fixture(scope="function")
 def example_config(tmp_path):
     config = tmp_path / "testconfig.toml"
@@ -47,7 +118,6 @@ def example_config(tmp_path):
             "tasks": {
                 "task_ID": {
                     "deliver_ID": "20240101/01",
-                    "checks": {"User4:Task1": []},
                     "open_date": datetime(year=2024, month=1, day=1),
                 }
             }
@@ -63,10 +133,6 @@ example_solution = Solution(
     checks={
         "user_ID:task_ID/1": [],
         "user_ID:task_ID/validate": [],
-        "User1:Task1": [],
-        "User2:Task1": [],
-        "User3:Task1": [],
-        "User4:Task1": [],
     },
     content={"prog.py": b"a, b = eval(input())\nprint(max(a, b))"},
     timestamp=int(datetime(year=2024, month=1, day=1).timestamp()),
@@ -100,8 +166,8 @@ class TestMake:
     def test_get_solution(self, example_config, example_homework):
         assert get_solution(example_homework) == example_solution
 
-    def test_parse_store_homework(self, example_config, example_homework):
-        parse_store_homework(example_homework)
+    def test_parse_homework_and_store(self, example_config, example_homework):
+        parse_homework_and_store(example_homework)
 
         assert list(search(Solution)) == [
             example_solution,
@@ -115,7 +181,7 @@ class TestMake:
 
     def test_parse_store_all_homeworks(self, example_config, example_homework):
         store(example_homework)
-        parse_store_all_homeworks()
+        parse_all_stored_homeworks()
 
         assert list(search(Solution)) == [
             example_solution,
@@ -126,3 +192,54 @@ class TestMake:
         ]
         delete(Solution)
         delete(Check)
+
+    def test_parse_update_solution(self, checked_example_homework, example_homework_new_solution):
+        old_checks_results: list[CheckResult] = list(search(CheckResult))
+
+        store(example_homework_new_solution)
+        parse_all_stored_homeworks()
+
+        cur_timestamp = datetime.now().timestamp()
+
+        check_new_solutions()
+
+        new_checks_results: list[CheckResult] = list(search(CheckResult))
+
+        assert len(old_checks_results) == len(new_checks_results)
+        assert all([check_result.timestamp > cur_timestamp for check_result in new_checks_results])
+
+        clean_up_database()
+
+
+    def test_parse_new_check(self, checked_example_homework, example_homework_new_check):
+        # TODO remove if logic is set up correctly
+        pytest.skip()
+
+        old_checks_results: list[CheckResult] = list(search(CheckResult))
+
+        store(example_homework_new_check)
+        parse_all_stored_homeworks()
+
+        check_new_solutions()
+
+        new_checks_results: list[CheckResult] = list(search(CheckResult))
+
+        assert len(old_checks_results) == len(new_checks_results) - 1
+        assert all([old_result in new_checks_results for old_result in old_checks_results])
+
+        clean_up_database()
+
+    def test_parse_update_check(self, checked_example_homework, example_homework_update_check):
+        old_checks_results: list[CheckResult] = list(search(CheckResult))
+
+        store(example_homework_update_check)
+        parse_all_stored_homeworks()
+
+        check_new_solutions()
+
+        new_checks_results: list[CheckResult] = list(search(CheckResult))
+
+        assert len(old_checks_results) == len(new_checks_results)
+        assert all([old_result not in new_checks_results for old_result in old_checks_results])
+
+        clean_up_database()

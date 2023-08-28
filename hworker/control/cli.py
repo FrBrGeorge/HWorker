@@ -74,7 +74,7 @@ class HWorker(cmd.Cmd):
         args = self.shplit(arg)
         deliver.download_all()
         if args != ["only"]:
-            make.make.parse_store_all_homeworks()
+            make.make.parse_all_stored_homeworks()
 
     def complete_download(self, text, line, begidx, endidx):
         objnames = ("only",)

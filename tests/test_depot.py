@@ -1,11 +1,7 @@
 """Tests for depot"""
 import datetime
-import os
 
 import pytest
-
-_test_database_filename = "test.db"
-os.environ["HWORKER_DATABASE_FILENAME"] = _test_database_filename
 
 
 from hworker.depot import store, delete, search
