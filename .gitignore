@@ -1,8 +1,7 @@
-
-
 ### Workflow files
 data.db
 logs/
+sample/
 
 # Configs
 hworker*.toml

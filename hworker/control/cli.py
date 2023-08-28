@@ -10,6 +10,7 @@ import re
 import shlex
 import sys
 import os
+import shutil
 from pathlib import Path
 from pprint import pprint
 
@@ -180,17 +181,35 @@ class HWorker(cmd.Cmd):
         pass
 
 
+def copy_sample(path: Path) -> Path:
+    """Copy sample project from inside package
+
+    :param path: Destination path
+    :return: Sample project config file name"""
+
+    from .. import __path__ as module_path
+
+    P = Path(path)
+    shutil.copytree(Path(module_path[0]) / "example", P, dirs_exist_ok=True)
+    return str(P / "example.toml")
+
+
 def shell():
     parser = argparse.ArgumentParser(description="Homework checker")
-    parser.add_argument("-c", "--command", action="append", help="Run a command")
     parser.add_argument(
         "-e",
         "--external",
         action="store_true",
         help="Treat config file as external one and use current directory as project path",
     )
+    parser.add_argument("-c", "--command", action="append", help="Run a COMMAND")
+    parser.add_argument(
+        "-s", "--sample", nargs="?", metavar="PATH", const="sample", help="Copy a sample project into PATH"
+    )
     parser.add_argument("config", nargs="*", help="Configuration file to parse")
     args = parser.parse_args()
+    if args.sample:
+        args.config.insert(0, copy_sample(args.sample))
     if args.config:
         finalconf = config.process_configs(*args.config)
         if not args.external:
