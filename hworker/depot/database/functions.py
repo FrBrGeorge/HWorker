@@ -1,7 +1,7 @@
 """Database functions"""
 import functools
 from operator import itemgetter
-from typing import Iterable, Union, Type, Optional
+from typing import Iterable, Optional
 
 import sqlalchemy.exc
 
@@ -10,7 +10,7 @@ from hworker.log import get_logger
 from .common import get_Session
 from .models import *
 
-_object_to_model_class: dict[Type[objects.StoreObject] : Type[Base]] = {
+_object_to_model_class: dict[type[objects.StoreObject] : type[Base]] = {
     objects.Homework: Homework,
     objects.Check: Check,
     objects.Solution: Solution,
@@ -23,7 +23,7 @@ _object_to_model_class: dict[Type[objects.StoreObject] : Type[Base]] = {
     objects.FinalScore: FinalScore,
     objects.UpdateTime: UpdateTime,
 }
-_model_class_to_object: dict[Type[Base] : Type[objects.StoreObject]] = {
+_model_class_to_object: dict[type[Base] : type[objects.StoreObject]] = {
     value: key for key, value in _object_to_model_class.items()
 }
 
@@ -32,7 +32,7 @@ def _get_fields_from_object(obj: Any):
     return {name: value for name, value in obj.__dict__.items() if not name.startswith("_") and not callable(value)}
 
 
-def _translate_object_to_model(obj: Union[objects.StoreObject, Type[objects.StoreObject]]) -> Base:
+def _translate_object_to_model(obj: objects.StoreObject | type[objects.StoreObject]) -> Base:
     if isinstance(obj, objects.StoreObject) and type(obj) != objects.StoreObject:
         obj = obj
     elif issubclass(obj, objects.StoreObject) and obj != objects.StoreObject:
@@ -50,8 +50,8 @@ def _translate_object_to_model(obj: Union[objects.StoreObject, Type[objects.Stor
 
 
 def _create_object(
-    to_parse: Union[Base, sqlalchemy.engine.Row],
-    return_type: Type[objects.StoreObject],
+    to_parse: Base | sqlalchemy.engine.Row,
+    return_type: type[objects.StoreObject],
     return_fields: list[str] = None,
 ) -> objects.StoreObject:
     if isinstance(to_parse, Base):
@@ -69,7 +69,7 @@ def _create_object(
     return return_type(**vals)
 
 
-def _parse_criteria(model: Type[Base], criteria: objects.Criteria) -> BinaryExpression:
+def _parse_criteria(model: type[Base], criteria: objects.Criteria) -> BinaryExpression:
     model_field = getattr(model, criteria.field_name)
 
     model_method = getattr(model_field, criteria.get_condition_function())
@@ -120,12 +120,12 @@ def store(obj: objects.StoreObject) -> None:
 
 
 def search(
-    obj_type: Type[objects.StoreObject],
+    obj_type: type[objects.StoreObject],
     *criteria: objects.Criteria,
     return_fields: list[str] = None,
     first: bool = False,
     actual: bool = False,
-) -> Union[Iterable[objects.StoreObject], Optional[objects.StoreObject]]:
+) -> Iterable[objects.StoreObject] | Optional[objects.StoreObject]:
     """Search for object in database
     :param obj_type: type of object to search
     :param criteria: criteria for searching
@@ -155,7 +155,7 @@ def search(
         return map(translator, search_result)
 
 
-def delete(obj_type: Type[objects.StoreObject], *criteria: objects.Criteria) -> None:
+def delete(obj_type: type[objects.StoreObject], *criteria: objects.Criteria) -> None:
     """
     Delete object from database
     :param obj_type: type of object to delete or its instance
