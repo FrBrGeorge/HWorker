@@ -92,7 +92,7 @@ def runtime_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> 
     if check_num == 0:
         check_num = randint(1, 1000000)
     prog = solution.content["prog.py"]
-    prog_input, initial_output = io.BytesIO(), bytes()
+    prog_input, initial_output = b"", b""
     for name, b in checker.content.items():
         if name.endswith(".in"):
             prog_input = b
