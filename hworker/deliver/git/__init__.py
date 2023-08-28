@@ -114,7 +114,7 @@ def download_all() -> None:
                     store(
                         Homework(
                             content=content,
-                            ID=commit[0],
+                            ID=f"{student_id}:{task}:{commit[0][0:7]}",
                             USER_ID=student_id,
                             TASK_ID=os.path.join(task),
                             timestamp=commit[1],
