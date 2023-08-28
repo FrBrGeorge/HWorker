@@ -106,8 +106,8 @@ def store_check_results():
     :return: -
     """
     deliver.download_all()
-    make.parse_store_all_homeworks()
-    make.check_all_solutions()
+    make.parse_all_stored_homeworks()
+    make.check_new_solutions()
 
 
 def big_red_button():

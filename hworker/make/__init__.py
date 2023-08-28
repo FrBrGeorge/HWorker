@@ -2,9 +2,9 @@
 import datetime
 import tomllib
 from tomllib import loads
+from typing import Iterable
 
-from .. import depot
-from ..check import check
+from ..check import check, get_result_ID
 from ..config import (
     get_runtime_suffix,
     get_validate_suffix,
@@ -13,7 +13,7 @@ from ..config import (
     get_task_info,
 )
 from ..depot import store, search
-from ..depot.objects import Homework, Check, Solution, CheckCategoryEnum, Criteria
+from ..depot.objects import Homework, Check, Solution, CheckCategoryEnum, Criteria, CheckResult, UpdateTime
 from ..log import get_logger
 
 
@@ -90,18 +90,18 @@ def get_solution(hw: Homework) -> Solution:
     )
 
 
-def parse_store_homework(hw: Homework) -> None:
+def parse_homework_and_store(hw: Homework) -> None:
     """Parse homework to Solution and Checks and store them with depot
 
     :param hw: homework object
     :return: -
     """
-    for check in get_checks(hw):
-        store(check)
+    for cur_check in get_checks(hw):
+        store(cur_check)
     store(get_solution(hw))
 
 
-def parse_store_all_homeworks() -> None:
+def parse_all_stored_homeworks() -> None:
     """Parse all actual homeworks to Solution and Checks and store them with depot
 
     :return: -
@@ -109,19 +109,27 @@ def parse_store_all_homeworks() -> None:
     get_logger(__name__).info("Parse and store all homeworks...")
     hws = search(Homework, actual=True)
     for hw in hws:
-        parse_store_homework(hw)
+        parse_homework_and_store(hw)
 
 
-def check_solution(solution: Solution) -> None:
+def run_solution_checks_and_store(solution: Solution) -> None:
     """Run all given solution checks and store results in depot
 
     :param solution: solution to run checks
     :return: -
     """
     get_logger(__name__).debug(f"Run all checks of {solution.ID} solution")
+
     for check_name in solution.checks:
-        checker = search(Check, Criteria("ID", "==", check_name), actual=True, first=True)
+        checker = search(Check, Criteria("ID", "==", check_name), first=True)
+        # TODO checker may be None
+        # TODO remove this if
+        if checker is None:
+            continue
         check_result = check(checker, solution)
+        # TODO remove this if
+        if check_result is None:
+            continue
         store(check_result)
 
 
@@ -130,9 +138,34 @@ def check_all_solutions() -> None:
 
     :return: -
     """
-    depot.store(depot.objects.UpdateTime(name="Check run", timestamp=datetime.datetime.now().timestamp()))
-
+    store(UpdateTime(name="Check run", timestamp=datetime.datetime.now().timestamp()))
     get_logger(__name__).info("Run all checks on all solutions...")
+
     solutions = search(Solution, actual=True)
     for solution in solutions:
-        check_solution(solution)
+        run_solution_checks_and_store(solution)
+
+
+def check_new_solutions() -> None:
+    """Run new solution checks for every actual solution and store results in depot
+
+    :return: -
+    """
+    store(UpdateTime(name="Check run", timestamp=datetime.datetime.now().timestamp()))
+    get_logger(__name__).info("Run new checks on all solutions...")
+
+    solutions: Iterable[Solution] = search(Solution, actual=True)
+
+    for solution in solutions:
+        for check_name in solution.checks:
+            checker: Check = search(Check, Criteria("ID", "==", check_name), first=True)
+            # Not null because solutions and checks parsed together
+            result_obj: CheckResult = search(
+                CheckResult, Criteria("ID", "==", get_result_ID(solution=solution, checker=checker)), first=True
+            )
+
+            if result_obj is None or max(solution.timestamp, checker.timestamp) > result_obj.timestamp:
+                new_result = check(checker, solution)
+                if new_result is None:
+                    continue
+                store(new_result)
