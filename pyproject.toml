@@ -17,7 +17,7 @@ dynamic = ["version", "dependencies"]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["hworker*", "example*"]
+include = ["hworker"]
 
 [tool.setuptools-pipfile]
 path = "Pipfile"
@@ -35,5 +35,3 @@ tmp_path_retention_policy = "failed"
 line-length = 120
 target-version = ['py311']
 include = '\.pyi?$'
-
-

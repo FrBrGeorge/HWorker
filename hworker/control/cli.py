@@ -9,6 +9,7 @@ import io
 import re
 import shlex
 import sys
+import os
 from pathlib import Path
 from pprint import pprint
 
@@ -182,10 +183,18 @@ class HWorker(cmd.Cmd):
 def shell():
     parser = argparse.ArgumentParser(description="Homework checker")
     parser.add_argument("-c", "--command", action="append", help="Run a command")
+    parser.add_argument(
+        "-e",
+        "--external",
+        action="store_true",
+        help="Treat config file as external one and use current directory as project path",
+    )
     parser.add_argument("config", nargs="*", help="Configuration file to parse")
     args = parser.parse_args()
     if args.config:
-        config.process_configs(*args.config)
+        finalconf = config.process_configs(*args.config)
+        if not args.external:
+            os.chdir(finalconf.parent)
     if args.command:
         with io.StringIO("\n".join(args.command) + "\n") as stdin:
             runner = HWorker(stdin=stdin)

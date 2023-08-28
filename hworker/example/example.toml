@@ -4,7 +4,7 @@ deliver = [
 ]
 
 [file]
-root_path = "example"
+root_path = "repo"
 
 [file.users]
 "The teacher" = "teacher"
@@ -19,4 +19,4 @@ checks = {"The teacher:first/deadline" = [], "The teacher:first/attendance" = []
 open_date = 2023-08-12
 
 [score]
-score_directory = "example_scores"
+score_directory = "scores"
