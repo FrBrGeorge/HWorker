@@ -19,11 +19,13 @@ _module_objects = [
 
 @cache
 def _get_score_directory():
-    return config.get_score_info()["score_directory"]
+    path = Path(config.get_score_info()["score_directory"])
+    path.mkdir(parents=True, exist_ok=True)
+    return path
 
 
 def _get_path_from_name(name: str):
-    return Path(_get_score_directory(), f"{name}.py")
+    return _get_score_directory() / f"{name}.py"
 
 
 def create_files():
