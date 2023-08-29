@@ -20,9 +20,7 @@ deliver = [
 "Путилов Георгий 321" = "https://git.cs.msu.ru/s02200464/prac-2022.git"
 "Воронец Владимир 319" = "https://gitlab.com/zenoro/pythonprac"
 "Мегина Мария 321" = "https://git.cs.msu.ru/s02200439/pythonprac.git"
-"Хаметов Марк 313" = "https://github.com/Djhekto/pythonprac.git"
 "Волчанинов Алексей 321" = "https://git.cs.msu.ru/s02200541/prak_repo"
-"Съедин Никита 313" = "https://gitlab.com/Syedin_Nikita/pythonprac.git"
 
 [tasks."20220913/1"]
 deliver_ID = "20220913/1"
@@ -161,7 +159,7 @@ deliver_ID = "20221129/1"
 open_date = 2022-11-29
 
 [score]
-score_directory = "example_scores"
+score_directory = "hworker/example/scores"
 
 [formalization]
 check_name = "tests"

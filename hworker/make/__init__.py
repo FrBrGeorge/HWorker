@@ -35,7 +35,8 @@ def get_checks(hw: Homework) -> list[Check]:
                 if suffix in get_runtime_suffix():
                     category = CheckCategoryEnum.runtime
                     for suf in get_runtime_suffix():
-                        content[f"{name}.{suf}"] = hw.content.get(f"{path_beg}.{suf}", None)
+                        # What to do if there is only one of the tests of in/out pair?
+                        content[f"{name}.{suf}"] = hw.content.get(f"{path_beg}.{suf}", b"")
                 elif suffix == get_validate_suffix():
                     category = CheckCategoryEnum.validate
                     content = {f"{name}.{suffix}": check_content}

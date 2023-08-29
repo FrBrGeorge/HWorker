@@ -103,6 +103,7 @@ def download_all() -> None:
     for student_id in get_git_uids():
         repo = git.Repo(local_path(student_id))
         for task in get_tasks_list():
+            repo.git.checkout(repo.heads[0])
             if os.path.isdir(
                 (task_path := os.path.join(local_path(student_id), get_task_info(task).get("deliver_ID", "")))
             ):
@@ -113,7 +114,7 @@ def download_all() -> None:
                     store(
                         Homework(
                             content=content,
-                            ID=commit[0],
+                            ID=f"{student_id}:{task}:{commit[0][0:7]}",
                             USER_ID=student_id,
                             TASK_ID=os.path.join(task),
                             timestamp=commit[1],
