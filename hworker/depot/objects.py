@@ -119,6 +119,7 @@ class Solution(StoreObject):
 class VerdictEnum(enum.Enum):
     passed = 0
     failed = 1
+    missing = -1
 
 
 class CheckResult(StoreObject):
