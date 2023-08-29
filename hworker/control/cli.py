@@ -14,7 +14,7 @@ import shutil
 from pathlib import Path
 from pprint import pprint
 
-from .. import deliver, config, control, depot, make  # NoQA: F401
+from .. import deliver, config, control, depot, make, score, publish  # NoQA: F401
 from ..depot.objects import Criteria as Rule
 from ..log import get_logger
 

@@ -17,7 +17,7 @@ dynamic = ["version", "dependencies"]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["hworker"]
+include = ["hworker*"]
 
 [tool.setuptools-pipfile]
 path = "Pipfile"
