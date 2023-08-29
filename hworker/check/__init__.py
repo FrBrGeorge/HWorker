@@ -15,7 +15,6 @@ def check(checker: Check, solution: Solution, check_num: int = 0) -> CheckResult
     :param check_num: optional parameter, will be used for parallelization
     :return: -
     """
-
     match checker.category if isinstance(checker, Check) else checker:
         case CheckCategoryEnum.runtime:
             return runtime_wo_store(checker, solution, check_num)
