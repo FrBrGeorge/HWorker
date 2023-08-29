@@ -38,6 +38,7 @@ class HWorker(cmd.Cmd):
     intro = "HomeWorker shell. Type ? for help.\n"
     prompt = "hw> "
     DELIMETERS = set(' \t\n`~!@#$%^&*()-=+[{]}\\|;:",<>/?')
+    whatshow = {"homework": depot.objects.Homework, "solution": depot.objects.Solution, "check": depot.objects.Check}
 
     def qsplit(self, line, text, begidx, endidx):
         try:  # All quotes are closed
@@ -110,30 +111,46 @@ class HWorker(cmd.Cmd):
             case ["user"]:
                 return self.filtertext(config.get_uids(), word, shift=delta, quote=quote)
 
+    def show_objects(self, Type, *options, actual=True):
+        print("@@", Type)
+        optnames = ("ID",)
+        rules = {optname: Rule(optname, "==", opt) for optname, opt in zip(optnames, options)}
+        for hw in depot.search(Type, *rules.values(), actual=actual):
+            print(hw)
+            if "ID" in rules and hasattr(hw, "content"):
+                for fname in hw.content:
+                    print(f"\t{fname}")
+
     def do_show(self, arg):
+        # TODO do_help()
         """Show objects or individual object"""
         args = self.shplit(arg)
+        if len(args) > 0:
+            if args[0] not in self.whatshow:
+                log(f"Unknown object '{args[0]}'")
+                return
+        else:
+            args = ["homework"]
         match args:
-            case [] | ["homework"]:
-                for hw in depot.search(depot.objects.Homework):
-                    print(hw)
-            case ["homework", ID]:
-                hw = depot.search(depot.objects.Homework, Rule("ID", "==", ID), first=True, actual=True)
-                print(hw)
-                if hw:
-                    for fname in hw.content:
-                        print(f"\t{fname}")
+            case [Type]:
+                self.show_objects(self.whatshow[Type])
+            case [Type, "all"]:
+                self.show_objects(self.whatshow[Type], actual=False)
+            case [Type, ID]:
+                self.show_objects(self.whatshow[Type], ID)
+            case [Type, ID, "all"]:
+                self.show_objects(self.whatshow[Type], ID, actual=False)
 
     def complete_show(self, text, line, begidx, endidx):
-        objnames = ("homework",)
         (_, *args, word), delta, quote = self.qsplit(line, text, begidx, endidx)
         # print("\n→", args, text, delta)
         match args:
             case []:
-                return self.filtertext(objnames, word, shift=delta)
-            case ["homework"]:
-                ids = [hw.ID for hw in depot.search(depot.objects.Homework, actual=True)]
-                return self.filtertext(ids, word, shift=delta, quote=quote)
+                return self.filtertext(self.whatshow, word, shift=delta)
+            case [Type]:
+                if Type in self.whatshow:
+                    ids = [hw.ID for hw in depot.search(self.whatshow[Type], actual=True)]
+                    return self.filtertext(ids, word, shift=delta, quote=quote)
 
     def do_shell(self, arg):
         "Execute python code"
