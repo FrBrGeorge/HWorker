@@ -85,10 +85,13 @@ class FileObject:
         self.timestamp = timestamp
 
     def __eq__(self, other):
-        return isinstance(other, FileObject) and self.content == other.content and self.timestamp == other.timestamp
+        return isinstance(other, FileObject) and all([getattr(self, field) == getattr(other, field) for field in ""])
 
     def __str__(self):
-        return ", ".join(f"{key}={value}" for key, value in self.__dict__.items())
+        return ", ".join(map(str, [self.content, self.timestamp]))
+
+    def __repr__(self):
+        return str(self)
 
 
 class Homework(StoreObject):
@@ -96,7 +99,7 @@ class Homework(StoreObject):
     is_broken: bool
     _is_versioned: bool = True
 
-    def __init__(self, content: dict[str, bytes] = None, is_broken: bool = None, **kwargs):
+    def __init__(self, content: dict[str, FileObject] = None, is_broken: bool = None, **kwargs):
         super().__init__(**kwargs)
         self.content = content
         self.is_broken = is_broken
@@ -141,9 +144,9 @@ class CheckResult(StoreObject):
     rating: float
     category: CheckCategoryEnum
     check_ID: str
-    check_timestamp: int
+    check_timestamp: float
     solution_ID: str
-    solution_timestamp: int
+    solution_timestamp: float
     verdict: VerdictEnum
     stdout: bytes
     stderr: bytes
@@ -155,9 +158,9 @@ class CheckResult(StoreObject):
         rating: float = None,
         category: CheckCategoryEnum = None,
         check_ID: str = None,
-        check_timestamp: int = None,
+        check_timestamp: float = None,
         solution_ID: str = None,
-        solution_timestamp: int = None,
+        solution_timestamp: float = None,
         verdict: VerdictEnum = None,
         stdout: bytes = None,
         stderr: bytes = None,
