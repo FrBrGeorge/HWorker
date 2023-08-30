@@ -2,6 +2,8 @@ from bs4 import BeautifulSoup
 
 
 def encode_to_str(to_encode: any) -> str:
+    if type(to_encode) == float:
+        to_encode = f"{to_encode:0.3f}"
     return str(to_encode).replace(" ", "\xa0")
 
 
