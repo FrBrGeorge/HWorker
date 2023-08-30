@@ -72,7 +72,9 @@ class CheckResult(Base):
     rating: Mapped[float] = mapped_column(Float)
     category: Mapped[CheckCategoryEnum] = mapped_column(Enum(CheckCategoryEnum))
     check_ID: Mapped[str] = mapped_column(String)
+    check_timestamp: Mapped[int] = mapped_column(Integer)
     solution_ID: Mapped[str] = mapped_column(String)
+    solution_timestamp: Mapped[int] = mapped_column(Integer)
     verdict: Mapped[VerdictEnum] = mapped_column(Enum(VerdictEnum))
     stdout: Mapped[bytes] = mapped_column(LargeBinary)
     stderr: Mapped[bytes] = mapped_column(LargeBinary)
@@ -83,7 +85,9 @@ class CheckResult(Base):
         rating: float = None,
         category: CheckCategoryEnum = None,
         check_ID: str = None,
+        check_timestamp: int = None,
         solution_ID: str = None,
+        solution_timestamp: int = None,
         verdict: VerdictEnum = None,
         stdout: bytes = None,
         stderr: bytes = None,
@@ -93,7 +97,9 @@ class CheckResult(Base):
         self.rating = rating
         self.category = category
         self.check_ID = check_ID
+        self.check_timestamp = check_timestamp
         self.solution_ID = solution_ID
+        self.solution_timestamp = solution_timestamp
         self.verdict = verdict
         self.stdout = stdout
         self.stderr = stderr

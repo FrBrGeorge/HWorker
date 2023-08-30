@@ -125,7 +125,9 @@ def runtime_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> 
         stderr=stderr,
         stdout=actual_output,
         check_ID=checker.ID,
+        check_timestamp=checker.timestamp,
         solution_ID=solution.ID,
+        solution_timestamp=solution.timestamp,
         verdict=VerdictEnum.passed if not exit_code else VerdictEnum.failed,
     )
 
