@@ -3,6 +3,7 @@
 ## The Uncompromising Homework Checker
   
 ![GitHub contributors](https://img.shields.io/github/contributors/FrBrGeorge/HWorker)
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/FrBrGeorge/HWorker/main)
 ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/FrBrGeorge/HWorker/pull_requests%26push.yaml?label=Tests)
 ![Read the Docs](https://img.shields.io/readthedocs/hworker)
 ![GitHub](https://img.shields.io/github/license/FrBrGeorge/HWorker)
