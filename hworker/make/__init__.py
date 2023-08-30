@@ -13,7 +13,7 @@ from ..config import (
     get_task_info,
 )
 from ..depot import store, search
-from ..depot.objects import Homework, Check, Solution, CheckCategoryEnum, Criteria, CheckResult, UpdateTime
+from ..depot.objects import Homework, Check, Solution, CheckCategoryEnum, Criteria, CheckResult, UpdateTime, FileObject
 from ..log import get_logger
 
 
@@ -29,6 +29,7 @@ def get_checks(hw: Homework) -> list[Check]:
         if check_path.startswith(get_check_name()):
             path_beg, _, suffix = check_path.rpartition(".")
             name = path_beg.rsplit("/", maxsplit=1)[-1]
+            timestamp = hw.timestamp
 
             if name not in seen:
                 content, category = {}, None
@@ -36,10 +37,16 @@ def get_checks(hw: Homework) -> list[Check]:
                     category = CheckCategoryEnum.runtime
                     for suf in get_runtime_suffix():
                         # What to do if there is only one of the tests of in/out pair?
-                        content[f"{name}.{suf}"] = hw.content.get(f"{path_beg}.{suf}", b"")
+                        file = hw.content.get(f"{path_beg}.{suf}", FileObject(content=b"", timestamp=hw.timestamp))
+                        content[f"{name}.{suf}"] = file.content
+                        timestamp = file.timestamp
                 elif suffix == get_validate_suffix():
+                    file_content = b""
                     category = CheckCategoryEnum.validate
-                    content = {f"{name}.{suffix}": check_content}
+                    if isinstance(check_content, FileObject):
+                        file_content = check_content.content
+                        timestamp = check_content.timestamp
+                    content = {f"{name}.{suffix}": file_content}
                 else:
                     continue
 
@@ -49,7 +56,7 @@ def get_checks(hw: Homework) -> list[Check]:
                     ID=f"{hw.USER_ID}:{hw.TASK_ID}/{name}",
                     TASK_ID=hw.TASK_ID,
                     USER_ID=hw.USER_ID,
-                    timestamp=hw.timestamp,
+                    timestamp=timestamp,
                 )
                 seen.add(name)
                 checks.append(check)
@@ -65,10 +72,11 @@ def get_solution(hw: Homework) -> Solution:
     :return: solution object
     """
     get_logger(__name__).debug(f"Started solution parsing for {hw.ID} homework")
-    content, remote_checks = {}, []
+    content, remote_checks, timestamp = {}, [], hw.timestamp
     for path, path_content in hw.content.items():
         if not path.startswith(get_check_name()):
-            content[path] = path_content
+            content[path] = path_content.content
+            timestamp = path_content.timestamp
     try:
         remote_content = loads(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8"))
     except tomllib.TOMLDecodeError:
@@ -87,7 +95,7 @@ def get_solution(hw: Homework) -> Solution:
         ID=solution_id,
         TASK_ID=hw.TASK_ID,
         USER_ID=hw.USER_ID,
-        timestamp=hw.timestamp,
+        timestamp=timestamp,
     )
 
 
