@@ -6,7 +6,7 @@ import pytest
 
 from hworker.config import create_config, process_configs
 from hworker.depot import search, delete, store
-from hworker.depot.objects import Homework, Check, CheckCategoryEnum, Solution, CheckResult
+from hworker.depot.objects import Homework, Check, CheckCategoryEnum, Solution, CheckResult, FileObject
 from hworker.make import (
     get_checks,
     get_solution,
@@ -17,16 +17,21 @@ from hworker.make import (
 )
 
 
+def example_file_object(content: bytes) -> FileObject:
+    return FileObject(content, timestamp=int(datetime(year=2024, month=1, day=1).timestamp()))
+
+
 @pytest.fixture(scope="function")
 def example_homework():
     return Homework(
         content={
-            "prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
+            "prog.py": example_file_object(b"a, b = eval(input())\n" b"print(max(a, b))"),
             # "check/remote": b"remote = {'User1:Task1' = [], 'User2:Task1' = [], 'User3:Task1' = []}",
-            "check/1.in": b"123, 345",
-            "check/1.out": b"345",
-            "check/validate.py": b"def timestamp_validator(solution) -> float:\n"
-            b"    return 1.0 if solution.timestamp else 0.0",
+            "check/1.in": example_file_object(b"123, 345"),
+            "check/1.out": example_file_object(b"345"),
+            "check/validate.py": example_file_object(
+                b"def timestamp_validator(solution) -> float:\n" b"    return 1.0 if solution.timestamp else 0.0"
+            ),
         },
         ID="hw_ID",
         USER_ID="user_ID",
@@ -57,11 +62,12 @@ def checked_example_homework(example_homework):
 def example_homework_new_solution():
     return Homework(
         content={
-            "prog.py": b"a, b = map(int, input().split(',')\n" b"print(max(a, b))",
-            "check/1.in": b"123, 345",
-            "check/1.out": b"345",
-            "check/validate.py": b"def timestamp_validator(solution) -> float:\n"
-            b"    return 1.0 if solution.timestamp else 0.0",
+            "prog.py": example_file_object(b"a, b = map(int, input().split(',')\n" b"print(max(a, b))"),
+            "check/1.in": example_file_object(b"123, 345"),
+            "check/1.out": example_file_object(b"345"),
+            "check/validate.py": example_file_object(
+                b"def timestamp_validator(solution) -> float:\n" b"    return 1.0 if solution.timestamp else 0.0"
+            ),
         },
         ID="hw_ID",
         USER_ID="user_ID",
@@ -75,13 +81,14 @@ def example_homework_new_solution():
 def example_homework_new_check():
     return Homework(
         content={
-            "prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
-            "check/1.in": b"123, 345",
-            "check/1.out": b"345",
-            "check/2.in": b"789, 123",
-            "check/2.out": b"789",
-            "check/validate.py": b"def timestamp_validator(solution) -> float:\n"
-            b"    return 1.0 if solution.timestamp else 0.0",
+            "prog.py": example_file_object(b"a, b = eval(input())\n" b"print(max(a, b))"),
+            "check/1.in": example_file_object(b"123, 345"),
+            "check/1.out": example_file_object(b"345"),
+            "check/2.in": example_file_object(b"789, 123"),
+            "check/2.out": example_file_object(b"789"),
+            "check/validate.py": example_file_object(
+                b"def timestamp_validator(solution) -> float:\n" b"    return 1.0 if solution.timestamp else 0.0"
+            ),
         },
         ID="hw_ID",
         USER_ID="user_ID",
@@ -95,11 +102,12 @@ def example_homework_new_check():
 def example_homework_update_check():
     return Homework(
         content={
-            "prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
-            "check/1.in": b"123, 3456",
-            "check/1.out": b"3456",
-            "check/validate.py": b"def timestamp_validator(solution) -> float:\n"
-            b"    return 1.0 if solution.timestamp else 0.0",
+            "prog.py": example_file_object(b"a, b = eval(input())\n" b"print(max(a, b))"),
+            "check/1.in": example_file_object(b"123, 3456"),
+            "check/1.out": example_file_object(b"3456"),
+            "check/validate.py": example_file_object(
+                b"def timestamp_validator(solution) -> float:\n" b"    return 1.0 if solution.timestamp else 0.0"
+            ),
         },
         ID="hw_ID",
         USER_ID="user_ID",
@@ -209,7 +217,6 @@ class TestMake:
         assert all([check_result.timestamp > cur_timestamp for check_result in new_checks_results])
 
         clean_up_database()
-
 
     def test_parse_new_check(self, checked_example_homework, example_homework_new_check):
         # TODO remove if logic is set up correctly

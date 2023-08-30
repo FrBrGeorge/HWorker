@@ -84,6 +84,12 @@ class FileObject:
         self.content = content
         self.timestamp = timestamp
 
+    def __eq__(self, other):
+        return isinstance(other, FileObject) and self.content == other.content and self.timestamp == other.timestamp
+
+    def __str__(self):
+        return ", ".join(f"{key}={value}" for key, value in self.__dict__.items())
+
 
 class Homework(StoreObject):
     content: dict[str, FileObject]  # filepath : file_content

@@ -5,6 +5,7 @@ from git import Repo
 
 from hworker import config
 from hworker.deliver.git import get_homework_content
+from hworker.depot.objects import FileObject
 
 
 @pytest.fixture()
@@ -21,7 +22,7 @@ def example_git_repo(tmp_path_factory):
     (test_path / config.get_remote_name()).write_bytes(b"UserN:TaskN\n")
     repo.git.add(".")
     repo.git.commit(message="test commit")
-    return str(repo_path)
+    return repo, str(repo_path)
 
 
 class TestDeliverGit:
@@ -29,10 +30,10 @@ class TestDeliverGit:
 
     def test_get_homework_content(self, example_git_repo):
         """"""
-
-        assert get_homework_content(example_git_repo) == {
-            "prog.py": b"a, b = eval(input())\n" b"print(max(a, b))",
-            "check/remote": b"UserN:TaskN\n",
-            "check/1.in": b"123, 345",
-            "check/1.out": b"345",
+        content = get_homework_content(*example_git_repo)
+        assert content == {
+            "prog.py": FileObject(b"a, b = eval(input())\n" b"print(max(a, b))", content["prog.py"].timestamp),
+            "check/remote": FileObject(b"UserN:TaskN\n", content["check/remote"].timestamp),
+            "check/1.in": FileObject(b"123, 345", content["check/1.in"].timestamp),
+            "check/1.out": FileObject(b"345", content["check/1.out"].timestamp),
         }
