@@ -98,8 +98,18 @@ def parse_homework_and_store(hw: Homework) -> None:
     :return: -
     """
     for cur_check in get_checks(hw):
-        store(cur_check)
-    store(get_solution(hw))
+        if (
+            not (previous_check := search(Check, Criteria("ID", "==", cur_check.ID), first=True))
+            or cur_check.content != previous_check.content
+        ):
+            store(cur_check)
+
+    solution = get_solution(hw)
+    if (
+        not (previous_solution := search(Solution, Criteria("ID", "==", solution.ID), first=True))
+        or solution.content != previous_solution.content
+    ):
+        store(solution)
 
 
 def parse_all_stored_homeworks() -> None:
@@ -123,14 +133,7 @@ def run_solution_checks_and_store(solution: Solution) -> None:
 
     for check_name in solution.checks:
         checker = search(Check, Criteria("ID", "==", check_name), first=True)
-        # TODO checker may be None
-        # TODO remove this if
-        if checker is None:
-            continue
         check_result = check(checker, solution)
-        # TODO remove this if
-        if check_result is None:
-            continue
         store(check_result)
 
 
