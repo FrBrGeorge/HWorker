@@ -101,7 +101,9 @@ class TestCheckValidate:
             stdout=b"",
             stderr=b"",
             check_ID=validator.ID,
+            check_timestamp=validator.timestamp,
             solution_ID=solution.ID,
+            solution_timestamp=solution.timestamp,
             verdict=VerdictEnum.passed,
         )
 
@@ -138,6 +140,8 @@ class TestCheckValidate:
             stdout=b"",
             stderr=b"",
             check_ID=validator.ID,
+            check_timestamp=validator.timestamp,
             solution_ID=solution.ID,
+            solution_timestamp=solution.timestamp,
             verdict=VerdictEnum.passed,
         )

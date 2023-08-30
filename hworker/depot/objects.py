@@ -76,8 +76,17 @@ class StoreObject:
         return list(self.items()) == list(other.items())
 
 
+class FileObject:
+    content: bytes
+    timestamp: float
+
+    def __init__(self, content: bytes = None, timestamp: float = None):
+        self.content = content
+        self.timestamp = timestamp
+
+
 class Homework(StoreObject):
-    content: dict[str, bytes]  # filepath : file_content
+    content: dict[str, FileObject]  # filepath : file_content
     is_broken: bool
     _is_versioned: bool = True
 
@@ -126,7 +135,9 @@ class CheckResult(StoreObject):
     rating: float
     category: CheckCategoryEnum
     check_ID: str
+    check_timestamp: int
     solution_ID: str
+    solution_timestamp: int
     verdict: VerdictEnum
     stdout: bytes
     stderr: bytes
@@ -138,7 +149,9 @@ class CheckResult(StoreObject):
         rating: float = None,
         category: CheckCategoryEnum = None,
         check_ID: str = None,
+        check_timestamp: int = None,
         solution_ID: str = None,
+        solution_timestamp: int = None,
         verdict: VerdictEnum = None,
         stdout: bytes = None,
         stderr: bytes = None,
@@ -148,7 +161,9 @@ class CheckResult(StoreObject):
         self.rating = rating
         self.category = category
         self.check_ID = check_ID
+        self.check_timestamp = check_timestamp
         self.solution_ID = solution_ID
+        self.solution_timestamp = solution_timestamp
         self.verdict = verdict
         self.stdout = stdout
         self.stderr = stderr
