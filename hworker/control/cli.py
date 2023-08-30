@@ -23,6 +23,11 @@ try:
 except ModuleNotFoundError:
     from unittest.mock import MagicMock as readline
 
+try:
+    from .._version import version
+except ModuleNotFoundError:
+    version = "0.0.0"
+
 logger = get_logger(__name__)
 HISTFILE = ".history"
 
@@ -34,8 +39,7 @@ def log(message, severity="error"):
 
 
 class HWorker(cmd.Cmd):
-    # TODO version
-    intro = "HomeWorker shell. Type ? for help.\n"
+    intro = f"HomeWorker v{version} shell. Type ? for help.\n"
     prompt = "hw> "
     DELIMETERS = set(' \t\n`~!@#$%^&*()-=+[{]}\\|;:",<>/?')
     whatshow = {"homework": depot.objects.Homework, "solution": depot.objects.Solution, "check": depot.objects.Check}
@@ -72,19 +76,8 @@ class HWorker(cmd.Cmd):
             log(E)
             return string.split()
 
-    def do_download(self, arg):
-        """Download all homeworks (do not parse if "only" parmeter is given)"""
-        args = self.shplit(arg)
-        deliver.download_all()
-        if args != ["only"]:
-            make.parse_all_stored_homeworks()
-
-    def complete_download(self, text, line, begidx, endidx):
-        objnames = ("only",)
-        return self.filtertext(objnames, text)
-
     def do_config(self, arg):
-        "Print (some) information from config file"
+        """Print (some) information from config file"""
         args = self.shplit(arg)
         match args:
             case ["users"] | ["user"]:
@@ -163,13 +156,35 @@ class HWorker(cmd.Cmd):
         else:
             return self.filtertext(globals(), prefix)
 
+    def do_download(self, arg):
+        """Download all homeworks (do not parse if "only" parmeter is given)"""
+        args = self.shplit(arg)
+        deliver.download_all()
+        if args != ["only"]:
+            make.parse_all_stored_homeworks()
+
+    def complete_download(self, text, line, begidx, endidx):
+        objnames = ("only",)
+        return self.filtertext(objnames, text)
+
+    def do_score(self, arg):
+        """Calculate scores"""
+        control.do_score()
+
+    # TODO delete()
+
+    def do_check(self, arg):
+        # TODO not all; TODO recheck all regardless of actualirt
+        """Check all homeworks"""
+        make.check_new_solutions()
+
     def do_publish(self, arg):
         """Start publisher"""
         # TODO check if is anything to publish
         control.start_publish()
 
     def do_run(self, arg):
-        """Download, check, core and publish at once"""
+        """Download, check, score and publish at once"""
         control.big_red_button()
 
     def do_echo(self, arg):

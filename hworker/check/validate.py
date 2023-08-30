@@ -39,8 +39,10 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
     elif get_version_validator_name() in dir(module):
         validator_type = get_version_validator_name()
 
+    stderr, result = b"", 0.0
+
     if validator_type:
-        stderr, result, v = b"", 0.0, getattr(module, validator_type)
+        v = getattr(module, validator_type)
         if validator_type == get_validator_name():
             try:
                 if validator_type == get_validator_name():
@@ -51,20 +53,23 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
                 stderr = str(error).encode()
             finally:
                 module_path.unlink(missing_ok=True)
+        verdict = VerdictEnum.passed if not stderr else VerdictEnum.failed
+    else:
+        verdict = VerdictEnum.missing
 
-        return CheckResult(
-            ID=validator.ID + solution.ID,
-            USER_ID=solution.USER_ID,
-            TASK_ID=solution.TASK_ID,
-            timestamp=datetime.now().timestamp(),
-            rating=result,
-            category=validator.category,
-            stdout=b"",
-            stderr=stderr,
-            check_ID=validator.ID,
-            solution_ID=solution.ID,
-            verdict=VerdictEnum.passed if not stderr else VerdictEnum.failed,
-        )
+    return CheckResult(
+        ID=validator.ID + solution.ID,
+        USER_ID=solution.USER_ID,
+        TASK_ID=solution.TASK_ID,
+        timestamp=datetime.now().timestamp(),
+        rating=result,
+        category=validator.category,
+        stdout=b"",
+        stderr=stderr,
+        check_ID=validator.ID,
+        solution_ID=solution.ID,
+        verdict=verdict,
+    )
 
 
 def validate(validator: Check, solution: Solution, check_num: int = 0) -> None:
