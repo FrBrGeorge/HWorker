@@ -8,7 +8,7 @@ import git
 from ... import depot
 from ...config import get_git_directory, get_repos, get_git_uids, repo_to_uid, get_tasks_list, get_task_info
 from ...depot import store
-from ...depot.objects import Homework
+from ...depot.objects import Homework, FileObject
 from ...log import get_logger
 
 
@@ -66,7 +66,7 @@ def update_all() -> None:
             pull(repo)
 
 
-def get_homework_content(root: str) -> dict:
+def get_homework_content(repo: git.Repo, root: str) -> dict:
     """Extracts tests, solution and URLS from homework and pack into dict
 
     :param root: local path to homework
@@ -75,7 +75,9 @@ def get_homework_content(root: str) -> dict:
     get_logger(__name__).debug(f"Getting {root} content")
     Root = Path(root)
     content = {
-        path.relative_to(Root).as_posix(): path.read_bytes()
+        path.relative_to(Root).as_posix(): FileObject(
+            content=path.read_bytes(), timestamp=repo.git.log("-1", "--format=%ct", "--date=default", "--", path)
+        )
         for path in Root.rglob("*")
         if path.is_file() and f"{os.sep}." not in str(path.relative_to(Root.parent))
     }
@@ -110,7 +112,7 @@ def download_all() -> None:
                 commits = get_commits(repo, task_path)
                 for commit in commits:
                     repo.git.checkout(commit[0])
-                    content = get_homework_content(task_path)
+                    content = get_homework_content(repo, task_path)
                     store(
                         Homework(
                             content=content,
