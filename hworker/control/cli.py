@@ -23,6 +23,11 @@ try:
 except ModuleNotFoundError:
     from unittest.mock import MagicMock as readline
 
+try:
+    from .._version import version
+except ModuleNotFoundError:
+    version = "0.0.0"
+
 logger = get_logger(__name__)
 HISTFILE = ".history"
 
@@ -34,8 +39,7 @@ def log(message, severity="error"):
 
 
 class HWorker(cmd.Cmd):
-    # TODO version
-    intro = "HomeWorker shell. Type ? for help.\n"
+    intro = f"HomeWorker v{version} shell. Type ? for help.\n"
     prompt = "hw> "
     DELIMETERS = set(' \t\n`~!@#$%^&*()-=+[{]}\\|;:",<>/?')
     whatshow = {"homework": depot.objects.Homework, "solution": depot.objects.Solution, "check": depot.objects.Check}
