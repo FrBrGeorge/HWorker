@@ -16,7 +16,7 @@ from subprocess import CompletedProcess, TimeoutExpired
 from tempfile import NamedTemporaryFile
 from typing import Iterator
 
-from ..config import get_check_directory, get_task_info
+from ..config import get_check_directory, get_task_info, get_prog_name
 from ..depot.database.functions import store
 from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
 from ..log import get_logger
@@ -91,7 +91,7 @@ def runtime_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> 
     """
     if check_num == 0:
         check_num = randint(1, 1000000)
-    prog = solution.content["prog.py"]
+    prog = solution.content.get(get_prog_name())
     prog_input, initial_output = b"", b""
     for name, b in checker.content.items():
         if name.endswith(".in"):
@@ -99,22 +99,25 @@ def runtime_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> 
         elif name.endswith(".out"):
             initial_output = b
 
-    if not os.path.exists(get_check_directory()):
-        os.makedirs(get_check_directory())
-    prog_path = os.path.join(get_check_directory(), f"prog_{check_num}.py")
-    with open(prog_path, mode="wb") as p:
-        p.write(prog)
+    content, stderr, actual_output, verdict = 0.0, b"", b"", VerdictEnum.missing
+    if prog is not None:
+        if not os.path.exists(get_check_directory()):
+            os.makedirs(get_check_directory())
+        prog_path = os.path.join(get_check_directory(), f"prog_{check_num}.py")
+        with open(prog_path, mode="wb") as p:
+            p.write(prog)
+        input_path = os.path.join(get_check_directory(), f"{check_num}.in")
+        with open(input_path, mode="wb") as i:
+            i.write(prog_input)
 
-    input_path = os.path.join(get_check_directory(), f"{check_num}.in")
-    with open(input_path, mode="wb") as i:
-        i.write(prog_input)
+        runner = choose_runner(checker)
+        task_info = get_task_info(solution.TASK_ID)
+        time_limit, resource_limit = task_info["time_limit"], task_info["resource_limit"]
+        actual_output, stderr, exit_code = runner(prog_path, input_path, time_limit, resource_limit)
+        diff, score = choose_diff_score(actual_output, initial_output, checker.category)
+        content = score(diff(actual_output, initial_output, task_info["test_size"]))
+        verdict = VerdictEnum.passed if not exit_code else VerdictEnum.failed
 
-    runner = choose_runner(checker)
-    task_info = get_task_info(solution.TASK_ID)
-    time_limit, resource_limit = task_info["time_limit"], task_info["resource_limit"]
-    actual_output, stderr, exit_code = runner(prog_path, input_path, time_limit, resource_limit)
-    diff, score = choose_diff_score(actual_output, initial_output, checker.category)
-    content = score(diff(actual_output, initial_output, task_info["test_size"]))
     return CheckResult(
         ID=checker.ID + solution.ID,
         USER_ID=solution.USER_ID,
@@ -128,7 +131,7 @@ def runtime_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> 
         check_timestamp=checker.timestamp,
         solution_ID=solution.ID,
         solution_timestamp=solution.timestamp,
-        verdict=VerdictEnum.passed if not exit_code else VerdictEnum.failed,
+        verdict=verdict,
     )
 
 
