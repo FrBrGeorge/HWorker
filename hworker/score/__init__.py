@@ -44,7 +44,8 @@ def _get_functions_from_module(name: str):
 
     found_funcs = dict()
     for key, value in inspect.getmembers(module):
-        if not key.startswith("_") and inspect.isfunction(value):
+        if not key.startswith("_") and inspect.isfunction(value) and getattr(value, "__module__", "") == name:
+        # if not key.startswith("_") and inspect.isfunction(value):
             found_funcs[key] = value
 
     get_logger(__name__).debug(f"For module {name:>20} found {found_funcs}")
@@ -54,6 +55,11 @@ def _get_functions_from_module(name: str):
 
 def read_and_import():
     get_logger(__name__).info("Importing user functions...")
+    # get rid of old/removed functions
+    depot.delete(depot.objects.TaskQualifier)
+    depot.delete(depot.objects.UserQualifier)
+    depot.delete(depot.objects.Formula)
+
     for index, name in enumerate(_module_names):
         found_funcs = _get_functions_from_module(name)
 
@@ -68,13 +74,12 @@ def read_and_import():
                 )
             )
 
-
-def _execute_user_func(func, inputs):
+def _execute_user_func(func, inputs: list):
     try:
         rating = func(inputs)
     except Exception as e:
         rating = None
-        get_logger(__name__).debug(
+        get_logger(__name__).error(
             f"Error occurred during executing user function\n {''.join(traceback.format_exception(e))}"
         )
     return rating
@@ -82,6 +87,12 @@ def _execute_user_func(func, inputs):
 
 def perform_qualifiers():
     depot.store(depot.objects.UpdateTime(name="Score", timestamp=datetime.datetime.now().timestamp()))
+
+    # get rid of old/removed scores
+    depot.delete(depot.objects.TaskScore)
+    depot.delete(depot.objects.UserScore)
+    depot.delete(depot.objects.FinalScore)
+
 
     get_logger(__name__).info("Performing all imported qualifiers...")
     _current_timestamp = datetime.datetime.now().timestamp()
