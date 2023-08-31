@@ -105,6 +105,7 @@ def parse_homework_and_store(hw: Homework) -> None:
     :param hw: homework object
     :return: -
     """
+    # Remove depot check logic
     for cur_check in get_checks(hw):
         if (
             not (previous_check := search(Check, Criteria("ID", "==", cur_check.ID), first=True))
