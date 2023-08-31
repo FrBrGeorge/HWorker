@@ -105,20 +105,10 @@ def parse_homework_and_store(hw: Homework) -> None:
     :param hw: homework object
     :return: -
     """
-    # Remove depot check logic
     for cur_check in get_checks(hw):
-        if (
-            not (previous_check := search(Check, Criteria("ID", "==", cur_check.ID), first=True))
-            or cur_check.content != previous_check.content
-        ):
-            store(cur_check)
+        store(cur_check)
 
-    solution = get_solution(hw)
-    if (
-        not (previous_solution := search(Solution, Criteria("ID", "==", solution.ID), first=True))
-        or solution.content != previous_solution.content
-    ):
-        store(solution)
+    store(get_solution(hw))
 
 
 def parse_all_stored_homeworks() -> None:
