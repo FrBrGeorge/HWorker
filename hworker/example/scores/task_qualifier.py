@@ -13,7 +13,7 @@ def _get_field(name: str, scores: Iterable[CheckResult]):
 
 
 def average(results: list[CheckResult]) -> float:
-    return sum([check.rating for check in results])
+    return sum([check.rating for check in results]) / len(results) if len(results) != 0 else 0
 
 
 def attendance(results: list[CheckResult]) -> float:

@@ -5,19 +5,19 @@ import re
 import tarfile
 import tempfile
 import traceback
+from operator import attrgetter
 
 from .mailer_utilities import get_mailbox
 from ... import depot
 from ...config import get_imap_info, email_to_uid, deliverid_to_taskid
-from ...depot.objects import Homework
+from ...depot.objects import Homework, FileObject
 from ...log import get_logger
 
-_default_datetime = datetime.datetime.fromisoformat("2009-05-17 20:09:00")
+_default_timestamp = datetime.datetime.fromisoformat("2009-05-17 20:09:00").timestamp()
 _depot_prefix = "i"
 
 
 def parse_tar_file(filename: str, content: bytes):
-    timestamps = []
     contents = {}
     is_broken = False
 
@@ -30,14 +30,15 @@ def parse_tar_file(filename: str, content: bytes):
             for member in tar.getmembers():
                 member: tarfile.TarInfo
                 if member.isfile():
-                    timestamps.append(member.mtime)
-                    contents[f"{filename}/{member.name}"] = tar.extractfile(member).read()
+                    contents[f"{filename}/{member.name}"] = FileObject(
+                        content=tar.extractfile(member).read(), timestamp=member.mtime
+                    )
 
         os.remove(tmp_file.name)
     except Exception as e:
         is_broken = True
         get_logger(__name__).debug(f"Exception during archive parsing\n {''.join(traceback.format_exception(e))}")
-    return max(timestamps, default=_default_datetime.timestamp()), contents, is_broken
+    return contents, is_broken
 
 
 def download_all():
@@ -50,12 +51,11 @@ def download_all():
 
     download_mails = 0
 
-    get_logger(__name__).info(f"Started")
+    get_logger(__name__).info(f"Started downloading")
 
     for mail in box.fetch("ALL", limit=get_imap_info()["letter_limit"]):
         mail_name = mail.from_
-        timestamps = []
-        contents = {}
+        contents: dict[str, FileObject] = dict()
         is_broken_all = False
 
         deliver_ids = []
@@ -67,8 +67,7 @@ def download_all():
             if deliver_id is not None:
                 deliver_ids.append(deliver_id)
 
-                timestamp, content, is_broken = parse_tar_file(filename=attachment.filename, content=attachment.payload)
-                timestamps.append(timestamp)
+                content, is_broken = parse_tar_file(filename=attachment.filename, content=attachment.payload)
                 contents.update(content)
                 is_broken_all = is_broken_all or is_broken
 
@@ -92,7 +91,7 @@ def download_all():
                         ID=f"{_depot_prefix}{mail.uid}",
                         USER_ID=USER_ID,
                         TASK_ID=TASK_ID,
-                        timestamp=max(timestamps),
+                        timestamp=max(map(attrgetter("timestamp"), contents.values()), default=_default_timestamp),
                         content=contents,
                         is_broken=is_broken_all,
                     )

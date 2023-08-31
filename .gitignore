@@ -8,9 +8,9 @@ hworker*.toml
 *_final.toml
 
 # Scores
-#task_qualifier.py
-#user_qualifier.py
-#formula.py
+task_qualifier.py
+user_qualifier.py
+formula.py
 
 # CLI
 .history
