@@ -19,7 +19,7 @@ directory = "/tmp/hworker_git"
 [imap]
 host = "host"
 port = 993
-folder = "folder"
+folder = "INBOX"
 username = "username"
 password = "password"
 letter_limit = -1
@@ -78,3 +78,6 @@ static_folder = "static"
 
 [score]
 score_directory = "."
+
+[depot]
+database_path = "data.db"

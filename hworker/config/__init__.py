@@ -278,6 +278,14 @@ def get_score_info() -> dict[str, str]:
     return config()["score"]
 
 
+def get_depot_info() -> dict[str, str]:
+    """Get depot info dict
+
+    :return: depot info dict
+    """
+    return config()["depot"]
+
+
 def get_publish_info() -> dict[str, str]:
     """Get publish info dict
 
