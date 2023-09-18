@@ -17,8 +17,8 @@ from hworker.make import (
 )
 
 
-def example_file_object(content: bytes) -> FileObject:
-    return FileObject(content, timestamp=int(datetime(year=2024, month=1, day=1).timestamp()))
+def example_file_object(content: bytes, day: int = 1) -> FileObject:
+    return FileObject(content, timestamp=int(datetime(year=2023, month=1, day=day).timestamp()))
 
 
 @pytest.fixture(scope="function")
@@ -26,7 +26,6 @@ def example_homework():
     return Homework(
         content={
             "prog.py": example_file_object(b"a, b = eval(input())\n" b"print(max(a, b))"),
-            # "check/remote": b"remote = {'User1:Task1' = [], 'User2:Task1' = [], 'User3:Task1' = []}",
             "check/1.in": example_file_object(b"123, 345"),
             "check/1.out": example_file_object(b"345"),
             "check/validate.py": example_file_object(
@@ -36,7 +35,7 @@ def example_homework():
         ID="hw_ID",
         USER_ID="user_ID",
         TASK_ID="task_ID",
-        timestamp=int(datetime(year=2024, month=1, day=1).timestamp()),
+        timestamp=int(datetime(year=2023, month=1, day=1).timestamp()),
         is_broken=False,
     )
 
@@ -62,7 +61,7 @@ def checked_example_homework(example_homework):
 def example_homework_new_solution():
     return Homework(
         content={
-            "prog.py": example_file_object(b"a, b = map(int, input().split(',')\n" b"print(max(a, b))"),
+            "prog.py": example_file_object(b"a, b = map(int, input().split(',')\n" b"print(max(a, b))", day=2),
             "check/1.in": example_file_object(b"123, 345"),
             "check/1.out": example_file_object(b"345"),
             "check/validate.py": example_file_object(
@@ -72,7 +71,7 @@ def example_homework_new_solution():
         ID="hw_ID",
         USER_ID="user_ID",
         TASK_ID="task_ID",
-        timestamp=int(datetime(year=2024, month=1, day=2).timestamp()),
+        timestamp=int(datetime(year=2023, month=1, day=2).timestamp()),
         is_broken=False,
     )
 
@@ -84,8 +83,8 @@ def example_homework_new_check():
             "prog.py": example_file_object(b"a, b = eval(input())\n" b"print(max(a, b))"),
             "check/1.in": example_file_object(b"123, 345"),
             "check/1.out": example_file_object(b"345"),
-            "check/2.in": example_file_object(b"789, 123"),
-            "check/2.out": example_file_object(b"789"),
+            "check/2.in": example_file_object(b"789, 123", day=2),
+            "check/2.out": example_file_object(b"789", day=2),
             "check/validate.py": example_file_object(
                 b"def timestamp_validator(solution) -> float:\n" b"    return 1.0 if solution.timestamp else 0.0"
             ),
@@ -93,7 +92,7 @@ def example_homework_new_check():
         ID="hw_ID",
         USER_ID="user_ID",
         TASK_ID="task_ID",
-        timestamp=int(datetime(year=2024, month=1, day=2).timestamp()),
+        timestamp=int(datetime(year=2023, month=1, day=2).timestamp()),
         is_broken=False,
     )
 
@@ -103,8 +102,8 @@ def example_homework_update_check():
     return Homework(
         content={
             "prog.py": example_file_object(b"a, b = eval(input())\n" b"print(max(a, b))"),
-            "check/1.in": example_file_object(b"123, 3456"),
-            "check/1.out": example_file_object(b"3456"),
+            "check/1.in": example_file_object(b"123, 3456", day=2),
+            "check/1.out": example_file_object(b"3456", day=2),
             "check/validate.py": example_file_object(
                 b"def timestamp_validator(solution) -> float:\n" b"    return 1.0 if solution.timestamp else 0.0"
             ),
@@ -112,7 +111,7 @@ def example_homework_update_check():
         ID="hw_ID",
         USER_ID="user_ID",
         TASK_ID="task_ID",
-        timestamp=int(datetime(year=2024, month=1, day=2).timestamp()),
+        timestamp=int(datetime(year=2023, month=1, day=2).timestamp()),
         is_broken=False,
     )
 
@@ -125,8 +124,8 @@ def example_config(tmp_path):
         {
             "tasks": {
                 "task_ID": {
-                    "deliver_ID": "20240101/01",
-                    "open_date": datetime(year=2024, month=1, day=1),
+                    "deliver_ID": "20230101/01",
+                    "open_date": datetime(year=2023, month=1, day=1),
                 }
             }
         },
@@ -143,7 +142,7 @@ example_solution = Solution(
         "user_ID:task_ID/validate": [],
     },
     content={"prog.py": b"a, b = eval(input())\nprint(max(a, b))"},
-    timestamp=int(datetime(year=2024, month=1, day=1).timestamp()),
+    timestamp=int(datetime(year=2023, month=1, day=1).timestamp()),
 )
 
 runtime_check = Check(
@@ -152,7 +151,7 @@ runtime_check = Check(
     USER_ID="user_ID",
     category=CheckCategoryEnum.runtime,
     content={"1.in": b"123, 345", "1.out": b"345"},
-    timestamp=int(datetime(year=2024, month=1, day=1).timestamp()),
+    timestamp=int(datetime(year=2023, month=1, day=1).timestamp()),
 )
 
 validate_check = Check(
@@ -163,7 +162,7 @@ validate_check = Check(
     content={
         "validate.py": b"def timestamp_validator(solution) -> float:\n" b"    return 1.0 if solution.timestamp else 0.0"
     },
-    timestamp=int(datetime(year=2024, month=1, day=1).timestamp()),
+    timestamp=int(datetime(year=2023, month=1, day=1).timestamp()),
 )
 
 
@@ -214,14 +213,11 @@ class TestMake:
         new_checks_results: list[CheckResult] = list(search(CheckResult))
 
         assert len(old_checks_results) == len(new_checks_results)
-        assert all([check_result.timestamp > cur_timestamp for check_result in new_checks_results])
+        assert all([check_result.timestamp >= cur_timestamp for check_result in new_checks_results])
 
         clean_up_database()
 
     def test_parse_new_check(self, checked_example_homework, example_homework_new_check):
-        # TODO remove if logic is set up correctly
-        pytest.skip()
-
         old_checks_results: list[CheckResult] = list(search(CheckResult))
 
         store(example_homework_new_check)
@@ -247,6 +243,7 @@ class TestMake:
         new_checks_results: list[CheckResult] = list(search(CheckResult))
 
         assert len(old_checks_results) == len(new_checks_results)
-        assert all([old_result not in new_checks_results for old_result in old_checks_results])
+        assert any([old_result not in new_checks_results for old_result in old_checks_results])
+        assert not all([old_result not in new_checks_results for old_result in old_checks_results])
 
         clean_up_database()

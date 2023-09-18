@@ -29,7 +29,7 @@ class TestCheckRuntime:
 
     @pytest.mark.parametrize(
         "user_config",
-        [{"tasks": {"task_ID": {"deliver_ID": "20240101/01", "open_date": datetime(year=2024, month=1, day=1)}}}],
+        [{"tasks": {"task_ID": {"deliver_ID": "20230101/01", "open_date": datetime(year=2023, month=1, day=1)}}}],
         indirect=True,
     )
     def test_checker(self, user_config):
