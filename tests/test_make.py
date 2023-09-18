@@ -117,7 +117,7 @@ def example_homework_update_check():
     )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="function", autouse=True)
 def example_config(tmp_path):
     config = tmp_path / "testconfig.toml"
     create_config(
@@ -171,10 +171,10 @@ class TestMake:
     def test_get_checks(self, example_homework):
         assert get_checks(example_homework) == [runtime_check, validate_check]
 
-    def test_get_solution(self, example_config, example_homework):
+    def test_get_solution(self, example_homework):
         assert get_solution(example_homework) == example_solution
 
-    def test_parse_homework_and_store(self, example_config, example_homework):
+    def test_parse_homework_and_store(self, example_homework):
         parse_homework_and_store(example_homework)
 
         assert list(search(Solution)) == [
@@ -187,7 +187,7 @@ class TestMake:
         delete(Solution)
         delete(Check)
 
-    def test_parse_store_all_homeworks(self, example_config, example_homework):
+    def test_parse_store_all_homeworks(self, example_homework):
         store(example_homework)
         parse_all_stored_homeworks()
 
