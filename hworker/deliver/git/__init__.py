@@ -2,6 +2,7 @@
 import datetime
 import os
 from pathlib import Path
+from tempfile import gettempdir
 
 import git
 
@@ -19,7 +20,7 @@ def local_path(student_id: str) -> str:
     :return: local repo path
     """
     git_directory = get_git_directory()
-    return os.path.join(git_directory, student_id)
+    return os.path.join(gettempdir(), git_directory, student_id)
 
 
 def clone(repo: str) -> None:
@@ -66,25 +67,24 @@ def update_all() -> None:
             pull(repo)
 
 
-def get_homework_content(repo: git.Repo, root: str) -> dict:
+def get_homework_content(repo: git.Repo, root: Path) -> dict:
     """Extracts tests, solution and URLS from homework and pack into dict
 
     :param root: local path to homework
     :return: dict with "prog", "tests" and "urls" keys
     """
     get_logger(__name__).debug(f"Getting {root} content")
-    Root = Path(root)
     content = {
-        path.relative_to(Root).as_posix(): FileObject(
+        path.relative_to(root).as_posix(): FileObject(
             content=path.read_bytes(), timestamp=repo.git.log("-1", "--format=%ct", "--date=default", "--", path)
         )
-        for path in Root.rglob("*")
-        if path.is_file() and f"{os.sep}." not in str(path.relative_to(Root.parent))
+        for path in root.rglob("*")
+        if path.is_file() and f"{os.sep}." not in str(path.relative_to(root.parent))
     }
     return content
 
 
-def get_commits(repo: git.Repo, path: str) -> list[tuple[str, str]]:
+def get_commits(repo: git.Repo, path: Path) -> list[tuple[str, str]]:
     """Get list of all commits (with timestamps) for a given directory
 
     :param repo: repo local path
@@ -92,7 +92,9 @@ def get_commits(repo: git.Repo, path: str) -> list[tuple[str, str]]:
     :return: list of (commit hash, timestamp) pairs
     """
     get_logger(__name__).debug(f"Getting {path} commits")
-    commits = [tuple(_.split()) for _ in repo.git.log("--format=%H %ct", "--date=default", "--", path).split("\n")]
+    commits = [
+        tuple(_.split()) for _ in repo.git.log("--format=%H %ct", "--date=default", "--", path.as_posix()).split("\n")
+    ]
     return commits
 
 
@@ -106,10 +108,8 @@ def download_all() -> None:
         repo = git.Repo(local_path(student_id))
         for task in get_tasks_list():
             repo.git.checkout(repo.heads[0])
-            if os.path.isdir(
-                (task_path := os.path.join(local_path(student_id), get_task_info(task).get("deliver_ID", "")))
-            ):
-                commits = get_commits(repo, task_path)
+            if os.path.isdir((task_path := Path(local_path(student_id), get_task_info(task).get("deliver_ID", "")))):
+                commits = [_ for _ in get_commits(repo, task_path) if _]
                 for commit in commits:
                     repo.git.checkout(commit[0])
                     content = get_homework_content(repo, task_path)
