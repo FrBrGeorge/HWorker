@@ -16,6 +16,6 @@ def global_user_config(tmp_path_factory):
 def database_test(tmp_path_factory):
     import hworker.depot.database.common as common
 
-    database_name = tmp_path_factory.getbasetemp() / "test.db"
+    database_name = (tmp_path_factory.getbasetemp() / "test.db").as_posix()
 
     common._database_path = database_name

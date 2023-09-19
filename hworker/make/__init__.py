@@ -16,6 +16,8 @@ from ..depot import store, search
 from ..depot.objects import Homework, Check, Solution, CheckCategoryEnum, Criteria, CheckResult, UpdateTime, FileObject
 from ..log import get_logger
 
+_default_timestamp = datetime.datetime.fromisoformat("2009-05-17 20:09:00").timestamp()
+
 
 def get_checks(hw: Homework) -> list[Check]:
     """Get homework checks list
@@ -29,7 +31,7 @@ def get_checks(hw: Homework) -> list[Check]:
         if check_path.startswith(get_check_name()):
             path_beg, _, suffix = check_path.rpartition(".")
             name = path_beg.rsplit("/", maxsplit=1)[-1]
-            timestamp = hw.timestamp
+            timestamp = _default_timestamp
 
             if name not in seen:
                 content, category = {}, None
@@ -39,13 +41,13 @@ def get_checks(hw: Homework) -> list[Check]:
                         # What to do if there is only one of the tests of in/out pair?
                         file = hw.content.get(f"{path_beg}.{suf}", FileObject(content=b"", timestamp=hw.timestamp))
                         content[f"{name}.{suf}"] = file.content
-                        timestamp = file.timestamp
+                        timestamp = max(timestamp, file.timestamp)
                 elif suffix == get_validate_suffix():
                     file_content = b""
                     category = CheckCategoryEnum.validate
                     if isinstance(check_content, FileObject):
                         file_content = check_content.content
-                        timestamp = check_content.timestamp
+                        timestamp = max(timestamp, check_content.timestamp)
                     content = {f"{name}.{suffix}": file_content}
                 else:
                     continue
@@ -72,11 +74,11 @@ def get_solution(hw: Homework) -> Solution:
     :return: solution object
     """
     get_logger(__name__).debug(f"Started solution parsing for {hw.ID} homework")
-    content, remote_checks, timestamp = {}, [], hw.timestamp
+    content, remote_checks, timestamp = {}, [], _default_timestamp
     for path, path_content in hw.content.items():
         if not path.startswith(get_check_name()):
             content[path] = path_content.content
-            timestamp = path_content.timestamp
+            timestamp = max(timestamp, path_content.timestamp)
     try:
         remote_content = loads(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8"))
     except tomllib.TOMLDecodeError:
@@ -167,7 +169,9 @@ def check_new_solutions() -> None:
                 CheckResult, Criteria("ID", "==", get_result_ID(solution=solution, checker=checker)), first=True
             )
 
-            if result_obj is None or max(solution.timestamp, checker.timestamp) > result_obj.timestamp:
+            if result_obj is None or max(solution.timestamp, checker.timestamp) > min(
+                result_obj.solution_timestamp, result_obj.check_timestamp
+            ):
                 new_result = check(checker, solution)
                 if new_result is None:
                     continue

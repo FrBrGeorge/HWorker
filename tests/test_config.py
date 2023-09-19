@@ -56,7 +56,7 @@ class TestConfig:
 
     @pytest.mark.parametrize(
         "user_config",
-        [{"tasks": {"task_ID": {"deliver_ID": "20240101/01", "open_date": datetime(year=2024, month=1, day=1)}}}],
+        [{"tasks": {"task_ID": {"deliver_ID": "20230101/01", "open_date": datetime(year=2023, month=1, day=1)}}}],
         indirect=True,
     )
     def test_task_info(self, user_config):
@@ -64,11 +64,11 @@ class TestConfig:
             "test_size": 100,
             "resource_limit": 3145728,
             "time_limit": 2,
-            "deliver_ID": "20240101/01",
-            "hard_deadline": datetime(2024, 1, 14, 0, 0),
+            "deliver_ID": "20230101/01",
+            "hard_deadline": datetime(2023, 1, 14, 0, 0),
             "hard_deadline_delta": "open_date+13d",
-            "open_date": datetime(2024, 1, 1, 0, 0),
-            "soft_deadline": datetime(2024, 1, 7, 0, 0),
+            "open_date": datetime(2023, 1, 1, 0, 0),
+            "soft_deadline": datetime(2023, 1, 7, 0, 0),
             "soft_deadline_delta": "open_date+6d",
         }
 
