@@ -76,7 +76,7 @@ def get_homework_content(repo: git.Repo, root: Path) -> dict:
     get_logger(__name__).debug(f"Getting {root} content")
     content = {
         path.relative_to(root).as_posix(): FileObject(
-            content=path.read_bytes(), timestamp=repo.git.log("-1", "--format=%ct", "--date=default", "--", path)
+            content=path.read_bytes(), timestamp=int(repo.git.log("-1", "--format=%ct", "--date=default", "--", path))
         )
         for path in root.rglob("*")
         if path.is_file() and f"{os.sep}." not in str(path.relative_to(root.parent))
