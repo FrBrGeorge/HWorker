@@ -1,4 +1,3 @@
-import logging
 import os
 import shutil
 from pathlib import Path
@@ -11,6 +10,9 @@ from waitress import serve
 from paste.translogger import TransLogger
 
 
+_request_log_format = '%(REMOTE_ADDR)15s - "%(REQUEST_METHOD)s %(REQUEST_URI)-50s %(HTTP_VERSION)s" %(status)s'
+
+
 def run_server():
     get_logger(__name__).info("Publish initializing...")
     host, port = get_publish_info()["host"], int(get_publish_info()["port"])
@@ -20,17 +22,12 @@ def run_server():
     else:
         if app.config.get("SECRET_KEY", "replace this") == "replace this":
             get_logger(__name__).error(
-                "Aborting start because your publish secret key in unset. "
+                "Aborting start because your publish SECRET_KEY in unset. "
                 "Please run: python3 -c 'import secrets; print(secrets.token_hex())' "
                 "And paste key to your config file"
             )
             return
-        # logging.getLogger("waitress").setLevel(logging.DEBUG)
-        # logging.getLogger("wsgi").setLevel(logging.DEBUG)
-        request_log_format = '%(REMOTE_ADDR)15s - "%(REQUEST_METHOD)s %(REQUEST_URI)-50s %(HTTP_VERSION)s" %(status)s'
-        # serve(app, host=host, port=port)
-        serve(TransLogger(app, setup_console_handler=False, format=request_log_format), host=host, port=port)
-        print(logging.getLogger("waitress"))
+        serve(TransLogger(app, setup_console_handler=False, format=_request_log_format), host=host, port=port)
 
 
 def generate_static_html(root: Path):
