@@ -13,6 +13,8 @@ pytimeparse = "*"
 flask = "*"
 bs4 = "*"
 setuptools-scm = "*"
+waitress = "*"
+paste = "*"
 
 [dev-packages]
 build = "*"
