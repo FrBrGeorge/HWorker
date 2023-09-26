@@ -100,7 +100,7 @@ def do_score():
     score.perform_qualifiers()
 
 
-def store_check_results():
+def download_store_check_results():
     """Get check results from homeworks
 
     :return: -
@@ -115,7 +115,7 @@ def big_red_button():
 
     :return: -
     """
-    store_check_results()
+    download_store_check_results()
     do_score()
     start_publish()
 
