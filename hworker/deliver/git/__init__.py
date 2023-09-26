@@ -119,7 +119,7 @@ def download_all() -> None:
                             ID=f"{student_id}:{task}:{commit[0][0:7]}",
                             USER_ID=student_id,
                             TASK_ID=os.path.join(task),
-                            timestamp=commit[1],
+                            timestamp=float(commit[1]),
                             is_broken=False,
                         )
                     )
