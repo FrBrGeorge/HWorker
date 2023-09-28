@@ -12,8 +12,14 @@ from paste.translogger import TransLogger
 _request_log_format = '%(REMOTE_ADDR)15s - "%(REQUEST_METHOD)s %(REQUEST_URI)-50s %(HTTP_VERSION)s" %(status)s'
 
 
-def run_server():
+def _get_app():
     from .app import app
+
+    return app
+
+
+def run_server():
+    app = _get_app()
 
     get_logger(__name__).info("Publish initializing...")
     host, port = get_publish_info()["host"], int(get_publish_info()["port"])
@@ -40,7 +46,7 @@ def generate_static_html(root: Path):
 
     shutil.copytree(package_root / static_name, root / static_name, dirs_exist_ok=True)
 
-    with app.test_client() as client:
+    with _get_app().test_client() as client:
         for index, url in enumerate(urls):
             page = client.get(url).data
             with open(root.joinpath(files[index]), "wb") as f:
