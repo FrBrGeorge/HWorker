@@ -2,7 +2,6 @@ import os
 import shutil
 from pathlib import Path
 
-from .app import app
 from ..config import get_publish_info
 from ..log import get_logger
 
@@ -14,6 +13,8 @@ _request_log_format = '%(REMOTE_ADDR)15s - "%(REQUEST_METHOD)s %(REQUEST_URI)-50
 
 
 def run_server():
+    from .app import app
+
     get_logger(__name__).info("Publish initializing...")
     host, port = get_publish_info()["host"], int(get_publish_info()["port"])
     if "DEBUG_ENVIRONMENT1" in os.environ:
