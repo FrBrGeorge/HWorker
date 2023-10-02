@@ -11,10 +11,11 @@ from functools import partial
 from itertools import zip_longest
 from math import isclose
 from os.path import basename
-from random import randint
+from pathlib import Path
 from subprocess import CompletedProcess, TimeoutExpired
 from tempfile import NamedTemporaryFile
 from typing import Iterator
+from tempfile import gettempdir
 
 from ..config import get_check_directory, get_task_info, get_prog_name
 from ..depot.database.functions import store
@@ -79,6 +80,8 @@ def python_runner(
     exit_code = result.wait()
     with open(prog_output.name, "rb") as po:
         po = po.read()
+    prog_output.close()
+    os.unlink(prog_output.name)
     return po, result.stderr.read(), exit_code
 
 
@@ -89,8 +92,6 @@ def runtime_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> 
     :param solution:
     :param check_num: number of check for parallel work
     """
-    if check_num == 0:
-        check_num = randint(1, 1000000)
     prog = solution.content.get(get_prog_name())
     prog_input, initial_output = b"", b""
     for name, b in checker.content.items():
@@ -100,13 +101,14 @@ def runtime_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> 
             initial_output = b
 
     content, stderr, actual_output, verdict = 0.0, b"", b"", VerdictEnum.missing
+    check_dir = Path(gettempdir(), get_check_directory())
     if prog is not None:
-        if not os.path.exists(get_check_directory()):
-            os.makedirs(get_check_directory())
-        prog_path = os.path.join(get_check_directory(), f"prog_{check_num}.py")
+        if not check_dir.exists():
+            os.makedirs(check_dir)
+        prog_path = Path(check_dir, f"{solution.USER_ID}.py")
         with open(prog_path, mode="wb") as p:
             p.write(prog)
-        input_path = os.path.join(get_check_directory(), f"{check_num}.in")
+        input_path = Path(check_dir, f"{solution.USER_ID}.in")
         with open(input_path, mode="wb") as i:
             i.write(prog_input)
 
@@ -117,6 +119,8 @@ def runtime_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> 
         diff, score = choose_diff_score(actual_output, initial_output, checker.category)
         content = score(diff(actual_output, initial_output, task_info["test_size"]))
         verdict = VerdictEnum.passed if not exit_code else VerdictEnum.failed
+        input_path.unlink()
+        prog_path.unlink()
 
     return CheckResult(
         ID=checker.ID + solution.ID,
