@@ -183,6 +183,10 @@ class HWorker(cmd.Cmd):
         # TODO check if is anything to publish
         control.start_publish()
 
+    def do_update(self, arg):
+        """Download, check and score (for periodical run)"""
+        control.update_all()
+
     def do_run(self, arg):
         """Download, check, score and publish at once"""
         control.big_red_button()

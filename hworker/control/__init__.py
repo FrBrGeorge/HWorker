@@ -110,13 +110,21 @@ def download_store_check_results():
     make.check_new_solutions()
 
 
-def big_red_button():
-    """Starts a full working system cycle
+def update_all():
+    """Starts a full working system circle
 
     :return: -
     """
     download_store_check_results()
     do_score()
+
+
+def big_red_button():
+    """Perform full circle and start publishing
+
+    :return: -
+    """
+    update_all()
     start_publish()
 
 
