@@ -134,15 +134,7 @@ def no_merge_processing(final_content: dict, user_config: str, no_merge: list, k
                 user_content = user_content.get(key, {})
             final_content[k] = user_content.get(k, final_content[k])
         elif isinstance(v, dict):
-            no_merge_processing(
-                v,
-                user_config,
-                no_merge,
-                keys
-                + [
-                    k,
-                ],
-            )
+            no_merge_processing(v, user_config, no_merge, keys + [k])
 
 
 def get_git_directory() -> str:
