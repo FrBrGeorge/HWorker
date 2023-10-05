@@ -164,7 +164,11 @@ def check_new_solutions() -> None:
     for solution in solutions:
         for check_name in solution.checks:
             checker: Check = search(Check, Criteria("ID", "==", check_name), first=True)
-            # Not null because solutions and checks parsed together
+
+            if checker is None:
+                get_logger(__name__).warn(f"Not found check named<{check_name}> from solution {solution}")
+                continue
+
             result_obj: CheckResult = search(
                 CheckResult, Criteria("ID", "==", get_result_ID(solution=solution, checker=checker)), first=True
             )
@@ -174,5 +178,8 @@ def check_new_solutions() -> None:
             ):
                 new_result = check(checker, solution)
                 if new_result is None:
+                    get_logger(__name__).warn(
+                        f"Check returned empty object for check <{checker}> from solution {solution}"
+                    )
                     continue
                 store(new_result)
