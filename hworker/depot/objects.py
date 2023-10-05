@@ -6,13 +6,13 @@ from typing import Any
 
 
 def is_field(name: str, obj: Any) -> bool:
-    """Check if the object woth certain name can be treated as "public data field"
+    """Check if the object with certain name can be treated as "public data field"
 
     @param name: Name of the object
     @obj: The object itself
     @return: If the object seems to be data field
 
-    For now it just check fo obj not to be a callable and name not to start with '_'"""
+    For now, it just checks fo obj not to be a callable and name not to start with '_'"""
     return bool(name) and not (name.startswith("_") or callable(obj))
 
 
@@ -125,7 +125,7 @@ class Check(StoreObject):
 
 class Solution(StoreObject):
     content: dict[str, bytes]  # filepath : file_content
-    checks: dict[str]  # list[ID]
+    checks: dict[str, list]  # list[ID]
     _is_versioned: bool = True
 
     def __init__(self, content: dict[str, bytes] = None, checks: dict[str] = None, **kwargs):

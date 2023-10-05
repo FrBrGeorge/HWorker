@@ -1,7 +1,7 @@
 """Database functions"""
 import functools
 from operator import itemgetter
-from typing import Iterable, Optional
+from typing import Iterable, Optional, TypeVar
 
 import sqlalchemy.exc
 
@@ -9,6 +9,8 @@ import hworker.depot.objects as objects
 from hworker.log import get_logger
 from .common import get_Session
 from .models import *
+
+ObjectSuccessor = TypeVar("ObjectSuccessor", bound=objects.StoreObject)
 
 _object_to_model_class: dict[type[objects.StoreObject] : type[Base]] = {
     objects.Homework: Homework,
@@ -23,6 +25,7 @@ _object_to_model_class: dict[type[objects.StoreObject] : type[Base]] = {
     objects.FinalScore: FinalScore,
     objects.UpdateTime: UpdateTime,
 }
+
 _model_class_to_object: dict[type[Base] : type[objects.StoreObject]] = {
     value: key for key, value in _object_to_model_class.items()
 }
@@ -77,7 +80,7 @@ def _parse_criteria(model: type[Base], criteria: objects.Criteria) -> BinaryExpr
     return model_method(criteria.field_value)
 
 
-def store(obj: objects.StoreObject) -> None:
+def store(obj: ObjectSuccessor) -> None:
     """Store object into database
     :param obj: object to store
     """
@@ -125,7 +128,7 @@ def search(
     return_fields: list[str] = None,
     first: bool = False,
     actual: bool = False,
-) -> Iterable[objects.StoreObject] | Optional[objects.StoreObject]:
+) -> Iterable[ObjectSuccessor] | Optional[ObjectSuccessor]:
     """Search for object in database
     :param obj_type: type of object to search
     :param criteria: criteria for searching

@@ -118,7 +118,7 @@ def example_homework_update_check():
 
 @pytest.fixture(scope="function", autouse=True)
 def example_config(tmp_path):
-    config = tmp_path / "testconfig.toml"
+    config = tmp_path / "test-config.toml"
     create_config(
         config,
         {

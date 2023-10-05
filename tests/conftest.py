@@ -7,7 +7,7 @@ import hworker.config
 
 @pytest.fixture(scope="session", autouse=True)
 def global_user_config(tmp_path_factory):
-    config = tmp_path_factory.getbasetemp() / "testconfig.toml"
+    config = tmp_path_factory.getbasetemp() / "test-config.toml"
     hworker.config.create_config(config, {})
     hworker.config.process_configs(str(config))
 

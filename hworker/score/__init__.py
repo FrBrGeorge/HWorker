@@ -32,8 +32,8 @@ def create_files():
     for name in _module_names:
         path = _get_path_from_name(name)
         if not path.exists():
-            with open(path, "x") as fp:
-                get_logger(__name__).warn(f"Empty {name} file")
+            path.touch()
+            get_logger(__name__).warn(f"Empty {name} file")
 
 
 @cache

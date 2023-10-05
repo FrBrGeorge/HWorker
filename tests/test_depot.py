@@ -5,11 +5,18 @@ import pytest
 
 
 from hworker.depot import store, delete, search
-from hworker.depot.objects import Homework, Criteria, is_field
+from hworker.depot.objects import Homework, Criteria, is_field, FileObject
 
 
 class TestDepotFunctions:
-    h1 = Homework(ID="10", USER_ID="11", TASK_ID="12", timestamp=12345, content={"lalala": b"dasdada"}, is_broken=False)
+    h1 = Homework(
+        ID="10",
+        USER_ID="11",
+        TASK_ID="12",
+        timestamp=12345,
+        content={"lalala": FileObject(b"dasdada", 0)},
+        is_broken=False,
+    )
 
     def test_store(self):
         store(self.h1)
@@ -21,7 +28,11 @@ class TestDepotFunctions:
         with pytest.raises(ValueError):
             store(Homework(ID="10", USER_ID="11", TASK_ID="12", timestamp=12345))
         with pytest.raises(ValueError):
-            store(Homework(ID="10", USER_ID="11", TASK_ID="12", timestamp=12345, content={"lalala": b"dasdada"}))
+            store(
+                Homework(
+                    ID="10", USER_ID="11", TASK_ID="12", timestamp=12345, content={"lalala": FileObject(b"dasdada", 0)}
+                )
+            )
 
     def test_delete(self):
         delete(Homework)
@@ -38,7 +49,7 @@ def homeworks():
                     USER_ID=name,
                     TASK_ID="1",
                     timestamp=int(datetime.datetime(2023, 3 + i * 2, 5).timestamp()),
-                    content={"1": b"2"},
+                    content={"1": FileObject(b"2", 0)},
                     is_broken=False,
                 )
             )
@@ -61,9 +72,9 @@ class TestComparison:
 
     def test_almost_equal(self, homeworks):
         hw = list(search(Homework))[0]
-        newhw = Homework(**hw, content={"No": b"Way"}, is_broken=False)
-        assert hw != newhw
-        assert hw @ newhw
+        new_hw = Homework(**hw, content={"No": FileObject(b"Way", 0)}, is_broken=False)
+        assert hw != new_hw
+        assert hw @ new_hw
 
 
 class TestDepotFunctionsWithCriteria:
