@@ -1,3 +1,5 @@
+# You can use "`F_string`" string constant, which replaces with "F_string".format(**V_dict),
+# where V-dict is current section dictinary expanded with {"SELF": field_name, "PARENT": parend_field_name}
 [logging]
 "console level" = "INFO"
 "file level" = "DEBUG"
@@ -36,6 +38,7 @@ root_path = "files"
 [tasks]
 
 [tasks._default]
+deliver_ID = "`{PARENT}`"               # replaces to task name
 soft_deadline_delta = "open_date+6d"
 hard_deadline_delta = "open_date+13d"
 test_size = 100

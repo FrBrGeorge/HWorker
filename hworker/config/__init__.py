@@ -49,12 +49,27 @@ def process_configs(user_config: str, *extras: str) -> Path:
         for name in [default_name, *extras, username]:
             merge(content, read_from_path(Path(folder) / f"{name}{extension}"))
     fill_final_config(content)
+    expand_macro(content, "")
     clear_underscores(content)
     no_merge_processing(content, user_config, content.get("formalization", {}).get("no_merge", []), [])
     finalpath = userdir / f"{username}{final_name_suffix}{extension}"
     create_config(finalpath, content)
     profile[:] = [content, *extras, username]
     return finalpath
+
+
+def expand_macro(content: dict, parent=str) -> None:
+    """Expand "`f-string`" fields
+
+    :param content: currnet section content
+    :param parent: parnet section name
+    :return:
+    """
+    for key, value in content.items():
+        if isinstance(value, dict):
+            expand_macro(value, key)
+        if isinstance(value, str) and value[0] == value[-1] == "`":
+            content[key] = value[1:-1].format(**content | {"SELF": key, "PARENT": parent})
 
 
 def config() -> dict:
@@ -73,6 +88,7 @@ def fill_final_config(final_content: dict) -> None:
     :param final_content:
     :return:
     """
+    # TODO propagate _default scheme up to all sections (not tasks only)
     for task_ID, task in final_content.get("tasks", {}).items():
         if not task_ID.startswith("_"):
             for dflt_name, dflt in final_content["tasks"]["_default"].items():
