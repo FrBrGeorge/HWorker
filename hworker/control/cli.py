@@ -175,9 +175,18 @@ class HWorker(cmd.Cmd):
     # TODO delete()
 
     def do_check(self, arg):
-        # TODO not all; TODO recheck all regardless of actualirt
-        """Check all homeworks"""
-        make.check_new_solutions()
+        # TODO individual
+        """Check new (default) or all homeworks"""
+        args = self.shplit(arg)
+        match args:
+            case [] | ["new"]:
+                make.check_new_solutions()
+            case ["all"]:
+                make.check_all_solutions()
+
+    def complete_check(self, text, line, begidx, endidx):
+        objnames = ("all", "new")
+        return self.filtertext(objnames, text)
 
     def do_publish(self, arg):
         """Start publisher"""
