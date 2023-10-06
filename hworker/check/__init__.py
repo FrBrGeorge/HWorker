@@ -5,6 +5,7 @@ from datetime import datetime
 from .runtime import runtime_wo_store
 from .validate import validate_wo_store
 from ..depot.objects import Check, Solution, CheckCategoryEnum, CheckResult, VerdictEnum
+from ._tools import get_result_ID
 
 
 def check(checker: Check, solution: Solution, check_num: int = 0) -> CheckResult:
@@ -22,7 +23,7 @@ def check(checker: Check, solution: Solution, check_num: int = 0) -> CheckResult
             return validate_wo_store(checker, solution, check_num)
         case _:
             return CheckResult(
-                ID=checker.ID + solution.ID,
+                ID=get_result_ID(checker, solution),
                 USER_ID=solution.USER_ID,
                 TASK_ID=solution.TASK_ID,
                 timestamp=datetime.now().timestamp(),
@@ -34,13 +35,3 @@ def check(checker: Check, solution: Solution, check_num: int = 0) -> CheckResult
                 solution_ID=solution.ID,
                 verdict=VerdictEnum.missing,
             )
-
-
-def get_result_ID(checker: Check, solution: Solution) -> str:
-    """CheckResult ID generator
-
-    :param checker: check object
-    :param solution: solution object
-    :return: CheckResult ID
-    """
-    return checker.ID + solution.ID

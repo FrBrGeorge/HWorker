@@ -6,8 +6,9 @@ import pytest
 
 from hworker.check.runtime import python_runner, runtime_wo_store
 from hworker.check.validate import validate_wo_store
+from hworker.check import get_result_ID
 from hworker.depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
-from .user_config import user_config
+from .user_config import user_config  # NoQA F401
 
 
 @pytest.fixture()
@@ -32,7 +33,7 @@ class TestCheckRuntime:
         [{"tasks": {"task_ID": {"deliver_ID": "20230101/01", "open_date": datetime(year=2023, month=1, day=1)}}}],
         indirect=True,
     )
-    def test_checker(self, user_config):
+    def test_checker(self, user_config):  # NoQA F811
         """"""
         # TODO: Change to parametrize
         checker = Check(
@@ -50,7 +51,7 @@ class TestCheckRuntime:
         result = runtime_wo_store(checker, solution)
 
         assert result == CheckResult(
-            ID=checker.ID + solution.ID,
+            ID=get_result_ID(checker, solution),
             USER_ID=solution.USER_ID,
             TASK_ID=solution.TASK_ID,
             timestamp=result.timestamp,
@@ -92,7 +93,7 @@ class TestCheckValidate:
         result = validate_wo_store(validator, solution)
 
         assert result == CheckResult(
-            ID=validator.ID + solution.ID,
+            ID=get_result_ID(validator, solution),
             USER_ID=solution.USER_ID,
             TASK_ID=solution.TASK_ID,
             timestamp=result.timestamp,
@@ -131,7 +132,7 @@ class TestCheckValidate:
         result = validate_wo_store(validator, solution)
 
         assert result == CheckResult(
-            ID=validator.ID + solution.ID,
+            ID=get_result_ID(validator, solution),
             USER_ID=solution.USER_ID,
             TASK_ID=solution.TASK_ID,
             timestamp=result.timestamp,

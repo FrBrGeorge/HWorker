@@ -1,6 +1,5 @@
 """Isolated runtime tests and check results"""
 
-import io
 import os
 import platform
 import subprocess
@@ -21,6 +20,7 @@ from ..config import get_check_directory, get_task_info, get_prog_name
 from ..depot.database.functions import store
 from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
 from ..log import get_logger
+from ._tools import get_result_ID
 
 if platform.system() != "Windows":
     try:
@@ -123,7 +123,7 @@ def runtime_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> 
         prog_path.unlink()
 
     return CheckResult(
-        ID=checker.ID + solution.ID,
+        ID=get_result_ID(checker, solution),
         USER_ID=solution.USER_ID,
         TASK_ID=solution.TASK_ID,
         timestamp=datetime.now().timestamp(),

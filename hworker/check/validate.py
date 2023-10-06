@@ -8,6 +8,7 @@ from ..config import get_check_directory, get_validator_name, get_version_valida
 from ..depot import store, search
 from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum, Criteria
 from ..log import get_logger
+from ._tools import get_result_ID
 
 
 def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) -> CheckResult:
@@ -58,7 +59,7 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
         verdict = VerdictEnum.missing
 
     return CheckResult(
-        ID=validator.ID + solution.ID,
+        ID=get_result_ID(validator, solution),
         USER_ID=solution.USER_ID,
         TASK_ID=solution.TASK_ID,
         timestamp=datetime.now().timestamp(),
