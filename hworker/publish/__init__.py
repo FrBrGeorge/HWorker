@@ -27,11 +27,12 @@ def run_server():
         host = "localhost"
         app.run(host=host, port=port, debug=True, use_debugger=True, use_reloader=False)
     else:
-        if app.config.get("SECRET_KEY", "replace this") == "replace this":
+        if not 1 < len(set(app.config.get("SECRET_KEY", "replace this junky text"))) < 17:
             get_logger(__name__).error(
-                "Aborting start because your publish SECRET_KEY in unset. "
-                "Please run: python3 -c 'import secrets; print(secrets.token_hex())' "
-                "And paste key to your config file"
+                "Aborting publishing because your publish SECRET_KEY is unset. "
+                "Please run\n    python3 -c 'import secrets; print(secrets.token_hex())'\n"
+                "and paste key to your config file like this:\n"
+                '    [publish]\n    …\n    SECRET_KEY = "64 hexadecimal digits"'
             )
             return
         serve(TransLogger(app, setup_console_handler=False, format=_request_log_format), host=host, port=port)

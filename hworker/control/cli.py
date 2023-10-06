@@ -7,6 +7,7 @@ import atexit
 import cmd
 import io
 import re
+import secrets
 import shlex
 import sys
 import os
@@ -242,11 +243,14 @@ def shell():
     parser.add_argument(
         "-s", "--sample", nargs="?", metavar="PATH", const="sample", help="Copy a sample project into PATH"
     )
-    parser.add_argument("config", nargs="*", help="Configuration file to parse")
+    parser.add_argument("config", nargs="*", help="Configuration to parse (file path, prefix or 'key = vaule')")
     args = parser.parse_args()
     if args.sample:
         args.config.insert(0, copy_sample(args.sample))
+        args.config.append(f'publish.SECRET_KEY = "{secrets.token_hex()}"')
     if args.config:
+        if "=" in args.config[0]:
+            log(f"Fist config must be a file, not '{args.config[0]}'", "critical")
         finalconf = config.process_configs(*args.config)
         if not args.external:
             os.chdir(finalconf.parent)

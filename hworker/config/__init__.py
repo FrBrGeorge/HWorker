@@ -3,7 +3,7 @@
 import datetime
 from copy import copy
 from pathlib import Path
-from tomllib import load
+from tomllib import load, loads
 from typing import Final
 
 from mergedeep import merge
@@ -47,7 +47,7 @@ def process_configs(user_config: str, *extras: str) -> Path:
     content = {}
     for folder in [*__path__, str(userdir)]:
         for name in [default_name, *extras, username]:
-            merge(content, read_from_path(Path(folder) / f"{name}{extension}"))
+            merge(content, loads(name) if "=" in name else read_from_path(Path(folder) / f"{name}{extension}"))
     fill_final_config(content)
     expand_macro(content, "")
     clear_underscores(content)
