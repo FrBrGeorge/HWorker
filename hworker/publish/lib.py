@@ -44,7 +44,7 @@ def _create_header(header: list, soup: BeautifulSoup):
 
     thead = soup.new_tag("thead")
 
-    trs = [soup.new_tag("tr") for i in range(max_depth)]
+    trs = [soup.new_tag("tr") for _ in range(max_depth)]
     for item in trs:
         thead.append(item)
 

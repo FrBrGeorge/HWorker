@@ -23,7 +23,7 @@ def run_server():
 
     get_logger(__name__).info("Publish initializing...")
     host, port = get_publish_info()["host"], int(get_publish_info()["port"])
-    if "DEBUG_ENVIRONMENT1" in os.environ:
+    if "DEBUG_ENVIRONMENT" in os.environ:
         host = "localhost"
         app.run(host=host, port=port, debug=True, use_debugger=True, use_reloader=False)
     else:

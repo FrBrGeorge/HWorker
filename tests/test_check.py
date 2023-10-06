@@ -40,9 +40,9 @@ class TestCheckRuntime:
         )
         solution = Solution(
             content={"prog.py": b"a, b = eval(input())\n" b"print(max(a, b), end='')"},
-            checks=[
-                checker.ID,
-            ],
+            checks={
+                checker.ID: [],
+            },
             ID="solution_ID",
             USER_ID="user_ID",
             TASK_ID="task_ID",
@@ -82,9 +82,9 @@ class TestCheckValidate:
         solution = Solution(
             content={"prog.py": b"a, b = eval(input())\n" b"print(max(a, b))"},
             timestamp=datetime.now().timestamp(),
-            checks=[
-                validator.ID,
-            ],
+            checks={
+                validator.ID: [],
+            },
             ID="solution_ID",
             USER_ID="user_ID",
             TASK_ID="task_ID",
@@ -121,9 +121,9 @@ class TestCheckValidate:
         solution = Solution(
             content={"prog.py": b"import itertools\n" b"a, b = eval(input())\n" b"print(max(a, b))"},
             timestamp=datetime.now().timestamp(),
-            checks=[
-                validator.ID,
-            ],
+            checks={
+                validator.ID: [],
+            },
             ID="solution_ID",
             USER_ID="user_ID",
             TASK_ID="task_ID",
