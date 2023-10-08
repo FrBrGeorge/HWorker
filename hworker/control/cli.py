@@ -117,7 +117,7 @@ class HWorker(cmd.Cmd):
             case ["user"]:
                 return self.filtertext(config.get_uids(), word, shift=delta, quote=quote)
 
-    def show_objects(self, Type, *options, actual=True, flt=".*"):
+    def show_objects(self, Type, *options, actual=True, flt=".*", dump=False):
         print("@@", Type)
         optnames = ("ID",)
         rules = {optname: Rule(optname, "==", opt) for optname, opt in zip(optnames, options)}
@@ -126,7 +126,11 @@ class HWorker(cmd.Cmd):
                 print(hw)
                 if "ID" in rules and hasattr(hw, "content"):
                     for fname in hw.content:
-                        print(f"\t{fname}")
+                        try:
+                            content = hw.content[fname].decode()
+                        except Exception:
+                            content = str(hw.content[fname])
+                        print(f"\t{fname}:\n{content}" if dump else f"\t{fname}")
 
     def do_show(self, arg):
         """Show objects or individual object"""
@@ -137,21 +141,23 @@ class HWorker(cmd.Cmd):
                 return
         else:
             args = ["homework"]
+        if dodump := "dump" in args:
+            args.remove("dump")
         match args:
             case [Type]:
-                self.show_objects(self.whatshow[Type])
+                self.show_objects(self.whatshow[Type], dump=dodump)
             case [Type, "all"]:
-                self.show_objects(self.whatshow[Type], actual=False)
+                self.show_objects(self.whatshow[Type], actual=False, dump=dodump)
             case [Type, ID]:
                 if self.is_regexp(ID):
-                    self.show_objects(self.whatshow[Type], flt=ID)
+                    self.show_objects(self.whatshow[Type], flt=ID, dump=dodump)
                 else:
-                    self.show_objects(self.whatshow[Type], ID)
+                    self.show_objects(self.whatshow[Type], ID, dump=dodump)
             case [Type, ID, "all"]:
                 if self.is_regexp(ID):
-                    self.show_objects(self.whatshow[Type], actual=False, flt=ID)
+                    self.show_objects(self.whatshow[Type], actual=False, flt=ID, dump=dodump)
                 else:
-                    self.show_objects(self.whatshow[Type], ID, actual=False)
+                    self.show_objects(self.whatshow[Type], ID, actual=False, dump=dodump)
 
     def help_show(self):
         res = f"""Show objects or individual object
@@ -161,7 +167,9 @@ show TYPE       - list objects of type TYPE
 show TYPE REGEX - list objects of type TYPE with ID matching REGEX
 show TYPE ID    - print certain objects
 
-Additionally, "all" can be appended to show all versions of objects.
+Additionally:
+                - "all" can be appended to show all versions of objects.
+                - "dump" can be appended to show object contents
 
 TYPE can be {', '.join(self.whatshow)}
         """
@@ -177,6 +185,8 @@ TYPE can be {', '.join(self.whatshow)}
                 if Type in self.whatshow:
                     ids = [hw.ID for hw in depot.search(self.whatshow[Type], actual=True)]
                     return self.filtertext(ids, word, shift=delta, quote=quote)
+            case [Type, _]:
+                return ["all", "dump"]
 
     def do_shell(self, arg):
         "Execute python code"
