@@ -43,7 +43,12 @@ class HWorker(cmd.Cmd):
     intro = f"HomeWorker v{version} shell. Type ? for help.\n"
     prompt = "hw> "
     DELIMETERS = set(' \t\n`~!@#$%^&*()-=+[{]}\\|;:",<>/?')
-    whatshow = {"homework": depot.objects.Homework, "solution": depot.objects.Solution, "check": depot.objects.Check}
+    whatshow = {
+        "homework": depot.objects.Homework,
+        "solution": depot.objects.Solution,
+        "check": depot.objects.Check,
+        "result": depot.objects.CheckResult,
+    }
 
     def qsplit(self, line, text, begidx, endidx):
         try:  # All quotes are closed
@@ -116,7 +121,6 @@ class HWorker(cmd.Cmd):
                     print(f"\t{fname}")
 
     def do_show(self, arg):
-        # TODO do_help()
         """Show objects or individual object"""
         args = self.shplit(arg)
         if len(args) > 0:
@@ -134,6 +138,19 @@ class HWorker(cmd.Cmd):
                 self.show_objects(self.whatshow[Type], ID)
             case [Type, ID, "all"]:
                 self.show_objects(self.whatshow[Type], ID, actual=False)
+
+    def help_show(self):
+        res = f"""Show objects or individual object
+
+show            - list homeworks
+show TYPE       - list objects of type TYPE
+show TYPE ID    - print certain objects
+
+If "all" is appended, all versions are shown.
+
+TYPE can be {', '.join(self.whatshow)}
+        """
+        print(res, file=sys.stderr)
 
     def complete_show(self, text, line, begidx, endidx):
         (_, *args, word), delta, quote = self.qsplit(line, text, begidx, endidx)
