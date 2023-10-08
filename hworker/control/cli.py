@@ -48,6 +48,8 @@ class HWorker(cmd.Cmd):
         "solution": depot.objects.Solution,
         "check": depot.objects.Check,
         "result": depot.objects.CheckResult,
+        "taskscore": depot.objects.TaskScore,
+        "userscore": depot.objects.UserScore,
     }
 
     def qsplit(self, line, text, begidx, endidx):
