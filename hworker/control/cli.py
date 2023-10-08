@@ -74,6 +74,11 @@ class HWorker(cmd.Cmd):
         return res
 
     @staticmethod
+    def is_regexp(string):
+        """Check if regexp is given instead of just string"""
+        return string.startswith(".") or "*" in string
+
+    @staticmethod
     def shplit(string):
         """Try to shlex.split(string) or print an error"""
         try:
@@ -110,15 +115,16 @@ class HWorker(cmd.Cmd):
             case ["user"]:
                 return self.filtertext(config.get_uids(), word, shift=delta, quote=quote)
 
-    def show_objects(self, Type, *options, actual=True):
+    def show_objects(self, Type, *options, actual=True, flt=".*"):
         print("@@", Type)
         optnames = ("ID",)
         rules = {optname: Rule(optname, "==", opt) for optname, opt in zip(optnames, options)}
         for hw in depot.search(Type, *rules.values(), actual=actual):
-            print(hw)
-            if "ID" in rules and hasattr(hw, "content"):
-                for fname in hw.content:
-                    print(f"\t{fname}")
+            if re.search(flt, hw["ID"]):
+                print(hw)
+                if "ID" in rules and hasattr(hw, "content"):
+                    for fname in hw.content:
+                        print(f"\t{fname}")
 
     def do_show(self, arg):
         """Show objects or individual object"""
@@ -135,18 +141,25 @@ class HWorker(cmd.Cmd):
             case [Type, "all"]:
                 self.show_objects(self.whatshow[Type], actual=False)
             case [Type, ID]:
-                self.show_objects(self.whatshow[Type], ID)
+                if self.is_regexp(ID):
+                    self.show_objects(self.whatshow[Type], flt=ID)
+                else:
+                    self.show_objects(self.whatshow[Type], ID)
             case [Type, ID, "all"]:
-                self.show_objects(self.whatshow[Type], ID, actual=False)
+                if self.is_regexp(ID):
+                    self.show_objects(self.whatshow[Type], actual=False, flt=ID)
+                else:
+                    self.show_objects(self.whatshow[Type], ID, actual=False)
 
     def help_show(self):
         res = f"""Show objects or individual object
 
 show            - list homeworks
 show TYPE       - list objects of type TYPE
+show TYPE REGEX - list objects of type TYPE with ID matching REGEX
 show TYPE ID    - print certain objects
 
-If "all" is appended, all versions are shown.
+Additionally, "all" can be appended to show all versions of objects.
 
 TYPE can be {', '.join(self.whatshow)}
         """
