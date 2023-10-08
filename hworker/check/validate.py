@@ -34,26 +34,20 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
     module = module_from_spec(spec)
     spec.loader.exec_module(module)
 
-    validator_type = None
-    if get_validator_name() in dir(module):
-        validator_type = get_validator_name()
-    elif get_version_validator_name() in dir(module):
-        validator_type = get_version_validator_name()
-
+    validator_type = (set(dir(module)) & {get_validator_name(), get_version_validator_name()} or {None}).pop()
     stderr, result = b"", 0.0
 
     if validator_type:
         v = getattr(module, validator_type)
-        if validator_type == get_validator_name():
-            try:
-                if validator_type == get_validator_name():
-                    result = v(solution, *validator_args)
-                else:
-                    result = v(search(Solution, Criteria("ID", "==", solution.ID)), *validator_args)
-            except Exception as error:
-                stderr = str(error).encode()
-            finally:
-                module_path.unlink(missing_ok=True)
+        try:
+            if validator_type == get_validator_name():
+                result = v(solution, *validator_args)
+            else:
+                result = v(search(Solution, Criteria("ID", "==", solution.ID)), *validator_args)
+        except Exception as error:
+            stderr = str(error).encode()
+        finally:
+            module_path.unlink(missing_ok=True)
         verdict = VerdictEnum.passed if not stderr else VerdictEnum.failed
     else:
         verdict = VerdictEnum.missing
