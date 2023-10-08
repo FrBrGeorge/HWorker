@@ -200,7 +200,7 @@ class TaskScore(StoreObject):
 
     name: str
     rating: float
-    _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
+    _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "rating", "timestamp"}
     _is_versioned: bool = False
 
     def __init__(self, name: str = None, rating: float = None, **kwargs):
@@ -231,7 +231,7 @@ class UserScore(StoreObject):
 
     name: str
     rating: float
-    _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
+    _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "rating", "timestamp"}
     _is_versioned: bool = False
 
     def __init__(self, name: str = None, rating: float = None, **kwargs):
@@ -263,7 +263,7 @@ class FinalScore(StoreObject):
 
     name: str
     rating: str
-    _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "timestamp"}
+    _public_fields: set[str] = {"ID", "USER_ID", "TASK_ID", "rating", "timestamp"}
     _is_versioned: bool = False
 
     def __init__(self, name: str = None, rating: str = None, **kwargs):
