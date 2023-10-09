@@ -106,6 +106,9 @@ def download_all() -> None:
     update_all()
     for student_id in get_git_uids():
         repo = git.Repo(local_path(student_id))
+        if not repo.heads:
+            get_logger(__name__).warning(f"Got empty repo from {student_id} student!")
+            continue
         for task in get_tasks_list():
             repo.git.checkout(repo.heads[0])
             if os.path.isdir((task_path := Path(local_path(student_id), get_task_info(task).get("deliver_ID", "")))):
