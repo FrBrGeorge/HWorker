@@ -77,6 +77,9 @@ def python_runner(
             )
         except TimeoutExpired as time_error:
             result = CompletedProcess(time_error.args, -1, stderr=str(time_error).encode(errors="replace"))
+        except Exception as error:
+            get_logger(__name__).warning(f"Runner {prog_path} crashed on {input_path} data:\n {error}")
+
     exit_code = result.wait()
     with open(prog_output.name, "rb") as po:
         po = po.read()
