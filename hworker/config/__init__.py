@@ -15,6 +15,7 @@ user_name = "hworker"
 default_name: Final = "default_hworker"
 extension: Final = ".toml"
 profile: list = []
+DAY_START = 6  # Additinal 6 hours for day to start after 6:00AM ☺
 
 
 def read_from_path(path: Path) -> dict:
@@ -58,18 +59,25 @@ def process_configs(user_config: str, *extras: str) -> Path:
     return finalpath
 
 
-def expand_macro(content: dict, parent=str) -> None:
-    """Expand "`f-string`" fields
+def expand_macro(content: dict, parent: str = "") -> None:
+    """Expand "`f-string`" fields and unify dates
 
     :param content: currnet section content
     :param parent: parnet section name
     :return:
     """
     for key, value in content.items():
-        if isinstance(value, dict):
-            expand_macro(value, key)
-        if isinstance(value, str) and value[0] == value[-1] == "`":
-            content[key] = value[1:-1].format(**content | {"SELF": key, "PARENT": parent})
+        match value:
+            case dict():
+                expand_macro(value, key)
+            case datetime.datetime():
+                pass
+            case datetime.date():
+                content[key] = datetime.datetime.combine(value, datetime.time(DAY_START))
+            case str() if "`" in value:
+                res = value.split("`")
+                res[1::2] = [r.format(**content | {"SELF": key, "PARENT": parent}) for r in res[1::2]]
+                content[key] = "".join(res)
 
 
 def config() -> dict:

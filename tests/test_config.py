@@ -18,6 +18,7 @@ from hworker.config import (
     get_task_info,
     create_config,
     no_merge_processing,
+    DAY_START,
 )
 from .user_config import user_config
 
@@ -65,10 +66,10 @@ class TestConfig:
             "resource_limit": 3145728,
             "time_limit": 2,
             "deliver_ID": "20230101/01",
-            "hard_deadline": datetime(2023, 1, 14, 0, 0),
+            "hard_deadline": datetime(2023, 1, 14, DAY_START, 0),
             "hard_deadline_delta": "open_date+13d",
-            "open_date": datetime(2023, 1, 1, 0, 0),
-            "soft_deadline": datetime(2023, 1, 7, 0, 0),
+            "open_date": datetime(2023, 1, 1, DAY_START, 0),
+            "soft_deadline": datetime(2023, 1, 7, DAY_START, 0),
             "soft_deadline_delta": "open_date+6d",
         }
 
