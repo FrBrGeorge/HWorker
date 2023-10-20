@@ -45,6 +45,7 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
             else:
                 result = v(search(Solution, Criteria("ID", "==", solution.ID)), *validator_args)
         except Exception as error:
+            get_logger(__name__).warning(f"Validator {validator.ID} crashed on {solution.ID} solution:\n {error}")
             stderr = str(error).encode()
         finally:
             module_path.unlink(missing_ok=True)
