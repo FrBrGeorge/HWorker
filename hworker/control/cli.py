@@ -106,6 +106,8 @@ class HWorker(cmd.Cmd):
                 )
             case ["tasks"] | ["task"]:
                 print("\n".join(config.get_tasks_list()))
+            case ["task", task]:
+                pprint(config.get_task_info(task))
             case []:
                 pprint(config.config())
 
@@ -117,6 +119,8 @@ class HWorker(cmd.Cmd):
                 return self.filtertext(objnames, word, shift=delta)
             case ["user"]:
                 return self.filtertext(config.get_uids(), word, shift=delta, quote=quote)
+            case ["task"]:
+                return self.filtertext(config.get_tasks_list(), word, shift=delta, quote=quote)
 
     def show_objects(self, Type, *options, actual=True, flt=".*", dump=False):
         print("@@", Type)
