@@ -97,7 +97,7 @@ def info():
     return render_template("info.html", username=username, taskname=taskname, tables=tables)
 
 
-@app.get("/student/<user_id:string>")
+@app.get("/student/<user_id>")
 def student(user_id):
     data_per_user: dict[str, list] = defaultdict(list)
 
