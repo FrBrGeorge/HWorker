@@ -1,4 +1,4 @@
-[![Black Logo](https://raw.githubusercontent.com/Veniamin-Arefev/HWorker/main/docs/_static/logo.png)](https://hworker.readthedocs.io/en/stable/)
+[![Black Logo](https://raw.githubusercontent.com/FrBrGeorge/HWorker/main/docs/_static/logo.png)](https://hworker.readthedocs.io/en/stable/)
 
 ## The Uncompromising Homework Checker
   
