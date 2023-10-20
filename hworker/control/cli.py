@@ -6,6 +6,7 @@ import argparse
 import atexit
 import cmd
 import io
+import logging
 import re
 import secrets
 import shlex
@@ -229,6 +230,28 @@ TYPE can be {', '.join(self.whatshow)}
     def complete_check(self, text, line, begidx, endidx):
         objnames = ("all", "new")
         return self.filtertext(objnames, text)
+
+    def do_logging(self, arg):
+        """Set console log level"""
+        objnames = logging.getLevelNamesMapping()
+        logger = logging.getLogger()
+        handler = [hand for hand in logger.handlers if isinstance(hand, logging.StreamHandler)][0]
+        if arg:
+            if arg in objnames:
+                handler.setLevel(arg)
+        else:
+            print(logging.getLevelName(handler.level))
+
+    def complete_logging(self, text, line, begidx, endidx):
+        d = logging.getLevelNamesMapping()
+        objnames = sorted(d, key=lambda x: d[x])
+        return self.filtertext(objnames, text)
+
+    def help_logging(self):
+        res = "Set console log level\n\n" + ", ".join(
+            f"{key}={val}" for key, val in logging.getLevelNamesMapping().items()
+        )
+        print(res, file=sys.stderr)
 
     def do_publish(self, arg):
         """Start publisher"""
