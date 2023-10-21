@@ -136,6 +136,8 @@ class HWorker(cmd.Cmd):
                         except Exception:
                             content = str(hw.content[fname])
                         print(f"\t{fname}:\n{content}" if dump else f"\t{fname}")
+                if "ID" in rules and hasattr(hw, "checks") and dump:
+                    pprint(hw.checks)
 
     def do_show(self, arg):
         """Show objects or individual object"""
