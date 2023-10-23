@@ -12,6 +12,8 @@ from ...depot import store
 from ...depot.objects import Homework, FileObject
 from ...log import get_logger
 
+_depot_prefix = "g"
+
 
 def local_path(student_id: str) -> str:
     """Convert student id to local repo path
@@ -119,7 +121,7 @@ def download_all() -> None:
                     store(
                         Homework(
                             content=content,
-                            ID=f"{student_id}:{task}",
+                            ID=f"{_depot_prefix}.{student_id}/{task}",
                             USER_ID=student_id,
                             TASK_ID=os.path.join(task),
                             timestamp=float(commit[1]),

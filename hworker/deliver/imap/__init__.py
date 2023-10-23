@@ -88,7 +88,7 @@ def download_all():
             else:
                 depot.store(
                     Homework(
-                        ID=f"{_depot_prefix}{mail.uid}",
+                        ID=f"{_depot_prefix}.{mail.uid}",
                         USER_ID=USER_ID,
                         TASK_ID=TASK_ID,
                         timestamp=max(map(attrgetter("timestamp"), contents.values()), default=_default_timestamp),
