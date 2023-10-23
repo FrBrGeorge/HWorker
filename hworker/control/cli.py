@@ -245,13 +245,13 @@ TYPE can be {', '.join(self.whatshow)}
         ids = [sol.ID for sol in depot.search(depot.objects.Solution, actual=True)]
         match args:
             case []:
-                return self.filtertext(ids + const, text)
+                return self.filtertext(ids + const, word, shift=delta, quote=quote)
 
     def do_logging(self, arg):
         """Set console log level"""
         objnames = logging.getLevelNamesMapping()
         logger = logging.getLogger()
-        handler = [hand for hand in logger.handlers if isinstance(hand, logging.StreamHandler)][0]
+        handler = [hand for hand in logger.handlers if type(hand) is logging.StreamHandler][0]
         if arg:
             if arg in objnames:
                 handler.setLevel(arg)
