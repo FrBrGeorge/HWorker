@@ -23,7 +23,9 @@ from ..log import get_logger
 try:
     import readline
 except ModuleNotFoundError:
-    from unittest.mock import MagicMock as readline
+    from unittest.mock import MagicMock
+
+    readline = MagicMock()
 
 try:
     from .._version import version
