@@ -232,10 +232,18 @@ TYPE can be {', '.join(self.whatshow)}
                 make.check_new_solutions()
             case ["all"]:
                 make.check_all_solutions()
+            case [ID]:
+                sol = depot.search(depot.objects.Solution, Rule("ID", "==", ID), actual=True, first=True)
+                for name, result in make.run_solution_checks(sol).items():
+                    print(f"{name}: {result}")
 
     def complete_check(self, text, line, begidx, endidx):
-        objnames = ("all", "new")
-        return self.filtertext(objnames, text)
+        (_, *args, word), delta, quote = self.qsplit(line, text, begidx, endidx)
+        const = ["all", "new"]
+        ids = [sol.ID for sol in depot.search(depot.objects.Solution, actual=True)]
+        match args:
+            case []:
+                return self.filtertext(ids + const, text)
 
     def do_logging(self, arg):
         """Set console log level"""
