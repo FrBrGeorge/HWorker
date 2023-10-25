@@ -5,6 +5,7 @@ from pathlib import Path
 from tempfile import gettempdir
 
 import git
+from tqdm import tqdm
 
 from ... import depot
 from ...config import get_git_directory, get_repos, get_git_uids, repo_to_uid, get_tasks_list, get_task_info
@@ -62,7 +63,7 @@ def update_all() -> None:
     """Pull every repo from config list (or clone if not downloaded)"""
     repos = get_repos()
     get_logger(__name__).info("Updating all repos")
-    for repo in repos:
+    for repo in tqdm(repos, colour="green", desc="Git repositories update", delay=2):
         if not os.path.exists(local_path(repo_to_uid(repo))):
             clone(repo)
         else:
@@ -107,7 +108,7 @@ def download_all() -> None:
     depot.store(depot.objects.UpdateTime(name="Git deliver", timestamp=datetime.datetime.now().timestamp()))
     get_logger(__name__).info("Downloading (or updating) all repos and store them")
     update_all()
-    for student_id in get_git_uids():
+    for student_id in tqdm(get_git_uids(), colour="green", desc="Git download", delay=2):
         repo = git.Repo(local_path(student_id))
         if not repo.heads:
             get_logger(__name__).warning(f"Got empty repo from {student_id} student!")
