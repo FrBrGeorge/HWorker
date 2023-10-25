@@ -22,7 +22,7 @@ def example_git_repo(tmp_path_factory):
     (test_path / config.get_remote_name()).write_bytes(b"UserN:TaskN\n")
     repo.git.add(".")
     repo.git.commit(message="test commit")
-    return repo, repo_path
+    return repo, repo_path, repo.git.log("-n", "1", "--pretty=format:%H")
 
 
 class TestDeliverGit:

@@ -95,7 +95,10 @@ def runtime_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> 
     :param solution:
     :param check_num: number of check for parallel work
     """
-    prog = solution.content.get(get_prog_name())
+    if get_prog_name() in solution.content:
+        prog = solution.content.get(get_prog_name())
+    else:
+        prog = ([None] + [solution.content[name] for name in solution.content if name.endswith(".py")])[-1]
     prog_input, initial_output = b"", b""
     for name, b in checker.content.items():
         if name.endswith(".in"):

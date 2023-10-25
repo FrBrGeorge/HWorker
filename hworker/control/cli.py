@@ -6,6 +6,7 @@ import argparse
 import atexit
 import cmd
 import io
+import logging
 import re
 import secrets
 import shlex
@@ -22,7 +23,9 @@ from ..log import get_logger
 try:
     import readline
 except ModuleNotFoundError:
-    from unittest.mock import MagicMock as readline
+    from unittest.mock import MagicMock
+
+    readline = MagicMock()
 
 try:
     from .._version import version
@@ -105,6 +108,8 @@ class HWorker(cmd.Cmd):
                 )
             case ["tasks"] | ["task"]:
                 print("\n".join(config.get_tasks_list()))
+            case ["task", task]:
+                pprint(config.get_task_info(task))
             case []:
                 pprint(config.config())
 
@@ -116,6 +121,8 @@ class HWorker(cmd.Cmd):
                 return self.filtertext(objnames, word, shift=delta)
             case ["user"]:
                 return self.filtertext(config.get_uids(), word, shift=delta, quote=quote)
+            case ["task"]:
+                return self.filtertext(config.get_tasks_list(), word, shift=delta, quote=quote)
 
     def show_objects(self, Type, *options, actual=True, flt=".*", dump=False):
         print("@@", Type)
@@ -131,6 +138,8 @@ class HWorker(cmd.Cmd):
                         except Exception:
                             content = str(hw.content[fname])
                         print(f"\t{fname}:\n{content}" if dump else f"\t{fname}")
+                if "ID" in rules and hasattr(hw, "checks") and dump:
+                    pprint(hw.checks)
 
     def do_show(self, arg):
         """Show objects or individual object"""
@@ -225,10 +234,40 @@ TYPE can be {', '.join(self.whatshow)}
                 make.check_new_solutions()
             case ["all"]:
                 make.check_all_solutions()
+            case [ID]:
+                sol = depot.search(depot.objects.Solution, Rule("ID", "==", ID), actual=True, first=True)
+                for name, result in make.run_solution_checks(sol).items():
+                    print(f"{name}: {result}")
 
     def complete_check(self, text, line, begidx, endidx):
-        objnames = ("all", "new")
+        (_, *args, word), delta, quote = self.qsplit(line, text, begidx, endidx)
+        const = ["all", "new"]
+        ids = [sol.ID for sol in depot.search(depot.objects.Solution, actual=True)]
+        match args:
+            case []:
+                return self.filtertext(ids + const, word, shift=delta, quote=quote)
+
+    def do_logging(self, arg):
+        """Set console log level"""
+        objnames = logging.getLevelNamesMapping()
+        logger = logging.getLogger()
+        handler = [hand for hand in logger.handlers if type(hand) is logging.StreamHandler][0]
+        if arg:
+            if arg in objnames:
+                handler.setLevel(arg)
+        else:
+            print(logging.getLevelName(handler.level))
+
+    def complete_logging(self, text, line, begidx, endidx):
+        d = logging.getLevelNamesMapping()
+        objnames = sorted(d, key=lambda x: d[x])
         return self.filtertext(objnames, text)
+
+    def help_logging(self):
+        res = "Set console log level\n\n" + ", ".join(
+            f"{key}={val}" for key, val in logging.getLevelNamesMapping().items()
+        )
+        print(res, file=sys.stderr)
 
     def do_publish(self, arg):
         """Start publisher"""

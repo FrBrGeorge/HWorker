@@ -1,4 +1,5 @@
 """Interface objects for depot management"""
+import datetime
 import enum
 from collections.abc import Iterator
 from inspect import getmembers_static
@@ -59,9 +60,15 @@ class StoreObject:
                 return getattr(self, name)
         raise KeyError(f"Index type must be int ot str, not {idx.__class__}")
 
+    def _stringify(self, key, value):
+        """Make object field value representaion more human readable"""
+        if key == "timestamp" and isinstance(value, float):
+            return str(datetime.datetime.fromtimestamp(value))
+        return value
+
     def __str__(self):
         """Object representation with only public fields"""
-        return ", ".join(f"{key}={value}" for key, value in self.items())
+        return ", ".join(f"{key}={self._stringify(key, value)}" for key, value in self.items())
 
     def __repr__(self):
         """Object representation with ALL fields"""

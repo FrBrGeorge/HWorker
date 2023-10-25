@@ -138,6 +138,21 @@ def run_solution_checks_and_store(solution: Solution) -> None:
         store(check_result)
 
 
+def run_solution_checks(solution: Solution) -> dict[str:CheckResult]:
+    """Run all given solution checks and store results in depot
+
+    :param solution: solution to run checks
+    :return: {check_name: CheckResult} dictionary
+    """
+    get_logger(__name__).debug(f"Run all checks of {solution.ID} solution")
+
+    check_results = {}
+    for check_name in solution.checks:
+        checker = search(Check, Criteria("ID", "==", check_name), first=True)
+        check_results[check_name] = check(checker, solution)
+    return check_results
+
+
 def check_all_solutions() -> None:
     """Run all solution checks for every actual solution and store results in depot
 

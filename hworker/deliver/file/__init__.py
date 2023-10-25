@@ -16,11 +16,12 @@ log = get_logger(__name__)
 
 def download_all():
     depot.store(depot.objects.UpdateTime(name="File deliver", timestamp=datetime.datetime.now().timestamp()))
-    get_logger(__name__).info("Downloading files...")
 
     root = Path(get_file_root_path())
+    log.info(f"Files at {root.absolute()}...")
     tasks = get_tasks_list()
     for userdir in root.iterdir():
+        log.debug(f"User {userdir}")
         if not userdir.is_dir():  # Irrelivate
             continue
         if (USER_ID := dirname_to_uid(userdir.name)) is None:
@@ -41,7 +42,7 @@ def download_all():
             if len(contents) > 0:
                 depot.store(
                     Homework(
-                        ID=f"{_depot_prefix}{TASK_ID}",
+                        ID=f"{_depot_prefix}.{taskdir}",
                         USER_ID=USER_ID,
                         TASK_ID=TASK_ID,
                         timestamp=max(c.timestamp for c in contents.values()),

@@ -12,6 +12,8 @@ from ...depot import store
 from ...depot.objects import Homework, FileObject
 from ...log import get_logger
 
+_depot_prefix = "g"
+
 
 def local_path(student_id: str) -> str:
     """Convert student id to local repo path
@@ -67,7 +69,7 @@ def update_all() -> None:
             pull(repo)
 
 
-def get_homework_content(repo: git.Repo, root: Path) -> dict:
+def get_homework_content(repo: git.Repo, root: Path, commit: str) -> dict:
     """Extracts tests, solution and URLS from homework and pack into dict
 
     :param root: local path to homework
@@ -76,9 +78,10 @@ def get_homework_content(repo: git.Repo, root: Path) -> dict:
     get_logger(__name__).debug(f"Getting {root} content")
     content = {
         path.relative_to(root).as_posix(): FileObject(
-            content=path.read_bytes(), timestamp=float(repo.git.log("-1", "--format=%ct", "--date=default", "--", path))
+            content=repo.git.show("--no-patch", commit, path),
+            timestamp=float(repo.git.log("-1", "--format=%ct", "--date=default", "--", commit, path)),
         )
-        for path in root.rglob("*")
+        for path in map(lambda p: Path(root, p), repo.git.ls_tree(commit, root, r=True, name_only=True).split("\n"))
         if path.is_file() and f"{os.sep}." not in str(path.relative_to(root.parent))
     }
     return content
@@ -110,16 +113,14 @@ def download_all() -> None:
             get_logger(__name__).warning(f"Got empty repo from {student_id} student!")
             continue
         for task in get_tasks_list():
-            repo.git.checkout(repo.heads[0])
             if os.path.isdir((task_path := Path(local_path(student_id), get_task_info(task).get("deliver_ID", "")))):
                 commits = [_ for _ in get_commits(repo, task_path) if _]
                 for commit in commits:
-                    repo.git.checkout(commit[0])
-                    content = get_homework_content(repo, task_path)
+                    content = get_homework_content(repo, task_path, commit[0])
                     store(
                         Homework(
                             content=content,
-                            ID=f"{student_id}:{task}",
+                            ID=f"{_depot_prefix}.{student_id}/{task}",
                             USER_ID=student_id,
                             TASK_ID=os.path.join(task),
                             timestamp=float(commit[1]),
