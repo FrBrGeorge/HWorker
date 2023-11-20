@@ -78,7 +78,7 @@
                 const skip_prefix = $("#skip_prefix").val();
                 const skip_suffix = $("#skip_suffix").val();
 
-                let username = $(e.currentTarget).parent().children()[0].innerText.replace("&nbsp;", " ")
+                let username = $(e.currentTarget).parent().children()[0].innerText.replaceAll(" ", " ");
                 let col_index = $(e.currentTarget).index($(e.currentTarget).innerText);
                 let total_cols = $(e.currentTarget).parent().children().length;
 
@@ -96,12 +96,12 @@
         });
     </script>
     {% endif %}
-    <form action="/student/" method="GET" target="_blank" id="student_form" hidden></form>
+    <form action="/student/" method="POST" target="_blank" id="student_form" hidden></form>
     <script>
         $(function () {
             $("tbody > tr > td:first-child").on("click", function (e) {
-                let username = e.currentTarget.innerText.replace("&nbsp;", " ");
-                {#console.log(username);#}
+                let username = e.currentTarget.innerText.replaceAll(" ", " ");
+                console.log(username);
 
                 const student_form = $("#student_form");
                 student_form.attr("action", "/student/"+username);
