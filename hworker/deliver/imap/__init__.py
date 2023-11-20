@@ -60,6 +60,7 @@ def download_all():
         colour="green",
         desc="Imap download",
         delay=2,
+        unit="mail",
         total=len(box.uids("ALL")),
     ):
         mail_name = mail.from_
