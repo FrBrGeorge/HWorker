@@ -20,6 +20,11 @@ def download_all():
     depot.store(depot.objects.UpdateTime(name="File deliver", timestamp=datetime.datetime.now().timestamp()))
 
     root = Path(get_file_root_path())
+
+    if not root.exists():
+        log.error(f"Directory {root.absolute()} doesnt exists")
+        return
+
     log.info(f"Files at {root.absolute()}...")
     tasks = get_tasks_list()
     for userdir in tqdm(root.iterdir(), colour="green", desc="Imap download", delay=2):
