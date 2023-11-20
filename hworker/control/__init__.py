@@ -32,12 +32,7 @@ def generate_scores():
     for name in names_for_qual:
         depot.store(depot.objects.UserQualifier(ID=f"{name}", timestamp=123, name=name, content=""))
 
-        for task_id in tasks:
-            depot.store(
-                depot.objects.TaskQualifier(
-                    ID=f"{task_id}/{name}", TASK_ID=task_id, timestamp=123, name=name, content=""
-                )
-            )
+        depot.store(depot.objects.TaskQualifier(ID=f"{name}", timestamp=123, name=name, content=""))
 
     for user_id in users:
         score_total = 0
