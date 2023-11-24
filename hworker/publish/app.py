@@ -164,4 +164,6 @@ def status():
 
     table = create_table(["Event type", "Date and time"], rows)
 
-    return render_template("status.html", table=table)
+    return render_template(
+        "status.html", table=table, current_time=datetime.datetime.now().strftime("%H:%M:%S %d.%m.%Y")
+    )
