@@ -2,7 +2,17 @@ import datetime
 from itertools import islice
 
 # TODO python 3.12 update
-# from itertools import batched
+try:
+    from itertools import batched
+except ImportError:
+
+    def batched(iterable, n):
+        if n < 1:
+            raise ValueError("n must be at least one")
+        it = iter(iterable)
+        while batch := tuple(islice(it, n)):
+            yield batch
+
 
 from flask import Flask, request, render_template, redirect
 
@@ -12,16 +22,6 @@ from ..config import get_publish_info
 
 app = Flask(__name__)
 app.config.update(get_publish_info())
-
-
-# TODO python 3.12 update
-def batched(iterable, n):
-    # batched('ABCDEFG', 3) --> ABC DEF G
-    if n < 1:
-        raise ValueError("n must be at least one")
-    it = iter(iterable)
-    while batch := tuple(islice(it, n)):
-        yield batch
 
 
 def _get_data_for_user(user_id: str):
@@ -136,7 +136,6 @@ def student(user_id):
         ["Task name", *user_score_names], [["All tasks", *user_data[1 : 1 + len(user_score_names)]]]
     )
 
-    # TODO python 3.12 update
     task_qual_table = create_table(
         ["Task name", *task_qualifiers],
         [
