@@ -15,7 +15,7 @@ user_name = "hworker"
 default_name: Final = "default_hworker"
 extension: Final = ".toml"
 profile: list = []
-DAY_START = 6  # Additinal 6 hours for day to start after 6:00AM ☺
+DAY_START = 1  # Additinal 1 hour for day to start after 1:00AM ☺
 
 
 def read_from_path(path: Path) -> dict:

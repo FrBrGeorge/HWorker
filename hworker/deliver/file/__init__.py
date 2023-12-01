@@ -3,6 +3,8 @@ import datetime
 import re
 from pathlib import Path
 
+from tqdm import tqdm
+
 from ... import depot
 from ...config import get_file_root_path, dirname_to_uid, get_tasks_list, taskid_to_deliverid
 from ...depot.objects import Homework, FileObject
@@ -18,9 +20,14 @@ def download_all():
     depot.store(depot.objects.UpdateTime(name="File deliver", timestamp=datetime.datetime.now().timestamp()))
 
     root = Path(get_file_root_path())
+
+    if not root.exists():
+        log.error(f"Directory {root.absolute()} doesnt exists")
+        return
+
     log.info(f"Files at {root.absolute()}...")
     tasks = get_tasks_list()
-    for userdir in root.iterdir():
+    for userdir in tqdm(root.iterdir(), colour="green", desc="Imap download", delay=2):
         log.debug(f"User {userdir}")
         if not userdir.is_dir():  # Irrelivate
             continue

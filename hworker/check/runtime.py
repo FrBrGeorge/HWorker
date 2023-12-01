@@ -13,14 +13,14 @@ from os.path import basename
 from pathlib import Path
 from subprocess import CompletedProcess, TimeoutExpired
 from tempfile import NamedTemporaryFile
-from typing import Iterator
 from tempfile import gettempdir
+from typing import Iterator
 
+from ._tools import get_result_ID
 from ..config import get_check_directory, get_task_info, get_prog_name
 from ..depot.database.functions import store
 from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum
 from ..log import get_logger
-from ._tools import get_result_ID
 
 if platform.system() != "Windows":
     try:

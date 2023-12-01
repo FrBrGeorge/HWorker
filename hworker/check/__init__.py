@@ -2,10 +2,10 @@
 
 from datetime import datetime
 
+from ._tools import get_result_ID
 from .runtime import runtime_wo_store
 from .validate import validate_wo_store
 from ..depot.objects import Check, Solution, CheckCategoryEnum, CheckResult, VerdictEnum
-from ._tools import get_result_ID
 
 
 def check(checker: Check, solution: Solution, check_num: int = 0) -> CheckResult:

@@ -5,12 +5,11 @@
 {% block main %}
 <div class="text-center form-control-general">
     <h1 class="h3 mb-3 fw-normal">{{ config.get("course_name") }} Status check</h1>
-    {% if table is defined %}
     <div>
-        <h1 class="h3 mb-3 fw-normal">{{ name }}</h1>
-        {{ table|safe }}
+        <h5>Current time is : {{ current_time }}</h5>
     </div>
-    {% endif %}
+
+    <div>{{ table|safe }}</div>
     <script>
         $(function () {
             $("table").dataTable({

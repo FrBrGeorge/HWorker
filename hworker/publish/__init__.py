@@ -2,12 +2,11 @@ import os
 import shutil
 from pathlib import Path
 
+from paste.translogger import TransLogger
+from waitress import serve
+
 from ..config import get_publish_info
 from ..log import get_logger
-
-from waitress import serve
-from paste.translogger import TransLogger
-
 
 _request_log_format = '%(REMOTE_ADDR)15s - "%(REQUEST_METHOD)s %(REQUEST_URI)-50s %(HTTP_VERSION)s" %(status)s'
 

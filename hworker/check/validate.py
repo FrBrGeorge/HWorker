@@ -1,14 +1,14 @@
 """Tasks meta-information checks and check results"""
-
+import os
 from datetime import datetime
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
+from ._tools import get_result_ID
 from ..config import get_check_directory, get_validator_name, get_version_validator_name, get_task_info
 from ..depot import store, search
 from ..depot.objects import Check, Solution, CheckResult, CheckCategoryEnum, VerdictEnum, Criteria
 from ..log import get_logger
-from ._tools import get_result_ID
 
 
 def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) -> CheckResult:
@@ -24,6 +24,9 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
     for name in solution.checks:
         if name == validator.ID:
             validator_args = get_task_info(validator.TASK_ID).get(validator.ID, [])
+
+    if not os.path.exists(get_check_directory()):
+        os.makedirs(get_check_directory())
 
     name, b = list(validator.content.items())[0]
     module_path = Path(get_check_directory()) / name

@@ -1,5 +1,18 @@
 import datetime
-from collections import defaultdict
+from itertools import islice
+
+# TODO python 3.12 update
+try:
+    from itertools import batched
+except ImportError:
+
+    def batched(iterable, n):
+        if n < 1:
+            raise ValueError("n must be at least one")
+        it = iter(iterable)
+        while batch := tuple(islice(it, n)):
+            yield batch
+
 
 from flask import Flask, request, render_template, redirect
 
@@ -11,10 +24,46 @@ app = Flask(__name__)
 app.config.update(get_publish_info())
 
 
+def _get_data_for_user(user_id: str):
+    user_data: list = []
+
+    final_score_names = list(map(lambda x: x.name, depot.search(depot.objects.Formula)))
+    user_score_names = list(map(lambda x: x.name, depot.search(depot.objects.UserQualifier)))
+    task_qualifiers = list(map(lambda x: x.name, depot.search(depot.objects.TaskQualifier)))
+    task_score_names = {task_id: task_qualifiers for task_id in config.get_tasks_list()}
+
+    for big_names, search_object in zip(
+        [final_score_names, user_score_names, task_score_names],
+        [depot.objects.FinalScore, depot.objects.UserScore, depot.objects.TaskScore],
+    ):
+        if type(big_names) == list:
+            for name in big_names:
+                score = depot.search(
+                    search_object,
+                    depot.objects.Criteria("USER_ID", "==", user_id),
+                    depot.objects.Criteria("name", "==", name),
+                    first=True,
+                )
+                user_data.append(None if score is None else score.rating)
+        else:
+            for task_id, names in big_names.items():
+                for name in names:
+                    score = depot.search(
+                        search_object,
+                        depot.objects.Criteria("TASK_ID", "==", task_id),
+                        depot.objects.Criteria("USER_ID", "==", user_id),
+                        depot.objects.Criteria("name", "==", name),
+                        first=True,
+                    )
+                    user_data.append(None if score is None else score.rating)
+
+    return user_data
+
+
 @app.get("/")
 def index():
     users = config.get_uids()
-    data_per_user: dict[str, list] = defaultdict(list)
+    data_per_user: dict[str, list] = dict()
 
     final_score_names = list(map(lambda x: x.name, depot.search(depot.objects.Formula)))
     user_score_names = list(map(lambda x: x.name, depot.search(depot.objects.UserQualifier)))
@@ -24,33 +73,9 @@ def index():
     }
 
     for user_id in users:
-        for big_names, search_object in zip(
-            [final_score_names, user_score_names, task_score_names],
-            [depot.objects.FinalScore, depot.objects.UserScore, depot.objects.TaskScore],
-        ):
-            if type(big_names) == list:
-                for name in big_names:
-                    score = depot.search(
-                        search_object,
-                        depot.objects.Criteria("USER_ID", "==", user_id),
-                        depot.objects.Criteria("name", "==", name),
-                        first=True,
-                    )
-                    data_per_user[user_id].append(None if score is None else score.rating)
-            else:
-                for task_id, names in big_names.items():
-                    for name in names:
-                        score = depot.search(
-                            search_object,
-                            depot.objects.Criteria("TASK_ID", "==", task_id),
-                            depot.objects.Criteria("USER_ID", "==", user_id),
-                            depot.objects.Criteria("name", "==", name),
-                            first=True,
-                        )
-                        data_per_user[user_id].append(None if score is None else score.rating)
+        data_per_user[user_id] = _get_data_for_user(user_id)
 
-    header = list()
-    header.append("Users")
+    header: list = ["Users"]
     if len(final_score_names) != 0:
         header.append(final_score_names[0])
     type_pretty_names = ["User Qualifiers", "Task Qualifiers"]
@@ -97,6 +122,37 @@ def info():
     return render_template("info.html", username=username, taskname=taskname, tables=tables)
 
 
+@app.route("/student/<user_id>", methods=["POST", "GET"])
+def student(user_id):
+    if user_id not in config.get_uids():
+        return redirect("/")
+
+    user_data: list = _get_data_for_user(user_id)
+
+    user_score_names = list(map(lambda x: x.name, depot.search(depot.objects.UserQualifier)))
+    task_qualifiers = list(map(lambda x: x.name, depot.search(depot.objects.TaskQualifier)))
+
+    user_qual_table = create_table(
+        ["Task name", *user_score_names], [["All tasks", *user_data[1 : 1 + len(user_score_names)]]]
+    )
+
+    task_qual_table = create_table(
+        ["Task name", *task_qualifiers],
+        [
+            [task_name, *scores]
+            for task_name, scores in zip(
+                config.get_tasks_list(), batched(user_data[1 + len(user_score_names) :], len(task_qualifiers))
+            )
+        ],
+    )
+    return render_template(
+        "student.html",
+        tables={"User Qualifiers": user_qual_table, "Task Qualifiers": task_qual_table},
+        username=user_id,
+        final_mark=user_data[0] if len(user_data) > 0 else None,
+    )
+
+
 @app.get("/status")
 def status():
     data: list[depot.objects.UpdateTime] = list(depot.search(depot.objects.UpdateTime))
@@ -107,4 +163,6 @@ def status():
 
     table = create_table(["Event type", "Date and time"], rows)
 
-    return render_template("status.html", table=table)
+    return render_template(
+        "status.html", table=table, current_time=datetime.datetime.now().strftime("%H:%M:%S %d.%m.%Y")
+    )

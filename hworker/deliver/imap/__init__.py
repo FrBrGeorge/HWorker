@@ -7,6 +7,8 @@ import tempfile
 import traceback
 from operator import attrgetter
 
+from tqdm import tqdm
+
 from .mailer_utilities import get_mailbox
 from ... import depot
 from ...config import get_imap_info, email_to_uid, deliverid_to_taskid
@@ -53,7 +55,14 @@ def download_all():
 
     get_logger(__name__).info(f"Started downloading")
 
-    for mail in box.fetch("ALL", limit=get_imap_info()["letter_limit"]):
+    for mail in tqdm(
+        box.fetch("ALL", limit=get_imap_info()["letter_limit"]),
+        colour="green",
+        desc="Imap download",
+        delay=2,
+        unit="mail",
+        total=len(box.uids("ALL")),
+    ):
         mail_name = mail.from_
         contents: dict[str, FileObject] = dict()
         is_broken_all = False

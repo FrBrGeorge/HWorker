@@ -50,7 +50,7 @@
             });
         </script>
     </div>
-    <div class="my_fit overflow-scroll">
+    <div class="my_fit overflow-scroll big-table">
         {{ table|safe }}
     </div>
     <script>
@@ -78,7 +78,7 @@
                 const skip_prefix = $("#skip_prefix").val();
                 const skip_suffix = $("#skip_suffix").val();
 
-                let username = $(e.currentTarget).parent().children()[0].innerText.replace("&nbsp;", " ")
+                let username = $(e.currentTarget).parent().children()[0].innerText.replaceAll(" ", " ");
                 let col_index = $(e.currentTarget).index($(e.currentTarget).innerText);
                 let total_cols = $(e.currentTarget).parent().children().length;
 
@@ -88,7 +88,6 @@
                 // console.log(col_index);
                 if (col_index > skip_prefix - 1 && col_index < total_cols - skip_suffix) {
                     let hw_name_index = Math.floor((col_index - skip_prefix) / one_task_columns)
-
                     $("#form_username").val(username);
                     $("#form_taskname").val(homework_names[hw_name_index]);
                     $("#data_form").trigger("submit");
@@ -97,6 +96,20 @@
         });
     </script>
     {% endif %}
+    <form action="/student/" method="POST" target="_blank" id="student_form" hidden></form>
+    <script>
+        $(function () {
+            $("tbody > tr > td:first-child").on("click", function (e) {
+                let username = e.currentTarget.innerText.replaceAll(" ", " ");
+                console.log(username);
+
+                const student_form = $("#student_form");
+                student_form.attr("action", "/student/"+username);
+                student_form.trigger("submit");
+            });
+        });
+    </script>
+
 
     <h6 id="update-time"></h6>
 </div>

@@ -7,12 +7,12 @@ import atexit
 import cmd
 import io
 import logging
+import os
 import re
 import secrets
 import shlex
-import sys
-import os
 import shutil
+import sys
 from pathlib import Path
 from pprint import pprint
 

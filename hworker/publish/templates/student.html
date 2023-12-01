@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Info{% endblock %}
+
+{% block main %}
+<div class="text-center form-control-general">
+    <h1 class="h3 mb-3 fw-normal">{{ config.get("course_name") }} Progress Check</h1>
+    <div>
+        <h5>Username is: {{ username }}</h5>
+        <h5>Final mark is: {{ final_mark }}</h5>
+    </div>
+    {% if tables is defined %}
+    {% for name, table in tables.items() %}
+    <div>
+        <h1 class="h3 mb-3 fw-normal">{{ name }}</h1>
+        <div class="">
+            {{ table|safe }}
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+    <script>
+        $(function () {
+            $("table").dataTable({
+                "paging": false,
+                "searching": false,
+                "info": false,
+            });
+        });
+    </script>
+
+</div>
+{% endblock %}
