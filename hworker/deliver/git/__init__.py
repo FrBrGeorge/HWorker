@@ -70,21 +70,31 @@ def update_all() -> None:
             pull(repo)
 
 
-def get_homework_content(repo: git.Repo, root: Path, commit: str) -> dict:
+def get_homework_content(repo: git.Repo, homework_root: Path, commit: str) -> dict:
     """Extracts tests, solution and URLS from homework and pack into dict
 
-    :param root: local path to homework
+    :param homework_root: local path to homework
     :return: dict with "prog", "tests" and "urls" keys
     """
-    get_logger(__name__).debug(f"Getting {root} content")
-    content = {
-        path.relative_to(root).as_posix(): FileObject(
-            content=repo.git.show("--no-patch", commit, path),
-            timestamp=float(repo.git.log("-1", "--format=%ct", "--date=default", "--", commit, path)),
-        )
-        for path in map(lambda p: Path(root, p), repo.git.ls_tree(commit, root, r=True, name_only=True).split("\n"))
-        if path.is_file() and f"{os.sep}." not in str(path.relative_to(root.parent))
-    }
+    get_logger(__name__).debug(f"Getting {homework_root} content")
+    content = dict()
+    for path in map(
+        lambda p: Path(repo.working_tree_dir, p),
+        repo.git.ls_tree(commit, homework_root, r=True, name_only=True).split("\n"),
+    ):
+        if path.is_file():
+            filename = path.relative_to(homework_root).as_posix()
+            try:
+                content[filename] = FileObject(
+                    content=repo.git.show(
+                        f"{commit}:{path.relative_to(repo.working_tree_dir).as_posix()}",
+                        stdout_as_string=False,
+                        strip_newline_in_stdout=False,
+                    ),
+                    timestamp=float(repo.git.log("-1", "--format=%ct", "--date=default", "--", commit, path)),
+                )
+            except git.GitError as git_error:
+                get_logger(__name__).warning(f"Can't get content for {filename}. Error message: {git_error}")
     return content
 
 
