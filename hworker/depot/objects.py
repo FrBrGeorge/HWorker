@@ -92,7 +92,7 @@ class FileObject:
         self.timestamp = timestamp
 
     def __eq__(self, other):
-        return isinstance(other, FileObject) and all([getattr(self, field) == getattr(other, field) for field in ""])
+        return isinstance(other, FileObject) and all([getattr(self, field) == getattr(other, field) for field in ["content", "timestamp"]])
 
     def __str__(self):
         return ", ".join(map(str, [self.content, self.timestamp]))
