@@ -9,9 +9,8 @@ from difflib import diff_bytes, unified_diff
 from functools import partial
 from itertools import zip_longest
 from math import isclose
-from os.path import basename
 from pathlib import Path
-from subprocess import CompletedProcess, TimeoutExpired
+from subprocess import TimeoutExpired
 from tempfile import NamedTemporaryFile
 from tempfile import gettempdir
 from typing import Iterator
@@ -75,17 +74,23 @@ def python_runner(
                 stdout=prog_output,
                 stderr=subprocess.PIPE,
             )
-        except TimeoutExpired as time_error:
-            result = CompletedProcess(time_error.args, -1, stderr=str(time_error).encode(errors="replace"))
         except Exception as error:
             get_logger(__name__).warning(f"Runner {prog_path} crashed on {input_path} data:\n {error}")
 
-    exit_code = result.wait()
+    # TODO: wall clock should be limited separately
+    try:
+        exit_code = result.wait(time_limit * 2)
+    except TimeoutExpired as E:
+        result.terminate()
+        stderr = f"TIMEOUT: {E.timeout}\n".encode(errors="replace")
+        exit_code = -1
+    else:
+        stderr = b""
     with open(prog_output.name, "rb") as po:
         po = po.read()
     prog_output.close()
     os.unlink(prog_output.name)
-    return po, result.stderr.read(), exit_code
+    return po, stderr + result.stderr.read(), exit_code
 
 
 def runtime_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> CheckResult:
@@ -123,7 +128,9 @@ def runtime_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> 
         time_limit, resource_limit = task_info["time_limit"], task_info["resource_limit"]
         actual_output, stderr, exit_code = runner(prog_path, input_path, time_limit, resource_limit)
         diff, score = choose_diff_score(actual_output, initial_output, checker.category)
-        content = score(diff(actual_output, initial_output, task_info["test_size"]))
+        if diffresult := diff(actual_output, initial_output, task_info["test_size"]):
+            stderr += b"".join(diffresult)
+        content = score(diffresult)
         verdict = VerdictEnum.passed if not exit_code else VerdictEnum.failed
         input_path.unlink()
         prog_path.unlink()
@@ -180,7 +187,7 @@ def bytes_diff(actual: bytes, initial: bytes, test_size: int) -> Iterator[bytes]
     act_size, init_size = len(actual), len(initial)
     if act_size > test_size or init_size > test_size:
         init_lines, act_lines = [f"Size differs: {init_size}\n"], ["Size differs: <output>\n"]
-    return diff_bytes(unified_diff, init_lines, act_lines, basename(initial), b"<output>")
+    return diff_bytes(unified_diff, init_lines, act_lines, b"<expect>", b"<actual>")
 
 
 def exact_score(diff: Iterator[bytes] | None) -> float:
@@ -202,9 +209,8 @@ def float_diff(actual: bytes, initial: bytes, relative: int = 1e-09) -> Iterator
     """
     # TODO: clear non-digit symbols
     for actual_num, initial_num in zip_longest(actual.split(), initial.split(), fillvalue=None):
-        yield f"{actual_num} " f"{'=' if isclose(float(actual_num), float(initial_num), rel_tol=relative) else '!='} " f"{initial_num}".encode(
-            "utf-8"
-        )
+        chk = isclose(float(actual_num), float(initial_num), rel_tol=relative)
+        yield f"{actual_num} {'=' if chk else '!='} {initial_num}".encode("utf-8")
 
 
 def float_score(diff: Iterator[bytes]) -> float:
