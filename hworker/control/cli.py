@@ -5,6 +5,7 @@ Commandline interface
 import argparse
 import atexit
 import cmd
+import datetime
 import io
 import logging
 import os
@@ -13,6 +14,7 @@ import secrets
 import shlex
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 from pprint import pprint
 
@@ -125,21 +127,29 @@ class HWorker(cmd.Cmd):
                 return self.filtertext(config.get_tasks_list(), word, shift=delta, quote=quote)
 
     def show_objects(self, Type, *options, actual=True, flt=".*", dump=False):
-        print("@@", Type)
+        print(f"\t{Type.__name__}:")
         optnames = ("ID",)
         rules = {optname: Rule(optname, "==", opt) for optname, opt in zip(optnames, options)}
         for hw in depot.search(Type, *rules.values(), actual=actual):
-            if re.search(flt, hw["ID"]):
+            try:
+                resflt = re.search(flt, hw["ID"])
+            except Exception as E:
+                log(f"Regexp error: {E}")
+                return
+            if resflt:
                 print(hw)
-                if "ID" in rules and hasattr(hw, "content"):
+                if ("ID" in rules or dump) and hasattr(hw, "content"):
                     for fname in hw.content:
                         try:
                             content = hw.content[fname].decode()
                         except Exception:
                             content = str(hw.content[fname])
                         print(f"\t{fname}:\n{content}" if dump else f"\t{fname}")
-                if "ID" in rules and hasattr(hw, "checks") and dump:
-                    pprint(hw.checks)
+                if dump:
+                    if hasattr(hw, "checks"):
+                        pprint(getattr(hw, "checks"))
+                    if stderr := getattr(hw, "stderr", None):
+                        print(stderr.decode(errors="replace"))
 
     def do_show(self, arg):
         """Show objects or individual object"""
@@ -321,6 +331,26 @@ def copy_sample(path: Path) -> Path:
     return str(P / "example.toml")
 
 
+def create_personal(path: Path) -> Path:
+    """Create temporary project for sngle task personal check
+
+    :param path: Task directory
+    :return: Temporary project config file name"""
+
+    path = Path(path)
+    user, task, cfgname = "user", path.name, "personal.toml"
+    root = Path(tempfile.mkdtemp())
+    shutil.copytree(path, root / user / task, dirs_exist_ok=True)
+
+    conf = {
+        "file": {"root_path": str(root), "users": {"user": user}},
+        "modules": {"deliver": ["file"]},
+        "tasks": {task: {"open_date": datetime.date.today()}},
+    }
+    config.create_config(root / cfgname, conf)
+    return str(root / cfgname)
+
+
 def shell():
     parser = argparse.ArgumentParser(description="Homework checker")
     parser.add_argument(
@@ -330,6 +360,7 @@ def shell():
         help="Treat config file as external one and use current directory as project path",
     )
     parser.add_argument("-c", "--command", action="append", help="Run a COMMAND")
+    parser.add_argument("-p", "--personal", nargs="?", metavar="PATH", const=".", help="Check single task from PATH")
     parser.add_argument(
         "-s", "--sample", nargs="?", metavar="PATH", const="sample", help="Copy a sample project into PATH"
     )
@@ -338,6 +369,14 @@ def shell():
     if args.sample:
         args.config.insert(0, copy_sample(args.sample))
         args.config.append(f'publish.SECRET_KEY = "{secrets.token_hex()}"')
+    elif args.personal:
+        args.config.insert(0, tmpcfg := create_personal(args.personal))
+        if not args.command:
+            args.command = ["logging WARNING", "download", "check all", "show result .* dump"]
+            if tmpcfg:
+                atexit.register(lambda: shutil.rmtree(Path(tmpcfg).parent))
+        else:
+            print(args.config)
     if args.config:
         if "=" in args.config[0]:
             log(f"Fist config must be a file, not '{args.config[0]}'", "critical")
