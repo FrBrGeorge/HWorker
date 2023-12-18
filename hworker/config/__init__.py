@@ -67,6 +67,7 @@ def expand_macro(content: dict, parent: str = "") -> None:
     :return:
     """
     for key, value in content.items():
+        defined = {"SELF": key, "PARENT": parent, "HOME": str(Path.home()), "CWD": str(Path.cwd())}
         match value:
             case dict():
                 expand_macro(value, key)
@@ -76,7 +77,7 @@ def expand_macro(content: dict, parent: str = "") -> None:
                 content[key] = datetime.datetime.combine(value, datetime.time(DAY_START))
             case str() if "`" in value:
                 res = value.split("`")
-                res[1::2] = [r.format(**content | {"SELF": key, "PARENT": parent}) for r in res[1::2]]
+                res[1::2] = [r.format(**content | defined) for r in res[1::2]]
                 content[key] = "".join(res)
 
 
