@@ -186,7 +186,7 @@ def bytes_diff(actual: bytes, initial: bytes, test_size: int) -> Iterator[bytes]
         return None
     act_size, init_size = len(actual), len(initial)
     if act_size > test_size or init_size > test_size:
-        init_lines, act_lines = [f"Size differs: {init_size}\n"], ["Size differs: <output>\n"]
+        init_lines, act_lines = [f"Size differs: {init_size}\n".encode()], ["Size differs: {act_size}\n".encode()]
     return diff_bytes(unified_diff, init_lines, act_lines, b"<expect>", b"<actual>")
 
 
