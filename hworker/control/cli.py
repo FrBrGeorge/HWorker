@@ -339,10 +339,11 @@ def create_personal(path: Path, timelimit: str = "") -> Path:
     path = Path(path)
     user, task, cfgname = "user", path.name, "personal.toml"
     root = Path(tempfile.mkdtemp())
-    shutil.copytree(path, root / user / task, dirs_exist_ok=True)
+    repo = root / "repo"
+    shutil.copytree(path, repo / user / task, dirs_exist_ok=True)
 
     conf = {
-        "file": {"root_path": str(root), "users": {"user": user}},
+        "file": {"root_path": str(repo), "users": {"user": user}},
         "modules": {"deliver": ["file"]},
         "tasks": {task: {"open_date": datetime.date.today()}},
     }
