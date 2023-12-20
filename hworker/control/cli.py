@@ -330,7 +330,7 @@ def copy_sample(path: Path) -> Path:
     return str(P / "example.toml")
 
 
-def create_personal(path: Path) -> Path:
+def create_personal(path: Path, timelimit: str = "") -> Path:
     """Create temporary project for sngle task personal check
 
     :param path: Task directory
@@ -346,6 +346,8 @@ def create_personal(path: Path) -> Path:
         "modules": {"deliver": ["file"]},
         "tasks": {task: {"open_date": datetime.date.today()}},
     }
+    if timelimit:
+        conf["tasks"][task]["time_limit"] = int(timelimit)
     config.create_config(root / cfgname, conf)
     return str(root / cfgname)
 
@@ -365,13 +367,16 @@ def shell():
     parser.add_argument(
         "-s", "--sample", nargs="?", metavar="PATH", const="sample", help="Copy a sample project into PATH"
     )
+    parser.add_argument(
+        "-t", "--timelimit", metavar="NUMBER", default="", help="Set personal time limit to NUMBER seconds"
+    )
     parser.add_argument("config", nargs="*", help="Configuration to parse (file path, prefix or 'key = vaule')")
     args = parser.parse_args()
     if args.sample:
         args.config.insert(0, copy_sample(args.sample))
         args.config.append(f'publish.SECRET_KEY = "{secrets.token_hex()}"')
     elif args.personal:
-        args.config.insert(0, tmpcfg := create_personal(args.personal))
+        args.config.insert(0, tmpcfg := create_personal(args.personal, args.timelimit))
         if not args.command:
             args.command = ["logging WARNING", "download", "check all", "show result .* dump"]
             if tmpcfg:

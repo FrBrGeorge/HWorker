@@ -76,6 +76,7 @@ def python_runner(
             )
         except Exception as error:
             get_logger(__name__).warning(f"Runner {prog_path} crashed on {input_path} data:\n {error}")
+            return b"", str(error), -1
 
     # TODO: wall clock should be limited separately
     try:
