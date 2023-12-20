@@ -57,12 +57,21 @@ class TestConfig:
 
     @pytest.mark.parametrize(
         "user_config",
-        [{"tasks": {"task_ID": {"deliver_ID": "20230101/01", "open_date": datetime(year=2023, month=1, day=1, hour=DAY_START)}}}],
+        [
+            {
+                "tasks": {
+                    "task_ID": {
+                        "deliver_ID": "20230101/01",
+                        "open_date": datetime(year=2023, month=1, day=1, hour=DAY_START),
+                    }
+                }
+            }
+        ],
         indirect=True,
     )
     def test_task_info(self, user_config):
         assert get_task_info("task_ID") == {
-            "test_size": 100,
+            "test_size": 1024,
             "resource_limit": 3145728,
             "time_limit": 2,
             "deliver_ID": "20230101/01",

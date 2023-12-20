@@ -41,7 +41,7 @@ root_path = "files"
 deliver_ID = "`{PARENT}`"               # replaces to task name
 soft_deadline_delta = "open_date+6d"
 hard_deadline_delta = "open_date+13d"
-test_size = 100
+test_size = 1024
 time_limit = 2
 resource_limit = 3145728
 
