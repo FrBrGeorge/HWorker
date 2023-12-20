@@ -116,10 +116,10 @@ def runtime_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> 
     if prog is not None:
         if not check_dir.exists():
             os.makedirs(check_dir)
-        prog_path = Path(check_dir, f"{solution.USER_ID}.py")
+        prog_path = Path(check_dir, f"{solution.USER_ID}_{solution.TASK_ID}.py")
         with open(prog_path, mode="wb") as p:
             p.write(prog)
-        input_path = Path(check_dir, f"{solution.USER_ID}.in")
+        input_path = Path(check_dir, f"{solution.USER_ID}_{solution.TASK_ID}.in")
         with open(input_path, mode="wb") as i:
             i.write(prog_input)
 
