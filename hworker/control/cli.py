@@ -34,7 +34,6 @@ try:
 except ModuleNotFoundError:
     version = "0.0.0"
 
-logger = get_logger(__name__)
 HISTFILE = ".history"
 
 
@@ -352,6 +351,8 @@ def create_personal(path: Path) -> Path:
 
 
 def shell():
+    global logger
+
     parser = argparse.ArgumentParser(description="Homework checker")
     parser.add_argument(
         "-e",
@@ -379,10 +380,12 @@ def shell():
             print(args.config)
     if args.config:
         if "=" in args.config[0]:
-            log(f"Fist config must be a file, not '{args.config[0]}'", "critical")
+            print(f"Fist config must be a file, not '{args.config[0]}'", file=sys.stderr)
+            sys.exit(1)
         finalconf = config.process_configs(*args.config)
         if not args.external:
             os.chdir(finalconf.parent)
+    logger = get_logger(__name__)
     if args.command:
         with io.StringIO("\n".join(args.command) + "\n") as stdin:
             runner = HWorker(stdin=stdin)
