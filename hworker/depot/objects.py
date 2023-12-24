@@ -4,6 +4,7 @@ import enum
 from collections.abc import Iterator
 from inspect import getmembers_static
 from typing import Any
+from numbers import Real
 
 
 def is_field(name: str, obj: Any) -> bool:
@@ -62,7 +63,7 @@ class StoreObject:
 
     def _stringify(self, key, value):
         """Make object field value representaion more human readable"""
-        if key == "timestamp" and isinstance(value, float):
+        if key == "timestamp" and isinstance(value, Real):
             return str(datetime.datetime.fromtimestamp(value))
         return value
 
@@ -92,7 +93,9 @@ class FileObject:
         self.timestamp = timestamp
 
     def __eq__(self, other):
-        return isinstance(other, FileObject) and all([getattr(self, field) == getattr(other, field) for field in ["content", "timestamp"]])
+        return isinstance(other, FileObject) and all(
+            [getattr(self, field) == getattr(other, field) for field in ["content", "timestamp"]]
+        )
 
     def __str__(self):
         return ", ".join(map(str, [self.content, self.timestamp]))
