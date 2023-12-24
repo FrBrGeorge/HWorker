@@ -23,7 +23,7 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
     validator_args = []
     for name in solution.checks:
         if name == validator.ID:
-            validator_args = get_task_info(validator.TASK_ID).get(validator.ID, [])
+            validator_args = get_task_info(validator.TASK_ID).get("checks", {}).get(validator.ID, [])
 
     if not os.path.exists(get_check_directory()):
         os.makedirs(get_check_directory())
