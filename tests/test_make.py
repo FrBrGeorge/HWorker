@@ -6,7 +6,7 @@ import pytest
 
 from hworker.config import create_config, process_configs
 from hworker.depot import search, delete, store
-from hworker.depot.objects import Homework, Check, CheckCategoryEnum, Solution, CheckResult, FileObject
+from hworker.depot.objects import Homework, Check, CheckCategoryEnum, Solution, CheckResult, FileObject, StoreObject
 from hworker.make import (
     get_checks,
     get_solution,
@@ -164,6 +164,10 @@ validate_check = Check(
     },
     timestamp=int(datetime(year=2023, month=1, day=1).timestamp()),
 )
+
+
+def dump_search(mark: str, name: str, obj: StoreObject, **kwargs):
+    print(f"\n{mark} {name}", *search(obj, **kwargs), sep=f"\n{mark} ")
 
 
 class TestMake:

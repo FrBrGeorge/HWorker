@@ -119,9 +119,14 @@ def parse_all_stored_homeworks() -> None:
     :return: -
     """
     get_logger(__name__).info("Parse and store all homeworks...")
-    hws = search(Homework, actual=True)
-    for hw in hws:
-        parse_homework_and_store(hw)
+    for hw in search(Homework, actual=True):
+        for cur_check in get_checks(hw):
+            store(cur_check)
+    for hw in search(Homework, actual=False):
+        store(get_solution(hw))
+    # See https://github.com/FrBrGeorge/HWorker/issues/93
+    for hw in search(Homework, actual=True):
+        store(get_solution(hw))
 
 
 def run_solution_checks_and_store(solution: Solution) -> None:
