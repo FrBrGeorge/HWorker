@@ -115,14 +115,12 @@ def runtime_wo_store(checker: Check, solution: Solution, check_num: int = 0) -> 
     content, stderr, actual_output, verdict = 0.0, b"", b"", VerdictEnum.missing
     check_dir = Path(gettempdir(), get_check_directory())
     if prog is not None:
-        if not check_dir.exists():
-            os.makedirs(check_dir)
-        prog_path = Path(check_dir, f"{solution.USER_ID}_{solution.TASK_ID}.py")
-        with open(prog_path, mode="wb") as p:
-            p.write(prog)
-        input_path = Path(check_dir, f"{solution.USER_ID}_{solution.TASK_ID}.in")
-        with open(input_path, mode="wb") as i:
-            i.write(prog_input)
+        check_dir.mkdir(parents=True, exist_ok=True)
+        qualname = f"{solution.USER_ID}/{solution.TASK_ID}".replace("/", "_")
+        prog_path = check_dir / f"{qualname}.py"
+        input_path = check_dir / f"{qualname}.in"
+        prog_path.write_bytes(prog)
+        input_path.write_bytes(prog_input)
 
         runner = choose_runner(checker)
         task_info = get_task_info(solution.TASK_ID)
