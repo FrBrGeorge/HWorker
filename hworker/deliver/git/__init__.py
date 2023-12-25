@@ -6,7 +6,8 @@ from pathlib import Path
 from tempfile import gettempdir
 
 import git
-from tqdm import tqdm
+
+# from tqdm import tqdm
 
 from ... import depot
 from ...config import get_git_directory, get_repos, get_git_uids, repo_to_uid, get_tasks_list, get_task_info
@@ -124,23 +125,30 @@ def download_all() -> None:
     depot.store(depot.objects.UpdateTime(name="Git deliver", timestamp=datetime.datetime.now().timestamp()))
     get_logger(__name__).info("Downloading (or updating) all repos and store them")
     update_all()
-    for student_id in tqdm(get_git_uids(), colour="green", desc="Git download", delay=2, unit="repo"):
-        repo = git.Repo(local_path(student_id))
-        if not repo.heads:
-            get_logger(__name__).warning(f"Got empty repo from {student_id} student!")
-            continue
-        for task in get_tasks_list():
-            if os.path.isdir((task_path := Path(local_path(student_id), get_task_info(task).get("deliver_ID", "")))):
-                commits = [_ for _ in get_commits(repo, task_path) if _]
-                for commit in commits:
-                    content = get_homework_content(repo, task_path, commit[0])
-                    store(
-                        Homework(
-                            content=content,
-                            ID=f"{_depot_prefix}.{student_id}/{task}",
-                            USER_ID=student_id,
-                            TASK_ID=os.path.join(task),
-                            timestamp=float(commit[1]),
-                            is_broken=False,
-                        )
+    with Pool() as p:
+        p.map(download_user, get_git_uids())
+    # for student_id in tqdm(get_git_uids(), colour="green", desc="Git download", delay=2, unit="repo"):
+    #     download_user(student_id)
+
+
+def download_user(student_id: str) -> bool:
+    repo = git.Repo(local_path(student_id))
+    if not repo.heads:
+        get_logger(__name__).warning(f"Got empty repo from {student_id} student!")
+        return False
+    for task in get_tasks_list():
+        if os.path.isdir((task_path := Path(local_path(student_id), get_task_info(task).get("deliver_ID", "")))):
+            commits = [_ for _ in get_commits(repo, task_path) if _]
+            for commit in commits:
+                content = get_homework_content(repo, task_path, commit[0])
+                store(
+                    Homework(
+                        content=content,
+                        ID=f"{_depot_prefix}.{student_id}/{task}",
+                        USER_ID=student_id,
+                        TASK_ID=os.path.join(task),
+                        timestamp=float(commit[1]),
+                        is_broken=False,
                     )
+                )
+    return True
