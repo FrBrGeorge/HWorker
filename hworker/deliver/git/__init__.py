@@ -1,5 +1,6 @@
 """Downloads solutions from repos"""
 import datetime
+from multiprocessing import Pool
 import os
 from pathlib import Path
 from tempfile import gettempdir
@@ -59,15 +60,20 @@ def pull(repo: str) -> None:
             get_logger(__name__).warning(f"Can't pull {repo} repo: {git_error}")
 
 
+def clone_pull(repo: str) -> None:
+    if not os.path.exists(local_path(repo_to_uid(repo))):
+        clone(repo)
+    else:
+        pull(repo)
+
+
 def update_all() -> None:
     """Pull every repo from config list (or clone if not downloaded)"""
     repos = get_repos()
     get_logger(__name__).info("Updating all repos")
-    for repo in tqdm(repos, colour="green", desc="Git repositories update", delay=2, unit="repo"):
-        if not os.path.exists(local_path(repo_to_uid(repo))):
-            clone(repo)
-        else:
-            pull(repo)
+    with Pool() as p:
+        p.map(clone_pull, repos)
+    # for repo in tqdm(repos, colour="green", desc="Git repositories update", delay=2, unit="repo"):
 
 
 def get_homework_content(repo: git.Repo, homework_root: Path, commit: str) -> dict:
