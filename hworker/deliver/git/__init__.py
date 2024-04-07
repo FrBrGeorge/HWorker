@@ -51,14 +51,16 @@ def pull(repo: str) -> None:
     :return: -
     """
     get_logger(__name__).debug(f"Pulling {repo} repo")
-    try:
-        repo = git.Repo(local_path(repo_to_uid(repo)))
-        repo.git.pull("origin", "main")
-    except git.GitError:
+    # TODO should be configured
+    for mainrepo in ("work", "main", "master"):
         try:
-            repo.git.pull("origin", "master")
-        except git.GitError as git_error:
-            get_logger(__name__).warning(f"Can't pull {repo} repo: {git_error}")
+            qrepo = git.Repo(local_path(repo_to_uid(repo)))
+            qrepo.git.pull("origin", mainrepo)
+            break
+        except git.GitError as E:
+            git_error = E
+    else:
+        get_logger(__name__).warning(f"Can't pull {repo} repo: {git_error}")
 
 
 def clone_pull(repo: str) -> None:
