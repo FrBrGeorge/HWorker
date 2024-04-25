@@ -1,0 +1,7 @@
+Script started on 2024-04-25 18:31:12+03:00 [TERM="xterm-256color" TTY="/dev/pts/7" COLUMNS="88" LINES="32"]
+]0;george@gear: /home/george[?2004h[george@gear ~]$ eecchhoo  """"QQ[K[KQQQQ""
+[?2004lQQ
+]0;george@gear: /home/george[?2004h[george@gear ~]$ [?2004l
+exit
+
+Script done on 2024-04-25 18:31:19+03:00 [COMMAND_EXIT_CODE="0"]

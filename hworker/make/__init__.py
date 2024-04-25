@@ -17,6 +17,7 @@ from ..config import (
 from ..depot import store, search
 from ..depot.objects import Homework, Check, Solution, CheckCategoryEnum, Criteria, CheckResult, UpdateTime, FileObject
 from ..log import get_logger
+from .screenplay import screenplay_all
 
 _default_timestamp = datetime.datetime.fromisoformat("2009-05-17 20:09:00").timestamp()
 
@@ -82,7 +83,7 @@ def get_solution(hw: Homework) -> Solution:
             content[path] = path_content.content
             timestamp = max(timestamp, path_content.timestamp)
     if need_screenreplay():
-        pass
+        content = screenplay_all(content)
     try:
         remote_content = loads(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8"))
     except tomllib.TOMLDecodeError:
