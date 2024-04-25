@@ -1,4 +1,5 @@
 """Parsing depot objects and basic execution functionality"""
+
 import datetime
 import tomllib
 from tomllib import loads
@@ -11,6 +12,7 @@ from ..config import (
     get_check_name,
     get_remote_name,
     get_task_info,
+    need_screenreplay,
 )
 from ..depot import store, search
 from ..depot.objects import Homework, Check, Solution, CheckCategoryEnum, Criteria, CheckResult, UpdateTime, FileObject
@@ -79,6 +81,8 @@ def get_solution(hw: Homework) -> Solution:
         if not path.startswith(get_check_name()):
             content[path] = path_content.content
             timestamp = max(timestamp, path_content.timestamp)
+    if need_screenreplay():
+        pass
     try:
         remote_content = loads(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8"))
     except tomllib.TOMLDecodeError:

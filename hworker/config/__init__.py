@@ -398,3 +398,8 @@ def get_version_validator_name() -> str:
     :return: version validator name
     """
     return config()["formalization"]["version_validator_name"]
+
+
+def need_screenreplay() -> bool:
+    """Return True if homewoek out to be screenreplay-ed to become a solution."""
+    return config()["make"]["screenreplay"]
