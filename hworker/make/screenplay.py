@@ -41,7 +41,10 @@ def screenplay(both: bytes, timer: bytes) -> bytes:
         B, T = D / "BOTH.txt", D / "TIME.txt"
         B.write_bytes(both)
         T.write_bytes(timer)
-        answer = cache[md5] = screendump(f"scriptreplay -m 0.001 -t {T} -B {B}", D)
+        answer = screendump(f"scriptreplay -m 0.001 -t {T} -B {B}", D)
+        columns = int(re.sub(rb'.*COLUMNS="(\d+)".*', rb"\1", both[: both.index(b"\n")]))
+        rejoin = rf"(^.{{{columns}}})\n".encode()
+        answer = cache[md5] = re.sub(rejoin, rb"\1", answer, flags=re.MULTILINE)
         return answer
 
 

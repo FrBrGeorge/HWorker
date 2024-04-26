@@ -26,8 +26,8 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
         if name == validator.ID:
             match get_task_info(solution.TASK_ID).get("checks", {}).get(validator.ID, []):
                 case [dict(argn), list(argp) | tuple(argp)] | (dict(argn), list(argp) | tuple(argp)):
-                    validator_args, validator_kwargs = ap, an
-                case [dict(a1), *_] as argns:  # Hack for TOML oneline-only tables
+                    validator_args, validator_kwargs = argp, argn
+                case [dict(_), *_] as argns:  # Hack for TOML oneline-only tables
                     validator_kwargs = {}
                     for argn in argns:
                         validator_kwargs |= argn
