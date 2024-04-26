@@ -1,4 +1,5 @@
 """Tasks meta-information checks and check results"""
+
 import os
 from datetime import datetime
 from importlib.util import module_from_spec, spec_from_file_location
@@ -20,10 +21,22 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
     :return:
     """
     # TODO: add check nums for parallel work
-    validator_args = []
+    validator_args, validator_kwargs = [], {}
     for name in solution.checks:
         if name == validator.ID:
-            validator_args = get_task_info(solution.TASK_ID).get("checks", {}).get(validator.ID, [])
+            match get_task_info(solution.TASK_ID).get("checks", {}).get(validator.ID, []):
+                case [dict(argn), list(argp) | tuple(argp)] | (dict(argn), list(argp) | tuple(argp)):
+                    validator_args, validator_kwargs = ap, an
+                case [dict(a1), *_] as argns:  # Hack for TOML oneline-only tables
+                    validator_kwargs = {}
+                    for argn in argns:
+                        validator_kwargs |= argn
+                case dict(argn):
+                    validator_kwargs = argn
+                case list(argp) | tuple(argp):
+                    validator_args = argp
+                case other:
+                    validator_args = [other]
 
     if not os.path.exists(get_check_directory()):
         os.makedirs(get_check_directory())
@@ -44,9 +57,9 @@ def validate_wo_store(validator: Check, solution: Solution, check_num: int = 0) 
         v = getattr(module, validator_type)
         try:
             if validator_type == get_validator_name():
-                result = v(solution, *validator_args)
+                result = v(solution, *validator_args, **validator_kwargs)
             else:
-                result = v(search(Solution, Criteria("ID", "==", solution.ID)), *validator_args)
+                result = v(search(Solution, Criteria("ID", "==", solution.ID)), *validator_args, **validator_kwargs)
         except Exception as error:
             get_logger(__name__).warning(f"Validator {validator.ID} crashed on {solution.ID} solution:\n {error}")
             stderr = str(error).encode()
