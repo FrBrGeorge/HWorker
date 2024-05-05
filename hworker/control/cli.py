@@ -208,7 +208,10 @@ TYPE can be {', '.join(self.whatshow)}
 
     def do_shell(self, arg):
         "Execute python code"
-        print(eval(arg))
+        try:
+            print(eval(arg))
+        except Exception as E:
+            print(E)
 
     def complete_shell(self, text, line, begidx, endidx):
         objname, _, prefix = text.rpartition(".")
