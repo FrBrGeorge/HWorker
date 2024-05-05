@@ -401,5 +401,9 @@ def get_version_validator_name() -> str:
 
 
 def need_screenreplay() -> bool:
-    """Return True if homewoek out to be screenreplay-ed to become a solution."""
+    """Return True if homework out to be screenreplay-ed to become a solution."""
     return config()["make"]["screenreplay"]
+
+
+def get_deadline_gap() -> datetime.time:
+    return config()["make"]["deadline_gap"]

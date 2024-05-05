@@ -14,7 +14,12 @@ from hworker.make import (
     parse_all_stored_homeworks,
     check_all_solutions,
     check_new_solutions,
+    fit_deadline,
 )
+
+DT1 = datetime(year=2023, month=1, day=1)
+DT2 = datetime(year=2023, month=1, day=2)
+DT3 = datetime(year=2023, month=1, day=2, hour=12)
 
 
 def example_file_object(content: bytes, day: int = 1) -> FileObject:
@@ -35,7 +40,7 @@ def example_homework():
         ID="hw_ID",
         USER_ID="user_ID",
         TASK_ID="task_ID",
-        timestamp=int(datetime(year=2023, month=1, day=1).timestamp()),
+        timestamp=int(DT1.timestamp()),
         is_broken=False,
     )
 
@@ -71,7 +76,7 @@ def example_homework_new_solution():
         ID="hw_ID",
         USER_ID="user_ID",
         TASK_ID="task_ID",
-        timestamp=int(datetime(year=2023, month=1, day=2).timestamp()),
+        timestamp=int(DT2.timestamp()),
         is_broken=False,
     )
 
@@ -92,7 +97,7 @@ def example_homework_new_check():
         ID="hw_ID",
         USER_ID="user_ID",
         TASK_ID="task_ID",
-        timestamp=int(datetime(year=2023, month=1, day=2).timestamp()),
+        timestamp=int(DT2.timestamp()),
         is_broken=False,
     )
 
@@ -111,7 +116,7 @@ def example_homework_update_check():
         ID="hw_ID",
         USER_ID="user_ID",
         TASK_ID="task_ID",
-        timestamp=int(datetime(year=2023, month=1, day=2).timestamp()),
+        timestamp=int(DT2.timestamp()),
         is_broken=False,
     )
 
@@ -125,7 +130,7 @@ def example_config(tmp_path):
             "tasks": {
                 "task_ID": {
                     "deliver_ID": "20230101/01",
-                    "open_date": datetime(year=2023, month=1, day=1),
+                    "open_date": DT1,
                 }
             }
         },
@@ -142,7 +147,7 @@ example_solution = Solution(
         "user_ID:task_ID/validate": [],
     },
     content={"prog.py": b"a, b = eval(input())\nprint(max(a, b))"},
-    timestamp=int(datetime(year=2023, month=1, day=1).timestamp()),
+    timestamp=int(DT1.timestamp()),
 )
 
 runtime_check = Check(
@@ -151,7 +156,7 @@ runtime_check = Check(
     USER_ID="user_ID",
     category=CheckCategoryEnum.runtime,
     content={"1.in": b"123, 345", "1.out": b"345"},
-    timestamp=int(datetime(year=2023, month=1, day=1).timestamp()),
+    timestamp=int(DT1.timestamp()),
 )
 
 validate_check = Check(
@@ -162,7 +167,7 @@ validate_check = Check(
     content={
         "validate.py": b"def timestamp_validator(solution) -> float:\n" b"    return 1.0 if solution.timestamp else 0.0"
     },
-    timestamp=int(datetime(year=2023, month=1, day=1).timestamp()),
+    timestamp=int(DT1.timestamp()),
 )
 
 
@@ -251,3 +256,13 @@ class TestMake:
         assert not all([old_result not in new_checks_results for old_result in old_checks_results])
 
         clean_up_database()
+
+    def test_fit_deadline(self):
+        for fn1 in (fns := (datetime.timestamp, datetime.date, lambda x: x, lambda x: int(datetime.timestamp(x)))):
+            for fn2 in fns:
+                assert fit_deadline(fn1(DT1), fn2(DT2))
+                assert fit_deadline(fn1(DT2), fn2(DT1))
+                assert fit_deadline(fn1(DT1), fn2(DT3))
+        for fn1 in (fns := (datetime.timestamp, lambda x: x, lambda x: int(datetime.timestamp(x)))):
+            for fn2 in fns:
+                assert not fit_deadline(fn1(DT3), fn2(DT1))

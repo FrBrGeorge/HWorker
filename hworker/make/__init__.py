@@ -13,13 +13,25 @@ from ..config import (
     get_remote_name,
     get_task_info,
     need_screenreplay,
+    get_deadline_gap,
 )
 from ..depot import store, search
-from ..depot.objects import Homework, Check, Solution, CheckCategoryEnum, Criteria, CheckResult, UpdateTime, FileObject
+from ..depot.objects import (
+    Homework,
+    Check,
+    Solution,
+    CheckCategoryEnum,
+    Criteria,
+    CheckResult,
+    UpdateTime,
+    FileObject,
+    StoreObject,
+)
 from ..log import get_logger
 from .screenplay import screenplay_all
 
 _default_timestamp = datetime.datetime.fromisoformat("2009-05-17 20:09:00").timestamp()
+type sometimes = datetime.datetime | datetime.date | float | int | StoreObject
 
 
 def get_checks(hw: Homework) -> list[Check]:
@@ -208,3 +220,22 @@ def check_new_solutions() -> None:
                     )
                     continue
                 store(new_result)
+
+
+def anytime(moment: sometimes) -> datetime.datetime:
+    match moment:
+        case StoreObject():
+            return datetime.datetime.fromtimestamp(moment.timestamp)
+        case datetime.datetime():
+            return moment
+        case datetime.date():
+            return datetime.datetime.combine(moment, datetime.time())
+        case int() | float():
+            return datetime.datetime.fromtimestamp(moment)
+    return None
+
+
+def fit_deadline(moment: sometimes, deadline: sometimes) -> bool:
+    """Calculates if moment fits tomorrow deadline border."""
+    final = datetime.datetime.combine(anytime(deadline).date(), get_deadline_gap()) + datetime.timedelta(days=1)
+    return anytime(moment) <= final
