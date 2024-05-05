@@ -1,4 +1,3 @@
-from functools import cache
 from operator import attrgetter
 
 from hworker.depot.objects import UserScore
@@ -11,7 +10,6 @@ def _filter_by_name(name: str, scores: list[UserScore]):
     return filter(lambda x: x.name == name, scores)
 
 
-@cache
 def _get_average():
     vals = list(map(attrgetter("rating"), search(UserScore)))
     return sum(vals) / len(vals) if len(vals) != 0 else 0

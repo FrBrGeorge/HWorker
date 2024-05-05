@@ -17,6 +17,7 @@ checks = {"The teacher:first/deadline" = [], "The teacher:first/attendance" = []
 
 [tasks.second]
 open_date = 2023-08-12
+checks = {"The teacher:first/deadline" = [], "The teacher:first/attendance" = [], "The teacher:first/no_import" = [], "The teacher:first/solution_size" = [30, ]}
 
 [score]
 score_directory = "scores"

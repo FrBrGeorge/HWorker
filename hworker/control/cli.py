@@ -15,12 +15,14 @@ import shlex
 import shutil
 import sys
 import tempfile
+from tomllib import load
 from pathlib import Path
 from pprint import pprint
 
 from .. import deliver, config, control, depot, make, score, publish  # NoQA: F401
 from ..depot.objects import Criteria as Rule
 from ..log import get_logger
+from ..make import anytime
 
 try:
     import readline
@@ -330,7 +332,18 @@ def copy_sample(path: Path) -> Path:
 
     P = Path(path)
     shutil.copytree(Path(module_path[0]) / "example", P, dirs_exist_ok=True)
-    return str(P / "example.toml")
+    CFile = P / "example.toml"
+    with open(CFile, "rb") as f:
+        cfg = load(f)
+    # Hardcode times
+    for gaps, userid in zip(((0, 0), (1, 2), (0, 3)), cfg["file"]["users"].values()):
+        D = P / cfg["file"]["root_path"] / userid
+        for gap, (taskname, task) in zip(gaps, cfg["tasks"].items()):
+            custom = int((anytime(task["open_date"]) + datetime.timedelta(days=gap * 6)).timestamp())
+            prog = D / taskname / "prog.py"
+            if prog.exists():
+                os.utime(prog, (custom, custom))
+    return str(CFile)
 
 
 def create_personal(path: Path, timelimit: str = "") -> Path:

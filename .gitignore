@@ -3,6 +3,7 @@ data.db*
 logs/
 sample/
 repo/
+!hworker/example/repo
 
 # Configs
 hworker*.toml
