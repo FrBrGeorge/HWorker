@@ -13,15 +13,27 @@ except ImportError:
         while batch := tuple(islice(it, n)):
             yield batch
 
-
 from flask import Flask, request, render_template, redirect
 
 from .lib import create_table
 from .. import config, depot
 from ..config import get_publish_info
 
-app = Flask(__name__)
+
+def _get_full_url(url_suffix: str) -> str:
+    if get_publish_info()["url_prefix"] == "":
+        return url_suffix
+    else:
+        return f"/{get_publish_info()["url_prefix"]}{url_suffix}"
+
+
+def _get_static_path():
+    return _get_full_url("/static")
+
+
+app = Flask(__name__, static_url_path=_get_static_path())
 app.config.update(get_publish_info())
+app.config["static_url_path"] = _get_static_path()
 
 
 def _get_data_for_user(user_id: str):
@@ -33,8 +45,8 @@ def _get_data_for_user(user_id: str):
     task_score_names = {task_id: task_qualifiers for task_id in config.get_tasks_list()}
 
     for big_names, search_object in zip(
-        [final_score_names, user_score_names, task_score_names],
-        [depot.objects.FinalScore, depot.objects.UserScore, depot.objects.TaskScore],
+            [final_score_names, user_score_names, task_score_names],
+            [depot.objects.FinalScore, depot.objects.UserScore, depot.objects.TaskScore],
     ):
         if type(big_names) == list:
             for name in big_names:
@@ -60,7 +72,7 @@ def _get_data_for_user(user_id: str):
     return user_data
 
 
-@app.get("/")
+@app.get(_get_full_url("/"))
 def index():
     users = config.get_uids()
     data_per_user: dict[str, list] = dict()
@@ -92,7 +104,7 @@ def index():
     )
 
 
-@app.post("/info")
+@app.post(_get_full_url("/info"))
 def info():
     username, taskname = map(lambda x: request.form.get(x), ["username", "taskname"])
     if username is None or taskname is None:
@@ -122,7 +134,7 @@ def info():
     return render_template("info.html", username=username, taskname=taskname, tables=tables)
 
 
-@app.route("/student/<user_id>", methods=["POST", "GET"])
+@app.route(_get_full_url("/student/<user_id>"), methods=["POST", "GET"])
 def student(user_id):
     if user_id not in config.get_uids():
         return redirect("/")
@@ -133,7 +145,7 @@ def student(user_id):
     task_qualifiers = list(map(lambda x: x.name, depot.search(depot.objects.TaskQualifier)))
 
     user_qual_table = create_table(
-        ["Task name", *user_score_names], [["All tasks", *user_data[1 : 1 + len(user_score_names)]]]
+        ["Task name", *user_score_names], [["All tasks", *user_data[1: 1 + len(user_score_names)]]]
     )
 
     task_qual_table = create_table(
@@ -141,8 +153,8 @@ def student(user_id):
         [
             [task_name, *scores]
             for task_name, scores in zip(
-                config.get_tasks_list(), batched(user_data[1 + len(user_score_names) :], len(task_qualifiers))
-            )
+            config.get_tasks_list(), batched(user_data[1 + len(user_score_names):], len(task_qualifiers))
+        )
         ],
     )
     return render_template(
@@ -153,7 +165,7 @@ def student(user_id):
     )
 
 
-@app.get("/status")
+@app.get(_get_full_url("/status"))
 def status():
     data: list[depot.objects.UpdateTime] = list(depot.search(depot.objects.UpdateTime))
 

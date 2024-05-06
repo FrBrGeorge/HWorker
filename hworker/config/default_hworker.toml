@@ -82,6 +82,7 @@ port = "8080"
 course_name = "Kapibarology"
 secret_cookie = "kapibara"
 static_folder = "static"
+url_prefix = ""
 SECRET_KEY = "replace this junky text"
 
 [score]
