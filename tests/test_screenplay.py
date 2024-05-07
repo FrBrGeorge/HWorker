@@ -4,10 +4,14 @@ Scriptreplay
 '''
 import pytest
 import hashlib
+import sys
 from hworker.make.screenplay import screenplay, screendump, screenplay_all
 from hworker.depot import search
 from hworker.depot.objects import RawData, Criteria
 from pathlib import Path
+
+if sys.platform != "linux":
+    pytest.skip(reason="tests for linux only", allow_module_level=True)
 
 
 @pytest.fixture()
