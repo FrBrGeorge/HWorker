@@ -84,6 +84,16 @@ class StoreObject:
         return list(self.items()) == list(other.items())
 
 
+class RawData(StoreObject):
+    content: bytes
+    _is_versioned: bool = False
+
+    def __init__(self, content: bytes = None, **kwargs):
+        fields = {"USER_ID": ".", "TASK_ID": ".", "timestamp": datetime.datetime.now().timestamp()}
+        super().__init__(**(fields | kwargs))
+        self.content = content
+
+
 class FileObject:
     content: bytes
     timestamp: float

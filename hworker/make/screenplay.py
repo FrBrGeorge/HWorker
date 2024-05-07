@@ -10,15 +10,13 @@ from pathlib import Path
 from tempfile import TemporaryDirectory as tmpdir
 from ..log import get_logger
 from subprocess import run
-import dbm.gnu
-from ..config import get_check_directory
 import hashlib
+from ..depot import store, search
+from ..depot.objects import RawData, Criteria
 
 # report.01.second/./BOTH.txt
 REname = re.compile(r"report....(\w+)[./]+(\w+)[.]txt")
 log = get_logger(__name__)
-(check_directory := Path(get_check_directory())).mkdir(parents=True, exist_ok=True)
-cache = dbm.gnu.open(check_directory / "cache.gdbm", "csu")
 
 
 def screendump(command: str, directory: Path) -> bytes:
@@ -34,8 +32,8 @@ def screendump(command: str, directory: Path) -> bytes:
 def screenplay(both: bytes, timer: bytes) -> bytes:
     """Run scritreplay on both / timer data and dump result's screen buffer."""
     md5 = hashlib.md5(both + timer).hexdigest()
-    if answer := cache.get(md5, None):
-        return answer
+    if answer := search(RawData, Criteria("ID", "==", md5), first=True):
+        return answer.content
     with tmpdir() as Dname:
         D = Path(Dname)
         B, T = D / "BOTH.txt", D / "TIME.txt"
@@ -44,7 +42,8 @@ def screenplay(both: bytes, timer: bytes) -> bytes:
         answer = screendump(f"scriptreplay -m 0.001 -t {T} -B {B}", D)
         columns = int(re.sub(rb'.*COLUMNS="(\d+)".*', rb"\1", both[: both.index(b"\n")]))
         rejoin = rf"(^.{{{columns}}})\n".encode()
-        answer = cache[md5] = re.sub(rejoin, rb"\1", answer, flags=re.MULTILINE)
+        answer = re.sub(rejoin, rb"\1", answer, flags=re.MULTILINE)
+        store(RawData(ID=md5, content=answer))
         return answer
 
 

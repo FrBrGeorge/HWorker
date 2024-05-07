@@ -27,6 +27,17 @@ class Base(DeclarativeBase):
         self.timestamp = timestamp
 
 
+class RawData(Base):
+    __tablename__ = "rawdata"
+
+    content: Mapped[bytes] = mapped_column(LargeBinary)
+
+    # noinspection PyTypeChecker
+    def __init__(self, content: bytes = None, **kwargs):
+        super().__init__(**kwargs)
+        self.content = content
+
+
 class Homework(Base):
     __tablename__ = "homework"
 

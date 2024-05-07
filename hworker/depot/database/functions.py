@@ -13,6 +13,7 @@ from .models import *
 ObjectSuccessor = TypeVar("ObjectSuccessor", bound=objects.StoreObject)
 
 _object_to_model_class: dict[type[objects.StoreObject] : type[Base]] = {
+    objects.RawData: RawData,
     objects.Homework: Homework,
     objects.Check: Check,
     objects.Solution: Solution,

@@ -3,7 +3,10 @@
 Scriptreplay
 '''
 import pytest
+import hashlib
 from hworker.make.screenplay import screenplay, screendump, screenplay_all
+from hworker.depot import search
+from hworker.depot.objects import RawData, Criteria
 from pathlib import Path
 
 
@@ -50,10 +53,18 @@ class TestScreenplay:
     def test_screenplay(self, simplescript):
         """ screenplay echo"""
         assert screenplay(simplescript[0], simplescript[1]).strip() == simplescript[2]
+        assert screenplay(simplescript[0], simplescript[1]).strip() == simplescript[2]
 
     def test_screenplay_esc(self, escapescript):
         """screenplay with color"""
         assert screenplay(escapescript[0], escapescript[1]).strip() == escapescript[2]
+        assert screenplay(escapescript[0], escapescript[1]).strip() == escapescript[2]
+
+    def test_screenplay_cache(self, escapescript):
+        """screnplay and then check for cached play"""
+        assert screenplay(escapescript[0], escapescript[1]).strip() == escapescript[2]
+        md5 = hashlib.md5(escapescript[0] + escapescript[1]).hexdigest()
+        assert search(RawData, Criteria("ID", "==", md5), first=True).content.strip() == escapescript[2]
 
     def test_screenplay_all(self, solution, simplescript, escapescript):
         """untarred solution"""
