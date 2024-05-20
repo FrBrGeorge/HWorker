@@ -13,6 +13,7 @@ except ImportError:
         while batch := tuple(islice(it, n)):
             yield batch
 
+
 from flask import Flask, request, render_template, redirect
 
 from .lib import create_table
@@ -45,10 +46,10 @@ def _get_data_for_user(user_id: str):
     task_score_names = {task_id: task_qualifiers for task_id in config.get_tasks_list()}
 
     for big_names, search_object in zip(
-            [final_score_names, user_score_names, task_score_names],
-            [depot.objects.FinalScore, depot.objects.UserScore, depot.objects.TaskScore],
+        [final_score_names, user_score_names, task_score_names],
+        [depot.objects.FinalScore, depot.objects.UserScore, depot.objects.TaskScore],
     ):
-        if type(big_names) == list:
+        if isinstance(big_names, list):
             for name in big_names:
                 score = depot.search(
                     search_object,
@@ -153,8 +154,8 @@ def student(user_id):
         [
             [task_name, *scores]
             for task_name, scores in zip(
-            config.get_tasks_list(), batched(user_data[1 + len(user_score_names):], len(task_qualifiers))
-        )
+                config.get_tasks_list(), batched(user_data[1 + len(user_score_names):], len(task_qualifiers))
+            )
         ],
     )
     return render_template(
