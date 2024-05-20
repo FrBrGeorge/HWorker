@@ -53,10 +53,10 @@ def download_all():
 
     download_mails = 0
 
-    get_logger(__name__).info(f"Started downloading")
-
+    limit = get_imap_info()["letter_limit"]
+    get_logger(__name__).info(f"Started downloading up to {limit} messages")
     for mail in tqdm(
-        box.fetch("ALL", limit=get_imap_info()["letter_limit"]),
+        box.fetch("ALL", limit=limit if limit > 0 else None),
         colour="green",
         desc="Imap download",
         delay=2,
