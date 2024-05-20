@@ -73,6 +73,12 @@ def _get_data_for_user(user_id: str):
     return user_data
 
 
+if get_publish_info()["url_prefix"]:
+    @app.get("/")
+    def redir():
+        return redirect(_get_full_url("/"))
+
+
 @app.get(_get_full_url("/"))
 def index():
     users = config.get_uids()
