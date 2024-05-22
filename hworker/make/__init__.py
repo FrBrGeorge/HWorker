@@ -14,6 +14,7 @@ from ..config import (
     get_task_info,
     need_screenreplay,
     get_deadline_gap,
+    user_checks,
 )
 from ..depot import store, search
 from ..depot.objects import (
@@ -103,14 +104,14 @@ def get_solution(hw: Homework) -> Solution:
         get_logger(__name__).warning(f"Incorrect remote content at {hw.ID} homework")
 
     remote_checks = remote_content.get("remote", {})
-    own_checks = {check.ID: [] for check in get_checks(hw)}
+    own_checks = {check.ID: [] for check in get_checks(hw)} if user_checks() else {}
     config_checks = get_task_info(hw.TASK_ID).get("checks", {})
     solution_id = f"{hw.USER_ID}:{hw.TASK_ID}"
 
     get_logger(__name__).debug(f"Extracted {solution_id} solution from {hw.ID} homework")
     return Solution(
         content=content,
-        checks=dict(own_checks, **remote_checks, **config_checks),
+        checks=own_checks | remote_checks | config_checks,
         ID=solution_id,
         TASK_ID=hw.TASK_ID,
         USER_ID=hw.USER_ID,

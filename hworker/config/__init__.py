@@ -407,3 +407,8 @@ def need_screenreplay() -> bool:
 
 def get_deadline_gap() -> datetime.time:
     return config()["make"]["deadline_gap"]
+
+
+def user_checks() -> bool:
+    """Return False if user-defined checks are ignored."""
+    return config()["check"].get("user_checks", True)
