@@ -98,7 +98,8 @@ def get_solution(hw: Homework) -> Solution:
     if need_screenreplay():
         content = screenplay_all(content)
     try:
-        remote_content = loads(hw.content.get(f"{get_check_name()}/{get_remote_name()}", b"").decode("utf-8"))
+        remote_file = hw.content.get(f"{get_check_name()}/{get_remote_name()}", None)
+        remote_content = loads(remote_file.content.decode("utf-8")) if remote_file else {}
     except tomllib.TOMLDecodeError:
         remote_content = {}
         get_logger(__name__).warning(f"Incorrect remote content at {hw.ID} homework")
