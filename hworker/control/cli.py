@@ -402,7 +402,7 @@ def shell():
             print(args.config)
     if args.config:
         if "=" in args.config[0]:
-            print(f"Fist config must be a file, not '{args.config[0]}'", file=sys.stderr)
+            print(f"First config must be a file, not '{args.config[0]}'", file=sys.stderr)
             sys.exit(1)
         finalconf = config.process_configs(*args.config)
         if not args.external:

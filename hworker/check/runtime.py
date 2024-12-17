@@ -4,6 +4,7 @@ import os
 import platform
 import subprocess
 import sys
+import time
 from datetime import datetime
 from difflib import diff_bytes, unified_diff
 from functools import partial
@@ -61,15 +62,16 @@ def python_runner(
     get_logger(__name__).debug(f"{prog_path} run")
     if not os.path.exists(get_check_directory()):
         os.makedirs(get_check_directory())
-    with open(input_path, encoding="utf-8") as prog_input, NamedTemporaryFile(
-        dir=get_check_directory(), delete=False
-    ) as prog_output:
+    with (
+        open(input_path, encoding="utf-8") as prog_input,
+        NamedTemporaryFile(dir=get_check_directory(), delete=False) as prog_output,
+    ):
         try:
             result = subprocess.Popen(
                 [sys.executable, prog_path],
-                preexec_fn=partial(python_set_limits, time_limit, resource_limit)
-                if platform.system() != "Windows"
-                else None,
+                preexec_fn=(
+                    partial(python_set_limits, time_limit, resource_limit) if platform.system() != "Windows" else None
+                ),
                 stdin=prog_input,
                 stdout=prog_output,
                 stderr=subprocess.PIPE,
@@ -85,7 +87,16 @@ def python_runner(
         result.terminate()
         stderr = f"TIMEOUT: {E.timeout}\n".encode(errors="replace")
         exit_code = -1
+        get_logger(__name__).debug(f"Time limit on {prog_path} / {input_path}")
+        sleep = 1
+        while result.poll() is None:
+            get_logger(__name__).warning(f"Waiting {sleep} seconds for {prog_path} to die")
+            time.sleep(sleep)
+            sleep *= 2
+            if sleep > time_limit * 32:
+                raise TimeoutError(f"Process {prog_path} is undead")
     else:
+        get_logger(__name__).debug(f"Check passed: {prog_path} / {input_path}")
         stderr = b""
     with open(prog_output.name, "rb") as po:
         po = po.read()
