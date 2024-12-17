@@ -16,7 +16,6 @@ from ..depot.objects import RawData, Criteria
 
 # report.01.second/./BOTH.txt
 REname = re.compile(r"report....(\w+)[./]+(\w+)[.]txt")
-log = get_logger(__name__)
 
 
 def screendump(command: str, directory: Path) -> bytes:
@@ -49,6 +48,7 @@ def screenplay(both: bytes, timer: bytes) -> bytes:
 
 def screenplay_all(content: dict[bytes, bytes]) -> dict[bytes, bytes]:
     """Read report files, select every BOTH/TIME pair, play and dump them."""
+    log = get_logger(__name__)
     records = {tuple(REname.match(name).groups()): value for name, value in content.items()}
     hosts, dumps = {host for host, path in records}, {}
     for host in hosts:

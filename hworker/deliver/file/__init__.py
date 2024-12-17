@@ -13,10 +13,10 @@ from ...log import get_logger
 _default_timestamp = datetime.datetime.fromisoformat("2009-05-17 20:09:00").timestamp()
 _depot_prefix = "f"
 _ignore_pattern = re.compile(r"(.*/|^)__pycache__/.*")
-log = get_logger(__name__)
 
 
 def download_all():
+    log = get_logger(__name__)
     depot.store(depot.objects.UpdateTime(name="File deliver", timestamp=datetime.datetime.now().timestamp()))
 
     root = Path(get_file_root_path()).absolute()

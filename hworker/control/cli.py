@@ -316,7 +316,7 @@ TYPE can be {', '.join(self.whatshow)}
             print()
         return True
 
-    doexit = do_EOF
+    do_exit = do_EOF
 
     def emptyline(self):
         pass
