@@ -1,6 +1,6 @@
 """Downloads solutions from repos"""
 import datetime
-from multiprocessing import Pool
+from multiprocessing import Pool, get_start_method
 import os
 from pathlib import Path
 from tempfile import gettempdir
@@ -70,12 +70,21 @@ def clone_pull(repo: str) -> None:
         pull(repo)
 
 
+def run_all(function, args):
+    """Try to run function against each arg in parrallel."""
+    if get_start_method() == "fork":
+        with Pool() as p:
+            res = p.map(function, args)
+    else:
+        res = [function(arg) for arg in args]
+    return res
+
+
 def update_all() -> None:
     """Pull every repo from config list (or clone if not downloaded)"""
     repos = get_repos()
     get_logger(__name__).info("Updating all repos")
-    with Pool() as p:
-        p.map(clone_pull, repos)
+    run_all(clone_pull, repos)
     # for repo in tqdm(repos, colour="green", desc="Git repositories update", delay=2, unit="repo"):
 
 
@@ -127,8 +136,7 @@ def download_all() -> None:
     depot.store(depot.objects.UpdateTime(name="Git deliver", timestamp=datetime.datetime.now().timestamp()))
     get_logger(__name__).info("Downloading (or updating) all repos and store them")
     update_all()
-    with Pool() as p:
-        p.map(download_user, get_git_uids())
+    run_all(download_user, get_git_uids())
     # for student_id in tqdm(get_git_uids(), colour="green", desc="Git download", delay=2, unit="repo"):
     #     download_user(student_id)
 
