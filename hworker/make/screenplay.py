@@ -49,11 +49,14 @@ def screenplay(both: bytes, timer: bytes) -> bytes:
 def screenplay_all(content: dict[bytes, bytes]) -> dict[bytes, bytes]:
     """Read report files, select every BOTH/TIME pair, play and dump them."""
     log = get_logger(__name__)
-    records = {tuple(REname.match(name).groups()): value for name, value in content.items()}
+    records = {
+        tuple(REname.match(name).groups()) if REname.match(name) else (name, ""): value
+        for name, value in content.items()
+    }
     hosts, dumps = {host for host, path in records}, {}
     for host in hosts:
         if (host, "BOTH") in records and (host, "TIME") in records:
             dumps[host] = screenplay(records[(host, "BOTH")], records[(host, "TIME")])
         else:
-            log.warning(f"Incomplete {host} report")
+            log.warning(f"Incomplete or incorrect {host} report")
     return dumps
