@@ -25,7 +25,7 @@ def screendump(command: str, directory: Path) -> bytes:
     if res.returncode:
         return f"!{res.returncode}".encode()
     else:
-        return S.read_bytes()
+        return S.read_bytes() if S.exists() else "!255".encode()
 
 
 def screenplay(both: bytes, timer: bytes) -> bytes:
