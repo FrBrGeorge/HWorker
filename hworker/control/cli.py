@@ -346,15 +346,16 @@ def copy_sample(path: Path) -> Path:
     return str(CFile)
 
 
-def create_personal(path: Path, timelimit: str = "") -> Path:
+def create_personal(path: Path, timelimit: str = "") -> tempfile.TemporaryDirectory:
     """Create temporary project for sngle task personal check
 
     :param path: Task directory
-    :return: Temporary project config file name"""
+    :return: Temporary project directory with config file name"""
 
     path = Path(path)
     user, task, cfgname = "user", path.name, "personal.toml"
-    root = Path(tempfile.mkdtemp())
+    rootd = tempfile.TemporaryDirectory(delete=False)
+    root = Path(rootd.name)
     repo = root / "repo"
     shutil.copytree(path, repo / user / task, dirs_exist_ok=True)
 
@@ -366,7 +367,8 @@ def create_personal(path: Path, timelimit: str = "") -> Path:
     if timelimit:
         conf["tasks"][task]["time_limit"] = int(timelimit)
     config.create_config(root / cfgname, conf)
-    return str(root / cfgname)
+    rootd.configname = str(root / cfgname)
+    return rootd
 
 
 def shell():
@@ -393,15 +395,14 @@ def shell():
         args.config.insert(0, copy_sample(args.sample))
         args.config.append(f'publish.SECRET_KEY = "{secrets.token_hex()}"')
     elif args.personal:
-        args.config.insert(0, tmpcfg := create_personal(args.personal, args.timelimit))
+        tmpconfd = create_personal(args.personal, args.timelimit)
+        args.config.insert(0, tmpconfd.configname)
         if not args.command:
             args.command = ["logging WARNING", "download", "check all", "show result .* dump"]
-            if tmpcfg:
-                atexit.register(lambda: shutil.rmtree(Path(tmpcfg).parent))
         else:
             print(args.config)
     if args.config:
-        if "=" in args.config[0]:
+        if "=" in str(args.config[0]):
             print(f"First config must be a file, not '{args.config[0]}'", file=sys.stderr)
             sys.exit(1)
         finalconf = config.process_configs(*args.config)
