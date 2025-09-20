@@ -12,7 +12,7 @@ authors = [
 description = "My package description"
 readme = "README.md"
 requires-python = ">=3.12"
-license = { text = "GPL-3.0 license" }
+license = "GPL-3.0"
 dynamic = ["version", "dependencies"]
 
 [tool.setuptools.packages.find]
